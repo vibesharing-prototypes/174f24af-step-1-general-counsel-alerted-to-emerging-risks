@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef } from "react";
+import { useRouter } from "next/navigation";
 // Tambo not available in VibeSharing - running in demo mode
 import {
   CanvasType,
@@ -17,6 +18,13 @@ import {
   ReportInsightCard,
   EmailDraftCard,
 } from "../shared/canvases";
+
+// Stub for useTamboThread when Tambo provider is unavailable
+function useTamboThread() {
+  return {
+    sendThreadMessage: async (_message: string) => ({ content: "" }),
+  };
+}
 
 // Grayscale SVG Icons
 const Icons = {
@@ -390,13 +398,14 @@ function InlineAssignmentCard({
                   />
                   <div className="text-[10px] text-[#6e7681] uppercase tracking-wider pt-1">Other options</div>
                   {suggestion.alternativeSuggestions.map((person) => (
-                    <PersonSuggestionCard
-                      key={person.id}
-                      person={person}
-                      isPrimary={false}
-                      onSelect={() => selectPerson(suggestion.riskId, person.id)}
-                      isSelected={selections[suggestion.riskId] === person.id}
-                    />
+                    <React.Fragment key={person.id}>
+                      <PersonSuggestionCard
+                        person={person}
+                        isPrimary={false}
+                        onSelect={() => selectPerson(suggestion.riskId, person.id)}
+                        isSelected={selections[suggestion.riskId] === person.id}
+                      />
+                    </React.Fragment>
                   ))}
                 </div>
               )}
@@ -434,16 +443,26 @@ function ChatMessageBubble({ message }: { message: ChatMessage }) {
       message.role === "user" && "flex-row-reverse"
     )}>
       <div className={cn(
-        "h-7 w-7 rounded-full flex-shrink-0 flex items-center justify-center",
+        "h-7 w-7 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden",
         message.role === "user" 
           ? "bg-gradient-to-br from-[#58a6ff] to-[#a371f7]"
-          : "bg-gradient-to-br from-[#3fb950] to-[#58a6ff]"
+          : "bg-white p-1"
       )}>
-        {message.role === "assistant" && (
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-            <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a2 2 0 0 1 0 4h-1.5v.5a2.5 2.5 0 0 1-5 0v-.5h-5v.5a2.5 2.5 0 0 1-5 0v-.5H4a2 2 0 0 1 0-4h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/>
+        {message.role === "assistant" ? (
+          <svg width="22" height="20" viewBox="0 0 22 20" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-full w-auto">
+            <path d="M20.1006 15.6877C20.0186 15.8056 19.9338 15.9211 19.8467 16.0364C19.5697 16.4006 19.2675 16.7474 18.9443 17.0706C17.5077 18.5072 15.6393 19.5107 13.5459 19.8596L6.03223 12.345L8.3877 9.98755H8.38965L8.39258 9.98462L20.1006 15.6877Z" fill="#D3222A"/>
+            <path d="M20.0259 4.21263C21.1905 5.84672 21.8735 7.84495 21.8735 9.99974C21.8735 12.116 21.2194 14.0737 20.1011 15.6872L8.39209 9.98412L20.0259 4.21263Z" fill="#EE312E"/>
+            <path d="M13.5454 19.8581C13.0018 19.9504 12.4428 19.9997 11.8735 19.9997H3.69971L4.89307 13.4802L6.03174 12.3445L13.5454 19.8581Z" fill="#AF292E"/>
+            <path d="M7.40379 10.0005L4.93727 11.2296L3.69979 13.7003L2.46653 11.2296L0 10.0005L2.46653 8.76302L3.69979 6.29649L3.71242 6.31754L4.93727 8.76302L7.40379 10.0005Z" fill="#1E1E1E"/>
+            <path d="M13.5435 0.141312C16.0395 0.559546 18.2228 1.90387 19.7261 3.80733C19.8311 3.94057 19.9311 4.07423 20.0259 4.2126L8.39209 9.98409H8.38623L6.04443 7.63936L13.5435 0.141312Z" fill="#D3222A"/>
+            <path d="M11.8735 0C12.4429 2.15682e-05 12.9997 0.0482901 13.5435 0.140625L6.04443 7.63965L4.88232 6.47754L3.69971 0H11.8735Z" fill="#AF292E"/>
+            <path d="M9.65975 9.99958L4.55273 4.89256V6.5949L7.53183 9.99958L4.55273 12.9787V15.1066L9.65975 9.99958Z" fill="#F8F8FA"/>
+            <path d="M9.65975 9.99958L4.55273 4.89256V6.5949L7.53183 9.99958L4.55273 12.9787V15.1066L9.65975 9.99958Z" fill="#F8F8FA"/>
+            <path d="M9.65975 9.99958L4.55273 4.89256V6.5949L7.53183 9.99958L4.55273 12.9787V15.1066L9.65975 9.99958Z" fill="#F8F8FA"/>
+            <path d="M9.65975 9.99958L4.55273 4.89256V6.5949L7.53183 9.99958L4.55273 12.9787V15.1066L9.65975 9.99958Z" fill="#F8F8FA"/>
+            <path d="M9.66016 9.99998L4.55273 15.1064V12.9785L7.53223 9.99998L4.55273 6.59471V4.89256L9.66016 9.99998Z" fill="#F8F8FA"/>
           </svg>
-        )}
+        ) : null}
       </div>
 
       <div className={cn(
@@ -482,10 +501,12 @@ function PinnedPromptBox({
   onSubmit, 
   isLoading,
   suggestions,
+  inline = false,
 }: { 
   onSubmit: (message: string) => void;
   isLoading: boolean;
   suggestions: string[];
+  inline?: boolean;
 }) {
   const [input, setInput] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -503,7 +524,11 @@ function PinnedPromptBox({
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-[#0d1117] via-[#0d1117] to-transparent pb-4 pt-8 z-50">
+    <div className={cn(
+      inline 
+        ? "mt-6 border-t border-[#30363d] pt-6" 
+        : "fixed bottom-0 left-0 right-0 bg-gradient-to-t from-[#0d1117] via-[#0d1117] to-transparent pb-4 pt-8 z-50"
+    )}>
       <div className="mx-auto max-w-4xl px-6">
         {/* Suggestions */}
         {suggestions.length > 0 && !input && (
@@ -524,9 +549,19 @@ function PinnedPromptBox({
         {/* Input */}
         <div className="rounded-2xl border border-[#30363d] bg-[#161b22] p-2 shadow-xl shadow-black/50">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#3fb950] to-[#58a6ff] flex-shrink-0">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-                <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a2 2 0 0 1 0 4h-1.5v.5a2.5 2.5 0 0 1-5 0v-.5h-5v.5a2.5 2.5 0 0 1-5 0v-.5H4a2 2 0 0 1 0-4h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/>
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white flex-shrink-0 p-1.5">
+              <svg width="22" height="20" viewBox="0 0 22 20" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-5 w-auto">
+                <path d="M20.1006 15.6877C20.0186 15.8056 19.9338 15.9211 19.8467 16.0364C19.5697 16.4006 19.2675 16.7474 18.9443 17.0706C17.5077 18.5072 15.6393 19.5107 13.5459 19.8596L6.03223 12.345L8.3877 9.98755H8.38965L8.39258 9.98462L20.1006 15.6877Z" fill="#D3222A"/>
+                <path d="M20.0259 4.21263C21.1905 5.84672 21.8735 7.84495 21.8735 9.99974C21.8735 12.116 21.2194 14.0737 20.1011 15.6872L8.39209 9.98412L20.0259 4.21263Z" fill="#EE312E"/>
+                <path d="M13.5454 19.8581C13.0018 19.9504 12.4428 19.9997 11.8735 19.9997H3.69971L4.89307 13.4802L6.03174 12.3445L13.5454 19.8581Z" fill="#AF292E"/>
+                <path d="M7.40379 10.0005L4.93727 11.2296L3.69979 13.7003L2.46653 11.2296L0 10.0005L2.46653 8.76302L3.69979 6.29649L3.71242 6.31754L4.93727 8.76302L7.40379 10.0005Z" fill="#1E1E1E"/>
+                <path d="M13.5435 0.141312C16.0395 0.559546 18.2228 1.90387 19.7261 3.80733C19.8311 3.94057 19.9311 4.07423 20.0259 4.2126L8.39209 9.98409H8.38623L6.04443 7.63936L13.5435 0.141312Z" fill="#D3222A"/>
+                <path d="M11.8735 0C12.4429 2.15682e-05 12.9997 0.0482901 13.5435 0.140625L6.04443 7.63965L4.88232 6.47754L3.69971 0H11.8735Z" fill="#AF292E"/>
+                <path d="M9.65975 9.99958L4.55273 4.89256V6.5949L7.53183 9.99958L4.55273 12.9787V15.1066L9.65975 9.99958Z" fill="#F8F8FA"/>
+                <path d="M9.65975 9.99958L4.55273 4.89256V6.5949L7.53183 9.99958L4.55273 12.9787V15.1066L9.65975 9.99958Z" fill="#F8F8FA"/>
+                <path d="M9.65975 9.99958L4.55273 4.89256V6.5949L7.53183 9.99958L4.55273 12.9787V15.1066L9.65975 9.99958Z" fill="#F8F8FA"/>
+                <path d="M9.65975 9.99958L4.55273 4.89256V6.5949L7.53183 9.99958L4.55273 12.9787V15.1066L9.65975 9.99958Z" fill="#F8F8FA"/>
+                <path d="M9.66016 9.99998L4.55273 15.1064V12.9785L7.53223 9.99998L4.55273 6.59471V4.89256L9.66016 9.99998Z" fill="#F8F8FA"/>
               </svg>
             </div>
             <input
@@ -947,7 +982,7 @@ function SectionHeader({
   );
 }
 
-function SoftTag({ children, variant = "default" }: { children: React.ReactNode; variant?: "default" | "ai" | "predictive" }) {
+function SoftTag({ children, variant = "default" }: { children?: React.ReactNode; variant?: "default" | "ai" | "predictive" }) {
   const styles = {
     default: "border-[#30363d] bg-[#21262d] text-[#8b949e]",
     ai: "border-[#a371f7]/40 bg-[#a371f7]/10 text-[#a371f7]",
@@ -960,22 +995,26 @@ function SoftTag({ children, variant = "default" }: { children: React.ReactNode;
   );
 }
 
-function Card({ children, className }: { children: React.ReactNode; className?: string }) {
+function Card({ children, className }: { children?: React.ReactNode; className?: string }) {
   return (
     <div className={cn("rounded-2xl border border-[#30363d] bg-[#161b22] p-5 shadow-sm", className)}>{children}</div>
   );
 }
 
-function VisionToggle({ vision, onChange }: { vision: Vision; onChange: (v: Vision) => void }) {
+function VisionToggle({ vision, onChange, variant = "dark" }: { vision: Vision; onChange: (v: Vision) => void; variant?: "dark" | "light" }) {
+  const isLight = variant === "light";
   return (
-    <div className="flex items-center gap-1 rounded-xl border border-[#30363d] bg-[#0d1117] p-1">
+    <div className={cn(
+      "flex items-center gap-1 rounded-xl border p-1",
+      isLight ? "border-[#0ea5e9]/40 bg-white" : "border-[#30363d] bg-[#0d1117]"
+    )}>
       <button
         onClick={() => onChange("near-term")}
         className={cn(
           "rounded-lg px-3 py-1.5 text-xs font-medium transition",
           vision === "near-term"
-            ? "bg-[#21262d] text-[#f0f6fc]"
-            : "text-[#8b949e] hover:text-[#f0f6fc]"
+            ? isLight ? "bg-[#0ea5e9] text-white" : "bg-[#21262d] text-[#f0f6fc]"
+            : isLight ? "text-[#0369a1] hover:bg-[#bae6fd]" : "text-[#8b949e] hover:text-[#f0f6fc]"
         )}
       >
         Near-term Vision
@@ -985,8 +1024,8 @@ function VisionToggle({ vision, onChange }: { vision: Vision; onChange: (v: Visi
         className={cn(
           "rounded-lg px-3 py-1.5 text-xs font-medium transition",
           vision === "future"
-            ? "bg-[#a371f7]/20 text-[#a371f7]"
-            : "text-[#8b949e] hover:text-[#f0f6fc]"
+            ? isLight ? "bg-[#a78bfa] text-white" : "bg-[#a371f7]/20 text-[#a371f7]"
+            : isLight ? "text-[#0369a1] hover:bg-[#bae6fd]" : "text-[#8b949e] hover:text-[#f0f6fc]"
         )}
       >
         1 Year+ Vision
@@ -1060,7 +1099,7 @@ function DevicePreviewBar({ device, onDeviceChange }: { device: DeviceType; onDe
   );
 }
 
-function IPhoneFrame({ children }: { children: React.ReactNode }) {
+function IPhoneFrame({ children }: { children?: React.ReactNode }) {
   return (
     <div className="flex items-center justify-center py-8">
       <div className="relative">
@@ -1085,7 +1124,7 @@ function IPhoneFrame({ children }: { children: React.ReactNode }) {
   );
 }
 
-function IPadFrame({ children }: { children: React.ReactNode }) {
+function IPadFrame({ children }: { children?: React.ReactNode }) {
   return (
     <div className="flex items-center justify-center py-8">
       <div className="relative">
@@ -1117,38 +1156,47 @@ function PrototypeNav({
   onDeviceChange: (d: DeviceType) => void;
 }) {
   return (
-    <>
+    <div className="border-b-2 border-[#0ea5e9]/40 bg-[#e0f2fe]">
+      {/* Explicit label: these controls are NOT part of the prototype */}
+      <div className="border-b border-[#0ea5e9]/30 bg-[#bae6fd] px-4 py-2">
+        <p className="text-[10px] font-medium uppercase tracking-widest text-[#0369a1]">
+          Demo controls — not part of prototype
+        </p>
+      </div>
+
       {/* Top bar with scenario description */}
-      <div className="w-full border-b border-[#30363d] bg-[#161b22]">
-        <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-3">
+      <div className="w-full border-b border-[#0ea5e9]/20 bg-[#e0f2fe]">
+        <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-3 flex-wrap gap-2">
           <div className="flex items-center gap-4">
-            <span className="text-xs font-medium uppercase tracking-wider text-[#6e7681]">Prototype</span>
-            <span className="text-sm font-semibold text-[#f0f6fc]">Risk Detection → 10K Update → Board Notification</span>
-            <span className="rounded-full border border-[#da3633]/40 bg-[#da3633]/10 px-2 py-0.5 text-[10px] font-medium text-[#da3633]">
+            <span className="text-xs font-medium uppercase tracking-wider text-[#0369a1]">Prototype</span>
+            <span className="text-sm font-semibold text-[#0c4a6e]">Risk Detection → 10K Update → Board Notification</span>
+            <span className="rounded-full border border-[#dc2626]/50 bg-[#fecaca] px-2 py-0.5 text-[10px] font-medium text-[#b91c1c]">
               Scenario
             </span>
           </div>
           
-          {/* Vision toggle only */}
           <div className="flex items-center gap-4">
-            <VisionToggle vision={vision} onChange={onVisionChange} />
+            <span className="rounded-full border-2 border-[#0c4a6e] bg-[#7dd3fc]/30 px-3 py-1 text-xs font-semibold text-[#0c4a6e]">
+              Viewing as: General Counsel
+            </span>
+            <VisionToggle vision={vision} onChange={onVisionChange} variant="light" />
           </div>
         </div>
       </div>
 
       {/* Scenario context bar */}
-      <div className="w-full border-b border-[#30363d] bg-[#0d1117]">
+      <div className="w-full border-b border-[#0ea5e9]/20 bg-[#e0f2fe]">
         <div className="mx-auto max-w-7xl px-4 py-3">
           <div className="flex items-start gap-3">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#da3633]/10">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#da3633" strokeWidth="2">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#fecaca]">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b91c1c" strokeWidth="2">
                 <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
                 <path d="M12 9v4M12 17h.01" />
               </svg>
             </div>
             <div className="flex-1">
-              <p className="text-sm text-[#8b949e]">
-                <span className="font-medium text-[#f0f6fc]">Scenario:</span> The General Counsel opens their GRC Command Center and sees that monitoring agents have detected 
+              <p className="text-sm text-[#0c4a6e]">
+                <span className="font-medium text-[#075985]">Scenario:</span> The General Counsel opens their GRC Command Center and sees that monitoring agents have detected 
                 emerging risks not captured in upcoming Board materials or regulatory filings. The GC will assess the risks, 
                 coordinate with stakeholders, update 10K risk disclosures, and notify the Board.
               </p>
@@ -1158,8 +1206,8 @@ function PrototypeNav({
       </div>
 
       {/* Device selector */}
-      <div className="flex flex-col items-center gap-3 bg-[#0d1117] py-4">
-        <div className="flex items-center gap-2 rounded-xl border border-[#30363d] bg-[#161b22] p-1">
+      <div className="flex flex-col items-center gap-3 bg-[#e0f2fe] py-4">
+        <div className="flex items-center gap-2 rounded-xl border border-[#0ea5e9]/40 bg-white p-1 shadow-sm">
           {[
             { id: "desktop" as DeviceType, icon: "🖥️", label: "Desktop" },
             { id: "ipad" as DeviceType, icon: "📱", label: "iPad" },
@@ -1171,8 +1219,8 @@ function PrototypeNav({
               className={cn(
                 "flex items-center gap-2 rounded-lg px-4 py-2 text-sm transition",
                 device === d.id
-                  ? "bg-[#21262d] text-[#f0f6fc]"
-                  : "text-[#8b949e] hover:text-[#f0f6fc]"
+                  ? "bg-[#0ea5e9] text-white shadow-sm"
+                  : "text-[#0369a1] hover:bg-[#bae6fd]"
               )}
             >
               <span>{d.icon}</span>
@@ -1182,18 +1230,25 @@ function PrototypeNav({
         </div>
         
         {/* Tambo prompt hints */}
-        <div className="flex items-center gap-2 text-xs text-[#6e7681]">
-          <span className="rounded bg-[#a371f7]/20 px-1.5 py-0.5 text-[10px] font-medium text-[#a371f7]">Live Mode</span>
+        <div className="flex items-center gap-2 text-xs text-[#0369a1]">
+          <span className="rounded bg-[#a78bfa]/30 px-1.5 py-0.5 text-[10px] font-medium text-[#6d28d9]">Live Mode</span>
           <span>Try:</span>
           {["draft 10K update", "compare to current disclosures", "notify the board", "who should review this", "show risk timeline"].map((prompt, i) => (
             <span key={prompt}>
-              <span className="text-[#8b949e]">&ldquo;{prompt}&rdquo;</span>
-              {i < 4 && <span className="ml-2 text-[#30363d]">•</span>}
+              <span className="text-[#0c4a6e]">&ldquo;{prompt}&rdquo;</span>
+              {i < 4 && <span className="ml-2 text-[#0ea5e9]/50">•</span>}
             </span>
           ))}
         </div>
       </div>
-    </>
+
+      {/* Prototype boundary label */}
+      <div className="border-t-2 border-[#0ea5e9] bg-[#0c4a6e] px-4 py-2">
+        <p className="text-[10px] font-medium uppercase tracking-widest text-[#7dd3fc]">
+          ↓ Prototype starts below (Diligent logo & GRC Command Center)
+        </p>
+      </div>
+    </div>
   );
 }
 
@@ -1971,6 +2026,9 @@ function DashboardContent({
   showChat = false,
   chatMessages = [],
   chatEndRef,
+  onPromptSubmit,
+  promptLoading = false,
+  promptSuggestions = [],
 }: {
   vision: Vision;
   activityOpen: boolean;
@@ -1991,16 +2049,14 @@ function DashboardContent({
   showChat?: boolean;
   chatMessages?: ChatMessage[];
   chatEndRef?: React.RefObject<HTMLDivElement | null>;
+  onPromptSubmit?: (message: string) => void;
+  promptLoading?: boolean;
+  promptSuggestions?: string[];
 }) {
   const isIphone = device === "iphone";
   const isIpad = device === "ipad";
   const isMobile = isIphone || isIpad;
   
-  // Track prompt box focus state to dim other sections
-  const [promptFocused, setPromptFocused] = React.useState(false);
-  
-  // CSS class for dimming other sections when prompt is focused
-  const dimClass = promptFocused ? "opacity-25 pointer-events-none transition-all duration-300" : "transition-all duration-300";
   return (
     <div className={cn(
       "overflow-hidden rounded-3xl border shadow-sm transition-colors duration-300",
@@ -2054,7 +2110,6 @@ function DashboardContent({
           "border-[#da3633]/40 bg-gradient-to-br from-[#da3633]/10 to-[#0d1117]",
           isIphone && "p-5 rounded-2xl",
           isIpad && "p-6 rounded-2xl",
-          dimClass
         )}>
           {/* Alert badge */}
           <div className="flex justify-center mb-4">
@@ -2154,7 +2209,6 @@ function DashboardContent({
               vision === "future"
                 ? "border-[#a371f7]/30 bg-[#a371f7]/5"
                 : "border-[#30363d] bg-[#21262d]",
-              dimClass
             )}
             ref={tickerRef}
             onMouseLeave={() => {
@@ -2280,7 +2334,7 @@ function DashboardContent({
 
         {/* DETECTED RISKS SECTION - Main content area */}
         {!isIphone && (
-          <section className={cn("mt-8", dimClass)}>
+          <section className="mt-8">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <h2 className="text-lg font-semibold text-[#f0f6fc]">Detected Risks Requiring Review</h2>
@@ -2306,7 +2360,8 @@ function DashboardContent({
             
             <div className="space-y-4">
               {detectedRisks.map((risk) => (
-                <Card key={risk.id} className={cn(
+                <React.Fragment key={risk.id}>
+                <Card className={cn(
                   "p-0 overflow-hidden",
                   risk.severity === "critical" && "border-[#da3633]/40",
                   risk.severity === "high" && "border-[#d29922]/40"
@@ -2412,6 +2467,7 @@ function DashboardContent({
                     </div>
                   </div>
                 </Card>
+                </React.Fragment>
               ))}
             </div>
           </section>
@@ -2452,18 +2508,9 @@ function DashboardContent({
           </section>
         )}
 
-        {/* Prompt box - full on desktop/iPad, compact button on iPhone */}
-        <div className="mt-8">
-          {isIphone ? (
-            <MobilePromptButton vision={vision} onOpenCanvas={onOpenCanvas} />
-          ) : (
-            <PromptBox vision={vision} onOpenCanvas={onOpenCanvas} hasTamboProvider={hasTamboProvider} onFocusChange={setPromptFocused} />
-          )}
-        </div>
-
         {/* Quick Actions for Risk Response */}
         {!isIphone && (
-          <section className={cn("mt-8", dimClass)}>
+          <section className="mt-8">
             <Card className="p-5">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-sm font-semibold text-[#f0f6fc]">Risk Response Actions</h3>
@@ -2538,7 +2585,7 @@ function DashboardContent({
 
         {/* Stakeholder Coordination Panel */}
         {!isIphone && (
-          <section className={cn("mt-8", dimClass)}>
+          <section className="mt-8">
             <Card className="p-5">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-sm font-semibold text-[#f0f6fc]">Stakeholders to Involve</h3>
@@ -2596,7 +2643,7 @@ function DashboardContent({
         {/* Keep some of the original sections but update for the scenario */}
         {/* Future: Cross-Diligent Risk Signals - full on desktop/iPad - HIDDEN since we have new risk UI */}
         {false && vision === "future" && !isIphone && (
-          <section className={cn("mt-8", dimClass)}>
+          <section className="mt-8">
             <Card className="p-0 overflow-hidden border-[#a371f7]/20">
               <div className="flex items-center justify-between border-b border-[#a371f7]/20 bg-gradient-to-r from-[#a371f7]/5 to-transparent px-5 py-4">
                 <div className="flex items-center gap-3">
@@ -2670,7 +2717,7 @@ function DashboardContent({
           </section>
         )}
 
-        <section className={cn("mt-10", dimClass)}>
+        <section className="mt-10">
           <SectionHeader 
             title={vision === "future" 
               ? "Your AI workspace at a glance" 
@@ -2720,130 +2767,6 @@ function DashboardContent({
           </div>
         </section>
 
-        <section className={cn("mt-12", dimClass)}>
-          <SectionHeader 
-            title={vision === "future" 
-              ? "AI-recommended actions awaiting your approval"
-              : isIphone 
-                ? "Get ahead"
-                : "Since everything's under control, get ahead of a few things"
-            } 
-          />
-          <div className={cn(
-            "mt-6 grid gap-6",
-            device === "desktop" && "lg:grid-cols-3",
-            isIpad && "grid-cols-1"
-          )}>
-            <div className={cn(device === "desktop" && "lg:col-span-2")}>
-              <div className="space-y-3">
-                {/* Show only first 2 actions on iPhone */}
-                {(isIphone ? currentNextActions.slice(0, 2) : currentNextActions).map((action) => (
-                  <div
-                    key={action.title}
-                    className={cn(
-                      "rounded-2xl border px-5 py-4 shadow-sm transition-colors duration-300",
-                      vision === "future"
-                        ? "border-[#a371f7]/20 bg-[#161b22]"
-                        : "border-[#30363d] bg-[#161b22]",
-                      isIphone && "px-4 py-3"
-                    )}
-                  >
-                    <div className={cn(
-                      "flex items-start justify-between gap-6",
-                      isMobile && "flex-col gap-3"
-                    )}>
-                      <div>
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <h3 className={cn(
-                            "text-base font-semibold text-[#f0f6fc]",
-                            isIphone && "text-sm"
-                          )}>{action.title}</h3>
-                          {"tag" in action && (
-                            <SoftTag variant="ai">{action.tag}</SoftTag>
-                          )}
-                        </div>
-                        <p className={cn(
-                          "mt-1 text-sm text-[#8b949e]",
-                          isIphone && "text-xs"
-                        )}>{action.detail}</p>
-                        <div className="mt-3 flex items-center gap-2 text-xs text-[#6e7681]">
-                          {"app" in action && (
-                            <span className="rounded-full border border-[#58a6ff]/30 bg-[#58a6ff]/10 px-2 py-0.5 text-[11px] text-[#58a6ff]">
-                              {action.app}
-                            </span>
-                          )}
-                          {vision === "near-term" && !isIphone && (
-                            <span className="text-[#6e7681]">Ready to complete</span>
-                          )}
-                        </div>
-                      </div>
-                      <button className={cn(
-                        "shrink-0 rounded-xl border px-3 py-2 text-sm",
-                        vision === "future"
-                          ? "border-[#a371f7] bg-[#a371f7]/10 text-[#a371f7] hover:bg-[#a371f7]/20"
-                          : "border-[#58a6ff] bg-[#58a6ff]/10 text-[#58a6ff] hover:bg-[#58a6ff]/20",
-                        isMobile && "w-full"
-                      )}>
-                        {vision === "future" ? "Approve" : "Open in app"}
-                      </button>
-                    </div>
-                  </div>
-                ))}
-                {isIphone && currentNextActions.length > 2 && (
-                  <button className="w-full rounded-xl border border-[#30363d] bg-[#21262d] px-4 py-3 text-sm text-[#8b949e]">
-                    View {currentNextActions.length - 2} more actions
-                  </button>
-                )}
-              </div>
-            </div>
-            {/* What's New sidebar - hidden on iPhone */}
-            {!isIphone && (
-              <div>
-                <Card className="p-5">
-                  <p className={cn(
-                    "text-xs uppercase tracking-[0.2em]",
-                    vision === "future" ? "text-[#a371f7]" : "text-[#6e7681]"
-                  )}>
-                    {vision === "future" ? "Coming Capabilities" : "What's New"}
-                  </p>
-                  <h3 className="mt-2 text-lg font-semibold text-[#f0f6fc]">
-                    {vision === "future" ? "On the AI Roadmap" : "Good to Know & Good to Go"}
-                  </h3>
-                  <p className="mt-2 text-sm text-[#8b949e]">
-                    {vision === "future"
-                      ? "Advanced AI capabilities in development for your legal workflow."
-                      : "Learn more about features and capabilities you already have today."
-                    }
-                  </p>
-                  <div className="mt-4 space-y-3">
-                    {currentWhatsNew.map((item) => (
-                      <a
-                        key={item.title}
-                        href={item.href}
-                        className={cn(
-                          "block rounded-xl border px-4 py-3 transition",
-                          vision === "future"
-                            ? "border-[#a371f7]/20 bg-[#0d1117] hover:border-[#a371f7]/40 hover:bg-[#a371f7]/5"
-                            : "border-[#30363d] bg-[#0d1117] hover:border-[#58a6ff]/50 hover:bg-[#21262d]"
-                        )}
-                      >
-                        <h4 className="text-sm font-semibold text-[#f0f6fc]">{item.title}</h4>
-                        <p className="mt-1 text-sm text-[#8b949e]">{item.detail}</p>
-                        <p className={cn(
-                          "mt-3 text-xs uppercase tracking-[0.2em]",
-                          vision === "future" ? "text-[#a371f7]" : "text-[#58a6ff]"
-                        )}>
-                          {vision === "future" ? "Learn More" : "Open"}
-                        </p>
-                      </a>
-                    ))}
-                  </div>
-                </Card>
-              </div>
-            )}
-          </div>
-        </section>
-
         {/* Chat Thread - appears when user submits a prompt */}
         {showChat && chatMessages.length > 0 && (
           <section className={cn(
@@ -2851,57 +2774,79 @@ function DashboardContent({
             isIphone && "mt-6 px-4 pt-4"
           )}>
             <div className="flex items-center gap-2 mb-4">
-              <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-gradient-to-br from-[#3fb950] to-[#58a6ff]">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-                  <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a2 2 0 0 1 0 4h-1.5v.5a2.5 2.5 0 0 1-5 0v-.5h-5v.5a2.5 2.5 0 0 1-5 0v-.5H4a2 2 0 0 1 0-4h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/>
+              <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-white flex-shrink-0 p-0.5">
+                <svg width="22" height="20" viewBox="0 0 22 20" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-full w-auto">
+                  <path d="M20.1006 15.6877C20.0186 15.8056 19.9338 15.9211 19.8467 16.0364C19.5697 16.4006 19.2675 16.7474 18.9443 17.0706C17.5077 18.5072 15.6393 19.5107 13.5459 19.8596L6.03223 12.345L8.3877 9.98755H8.38965L8.39258 9.98462L20.1006 15.6877Z" fill="#D3222A"/>
+                  <path d="M20.0259 4.21263C21.1905 5.84672 21.8735 7.84495 21.8735 9.99974C21.8735 12.116 21.2194 14.0737 20.1011 15.6872L8.39209 9.98412L20.0259 4.21263Z" fill="#EE312E"/>
+                  <path d="M13.5454 19.8581C13.0018 19.9504 12.4428 19.9997 11.8735 19.9997H3.69971L4.89307 13.4802L6.03174 12.3445L13.5454 19.8581Z" fill="#AF292E"/>
+                  <path d="M7.40379 10.0005L4.93727 11.2296L3.69979 13.7003L2.46653 11.2296L0 10.0005L2.46653 8.76302L3.69979 6.29649L3.71242 6.31754L4.93727 8.76302L7.40379 10.0005Z" fill="#1E1E1E"/>
+                  <path d="M13.5435 0.141312C16.0395 0.559546 18.2228 1.90387 19.7261 3.80733C19.8311 3.94057 19.9311 4.07423 20.0259 4.2126L8.39209 9.98409H8.38623L6.04443 7.63936L13.5435 0.141312Z" fill="#D3222A"/>
+                  <path d="M11.8735 0C12.4429 2.15682e-05 12.9997 0.0482901 13.5435 0.140625L6.04443 7.63965L4.88232 6.47754L3.69971 0H11.8735Z" fill="#AF292E"/>
+                  <path d="M9.65975 9.99958L4.55273 4.89256V6.5949L7.53183 9.99958L4.55273 12.9787V15.1066L9.65975 9.99958Z" fill="#F8F8FA"/>
+                  <path d="M9.65975 9.99958L4.55273 4.89256V6.5949L7.53183 9.99958L4.55273 12.9787V15.1066L9.65975 9.99958Z" fill="#F8F8FA"/>
+                  <path d="M9.65975 9.99958L4.55273 4.89256V6.5949L7.53183 9.99958L4.55273 12.9787V15.1066L9.65975 9.99958Z" fill="#F8F8FA"/>
+                  <path d="M9.65975 9.99958L4.55273 4.89256V6.5949L7.53183 9.99958L4.55273 12.9787V15.1066L9.65975 9.99958Z" fill="#F8F8FA"/>
+                  <path d="M9.66016 9.99998L4.55273 15.1064V12.9785L7.53223 9.99998L4.55273 6.59471V4.89256L9.66016 9.99998Z" fill="#F8F8FA"/>
                 </svg>
               </div>
               <span className="text-xs font-medium uppercase tracking-wider text-[#6e7681]">AI Assistant</span>
             </div>
             <div className="space-y-4">
               {chatMessages.map((message) => (
-                <ChatMessageBubble key={message.id} message={message} />
+                <React.Fragment key={message.id}>
+                  <ChatMessageBubble message={message} />
+                </React.Fragment>
               ))}
               <div ref={chatEndRef} />
             </div>
+            {/* Inline prompt box - attached to chat when active */}
+            {onPromptSubmit && (
+              <PinnedPromptBox
+                onSubmit={onPromptSubmit}
+                isLoading={promptLoading ?? false}
+                suggestions={promptSuggestions ?? []}
+                inline
+              />
+            )}
           </section>
         )}
 
-        {/* Footer - simplified on iPhone */}
-        <footer className={cn(
-          "mt-14 border-t border-[#30363d] bg-[#0d1117] px-5 py-5",
-          isIphone && "mt-8 px-4 py-4",
-          showChat && "mt-8"
-        )}>
-          <div className="flex items-center justify-between gap-6">
-            <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-[#6e7681]">System log</p>
-              {!isIphone && (
-                <p className="mt-1 text-sm text-[#8b949e]">
-                  {vision === "future" 
-                    ? "AI agent activity (last 24 hours)"
-                    : "Recent system activity (last 24 hours)"
-                  }
-                </p>
-              )}
-            </div>
-          </div>
-          <div className="mt-4 grid gap-2">
-            {/* Show only 3 entries on iPhone */}
-            {(isIphone ? currentActivityLog.slice(0, 3) : currentActivityLog).map((entry) => (
-              <div key={entry} className={cn(
-                "flex items-start gap-3 text-sm text-[#8b949e]",
-                isIphone && "text-xs"
-              )}>
-                <span className={cn(
-                  "mt-2 h-1.5 w-1.5 shrink-0 rounded-full",
-                  vision === "future" ? "bg-[#a371f7]" : "bg-[#3fb950]"
-                )} />
-                <span>{entry}</span>
+        {/* Footer - System log (hidden when chat is active) */}
+        {!showChat && (
+          <footer className={cn(
+            "mt-14 border-t border-[#30363d] bg-[#0d1117] px-5 py-5",
+            isIphone && "mt-8 px-4 py-4"
+          )}>
+            <div className="flex items-center justify-between gap-6">
+              <div>
+                <p className="text-xs uppercase tracking-[0.2em] text-[#6e7681]">System log</p>
+                {!isIphone && (
+                  <p className="mt-1 text-sm text-[#8b949e]">
+                    {vision === "future" 
+                      ? "AI agent activity (last 24 hours)"
+                      : "Recent system activity (last 24 hours)"
+                    }
+                  </p>
+                )}
               </div>
-            ))}
-          </div>
-        </footer>
+            </div>
+            <div className="mt-4 grid gap-2">
+              {/* Show only 3 entries on iPhone */}
+              {(isIphone ? currentActivityLog.slice(0, 3) : currentActivityLog).map((entry) => (
+                <div key={entry} className={cn(
+                  "flex items-start gap-3 text-sm text-[#8b949e]",
+                  isIphone && "text-xs"
+                )}>
+                  <span className={cn(
+                    "mt-2 h-1.5 w-1.5 shrink-0 rounded-full",
+                    vision === "future" ? "bg-[#a371f7]" : "bg-[#3fb950]"
+                  )} />
+                  <span>{entry}</span>
+                </div>
+              ))}
+            </div>
+          </footer>
+        )}
       </div>
     </div>
   );
@@ -2970,23 +2915,11 @@ function PageContent({ hasTamboProvider = false }: { hasTamboProvider?: boolean 
     },
   ];
 
-  const handleConfirmAssignments = (assignments: Record<string, string>) => {
-    const assignedPeople = Object.entries(assignments).map(([riskId, personId]) => {
-      const person = PEOPLE_DATABASE.find(p => p.id === personId);
-      const riskNames: Record<string, string> = {
-        "risk-taiwan": "Taiwan Strait risk",
-        "risk-vendor": "Vendor breach",
-        "risk-dma": "EU DMA risk",
-      };
-      return `${person?.name} → ${riskNames[riskId] || riskId}`;
-    });
+  const router = useRouter();
 
-    setChatMessages(prev => [...prev, {
-      id: `msg-${Date.now()}`,
-      role: "assistant",
-      content: `Done! I've notified:\n\n• ${assignedPeople.join('\n• ')}\n\nThey'll investigate and provide context. I'll alert you when complete.`,
-      timestamp: new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }),
-    }]);
+  const handleConfirmAssignments = (assignments: Record<string, string>) => {
+    // Navigate to coordinator page to complete the assign-owners workflow
+    router.push("/now/agentic-hero/superhero/coordinator");
   };
 
   const handlePromptSubmit = (message: string) => {
@@ -3071,6 +3004,9 @@ function PageContent({ hasTamboProvider = false }: { hasTamboProvider?: boolean 
     showChat,
     chatMessages,
     chatEndRef,
+    onPromptSubmit: handlePromptSubmit,
+    promptLoading,
+    promptSuggestions,
   };
 
   // Render active canvas
@@ -3094,7 +3030,7 @@ function PageContent({ hasTamboProvider = false }: { hasTamboProvider?: boolean 
   };
 
   return (
-    <div className="min-h-screen bg-[#0d1117] pb-28">
+    <div className={cn("min-h-screen bg-[#0d1117]", showChat ? "pb-6" : "pb-28")}>
       {/* Canvas overlay */}
       {activeCanvas !== "none" && renderCanvas()}
       
@@ -3126,12 +3062,14 @@ function PageContent({ hasTamboProvider = false }: { hasTamboProvider?: boolean 
             </div>
           )}
           
-          {/* Pinned Prompt Box */}
-          <PinnedPromptBox 
-            onSubmit={handlePromptSubmit}
-            isLoading={promptLoading}
-            suggestions={promptSuggestions}
-          />
+          {/* Pinned Prompt Box - fixed at bottom when no chat; inline when chat active */}
+          {!showChat && (
+            <PinnedPromptBox 
+              onSubmit={handlePromptSubmit}
+              isLoading={promptLoading}
+              suggestions={promptSuggestions}
+            />
+          )}
         </>
       )}
     </div>
