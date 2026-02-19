@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState, useRef } from "react";
-import { useRouter } from "next/navigation";
+import React, { useState, useRef, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 // Tambo not available in VibeSharing - running in demo mode
 import {
   CanvasType,
@@ -1271,9 +1272,6 @@ function TopNav({
             <DiligentLogo className="h-7 w-auto" />
             <span className="text-sm font-semibold text-[#f0f6fc]">GRC Command Center</span>
           </div>
-          <span className="rounded-full border border-[#58a6ff]/40 bg-[#58a6ff]/10 px-2 py-0.5 text-[10px] font-medium text-[#58a6ff]">
-            General Counsel
-          </span>
           {vision === "future" && (
             <span className="rounded-full border border-[#a371f7]/40 bg-[#a371f7]/10 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-[#a371f7]">
               AI-Enhanced
@@ -1313,7 +1311,10 @@ function TopNav({
             </svg>
           </button>
 
-          <div className="h-10 w-10 rounded-full bg-gradient-to-br from-[#58a6ff] to-[#a371f7]" aria-hidden="true" />
+          <div className="flex items-center gap-2">
+            <img src={GC_AVATAR_URL} alt="" className="h-10 w-10 rounded-full object-cover" />
+            <span className="text-sm font-medium text-[#f0f6fc]">{GC_NAME}</span>
+          </div>
         </div>
       </div>
     </div>
@@ -2007,6 +2008,9 @@ function MobileRiskSignalsCard() {
 
 // Dashboard content component to allow reuse in device frames
 function DashboardContent({ 
+  ceoApproved = false,
+  edgarApproved = false,
+  onEdgarApproved,
   vision, 
   activityOpen, 
   setActivityOpen, 
@@ -2030,6 +2034,9 @@ function DashboardContent({
   promptLoading = false,
   promptSuggestions = [],
 }: {
+  ceoApproved?: boolean;
+  edgarApproved?: boolean;
+  onEdgarApproved?: () => void;
   vision: Vision;
   activityOpen: boolean;
   setActivityOpen: (v: boolean) => void;
@@ -2104,7 +2111,92 @@ function DashboardContent({
           </div>
         ) : null}
 
-        {/* ALERT HERO - Emerging risks detected */}
+        {/* CEO APPROVED — EDGAR approval inline (no separate Finisher page) */}
+        {ceoApproved && (
+          <section id="edgar-approval" className="mb-8 space-y-6 scroll-mt-6">
+            <div className="rounded-2xl border border-[#3fb950]/40 bg-[#3fb950]/5 overflow-hidden">
+              <div className="p-6">
+                <div className="flex items-start gap-4">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#3fb950]/20">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3fb950" strokeWidth="1.5"><path d="M5 13l4 4L19 7" /></svg>
+                  </div>
+                  <div className="flex-1">
+                    {edgarApproved ? (
+                      <>
+                        <h2 className="text-lg font-semibold text-[#3fb950]">Approved</h2>
+                        <p className="mt-2 text-sm text-[#8b949e]">You approved the EDGAR submission. The package is queued. CEO/CFO certification will be requested before final transmit to SEC.</p>
+                        <p className="mt-2 text-xs text-[#8b949e]">You can close this window.</p>
+                      </>
+                    ) : (
+                      <>
+                        <h2 className="text-lg font-semibold text-[#3fb950]">EDGAR package ready — review and approve</h2>
+                        <p className="mt-2 text-sm text-[#8b949e]">Agents have formatted for SEC, applied XBRL tags, and prepared the submission. Review the filing below, then approve to submit.</p>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+              {!edgarApproved && (
+                <div className="border-t border-[#3fb950]/20 bg-[#0d1117]">
+                <div className="flex items-center justify-between border-b border-[#21262d] bg-[#161b22] px-4 py-2.5">
+                  <div className="flex items-center gap-2">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" /></svg>
+                    <span className="text-xs font-medium text-[#f0f6fc]">10-K Risk Disclosure — Item 1A (EDGAR-ready)</span>
+                  </div>
+                  <span className="rounded-full bg-[#21262d] border border-[#30363d] px-2 py-0.5 text-[10px] text-[#8b949e]">Filing preview</span>
+                </div>
+                <div className="p-4 max-h-[320px] overflow-y-auto">
+                  <div className="whitespace-pre-wrap font-mono text-xs leading-relaxed text-[#8b949e]/90">{`Item 1A. Risk Factors
+
+The following risk factors should be read carefully in connection with evaluating our business and the forward-looking statements contained in this Annual Report on Form 10-K.
+
+Risks Related to Our Business and Strategy
+
+Revenue Concentration Risk — Our business is subject to significant revenue concentration, with our top three clients representing approximately 42% of annual revenue.
+
+Third-Party Cybersecurity Risk — We rely on third-party service providers for critical business functions. A cybersecurity incident affecting any of our key vendors could disrupt our operations and expose sensitive data.
+
+Supply Chain Concentration — Approximately 68% of our cost of goods sold is tied to two primary suppliers. Approximately 47% of our chip suppliers have Taiwan-based operations, exposing us to geopolitical supply chain disruption risk. We are pursuing supplier diversification initiatives as discussed at the board level; qualification of alternative suppliers typically requires 12-18 months.
+
+Regulatory and Compliance Risks — We are subject to evolving regulatory frameworks including the EU Digital Markets Act. Compliance costs associated with these regulations have not been fully budgeted.`}</div>
+                </div>
+                <div className="border-t border-[#21262d] px-4 py-3 bg-[#161b22] flex justify-end">
+                  <button
+                    onClick={onEdgarApproved}
+                    className="inline-flex items-center gap-2 rounded-lg bg-[#3fb950] px-4 py-2.5 text-sm font-medium text-[#0d1117] hover:bg-[#46c35a]"
+                  >
+                    Approve EDGAR submission
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 13l4 4L19 7" /></svg>
+                  </button>
+                </div>
+                </div>
+              )}
+            </div>
+            <div className="rounded-2xl border border-[#58a6ff]/40 bg-[#58a6ff]/5 p-5">
+              <div className="flex items-start gap-4">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#58a6ff]/20">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#58a6ff" strokeWidth="1.5"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-sm font-semibold text-[#58a6ff]">GovernAI added to board agenda — ready for your review</h3>
+                  <p className="mt-1 text-xs text-[#8b949e] leading-relaxed">
+                    GovernAI has added Taiwan Strait, vendor breach, and EU DMA to the Feb 28 board meeting agenda. Review and confirm before the meeting.
+                  </p>
+                  <a
+                    href="#board-prep"
+                    className="mt-3 inline-flex items-center gap-2 rounded-lg border border-[#58a6ff]/50 bg-[#58a6ff]/10 px-3 py-2 text-xs font-medium text-[#58a6ff] hover:bg-[#58a6ff]/20 transition-colors"
+                  >
+                    Review agenda items
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* ALERT HERO - Emerging risks detected (hidden when ceoApproved) */}
+        {!ceoApproved && (
         <header className={cn(
           "rounded-3xl border p-10 shadow-sm transition-all duration-300",
           "border-[#da3633]/40 bg-gradient-to-br from-[#da3633]/10 to-[#0d1117]",
@@ -2200,9 +2292,10 @@ function DashboardContent({
             </div>
           )}
         </header>
+        )}
 
-        {/* Agent ticker - hidden on iPhone */}
-        {!isIphone && (
+        {/* Agent ticker - hidden on iPhone and when ceoApproved */}
+        {!ceoApproved && !isIphone && (
           <div
             className={cn(
               "ticker-strip relative mt-4 rounded-2xl border px-4 py-2 transition-all duration-300",
@@ -2332,309 +2425,260 @@ function DashboardContent({
           </div>
         )}
 
-        {/* DETECTED RISKS SECTION - Main content area */}
-        {!isIphone && (
+        {/* Detected Risks Requiring Review — first-page focus: assign owners (hidden when ceoApproved) */}
+        {!ceoApproved && !isIphone && (
           <section className="mt-8">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between gap-4 mb-4">
               <div className="flex items-center gap-3">
                 <h2 className="text-lg font-semibold text-[#f0f6fc]">Detected Risks Requiring Review</h2>
-                <span className="rounded-full border border-[#da3633]/40 bg-[#da3633]/10 px-2 py-0.5 text-xs font-medium text-[#da3633]">
+                <span className="rounded-full border border-[#da3633]/50 bg-[#da3633]/20 px-2.5 py-0.5 text-xs font-medium text-[#ff7b72]">
                   {detectedRisks.length} risks
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <a 
+                <Link
                   href="/now/agentic-hero/superhero/reviewer"
-                  className="rounded-lg border border-[#30363d] bg-[#21262d] px-4 py-1.5 text-xs font-medium text-[#f0f6fc] hover:bg-[#30363d] hover:border-[#8b949e] transition-colors"
+                  className="inline-flex items-center rounded-lg border border-[#58a6ff]/50 bg-[#58a6ff]/10 px-3 py-2 text-xs font-medium text-[#58a6ff] hover:bg-[#58a6ff]/20 transition-colors"
                 >
                   Review detection sources
-                </a>
-                <a 
+                </Link>
+                <Link
                   href="/now/agentic-hero/superhero/coordinator"
-                  className="rounded-lg border border-[#58a6ff] bg-[#58a6ff]/10 px-4 py-1.5 text-xs font-medium text-[#58a6ff] hover:bg-[#58a6ff]/20"
+                  className="inline-flex items-center gap-2 rounded-lg bg-[#58a6ff] px-4 py-2.5 text-sm font-medium text-white hover:bg-[#79b8ff] transition-colors"
                 >
-                  Assign Owners →
-                </a>
+                  Assign Owners
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+                </Link>
               </div>
             </div>
-            
             <div className="space-y-4">
               {detectedRisks.map((risk) => (
-                <React.Fragment key={risk.id}>
-                <Card className={cn(
-                  "p-0 overflow-hidden",
-                  risk.severity === "critical" && "border-[#da3633]/40",
-                  risk.severity === "high" && "border-[#d29922]/40"
-                )}>
-                  {/* Risk header */}
-                  <div className={cn(
-                    "flex items-start justify-between gap-4 px-5 py-4",
-                    risk.severity === "critical" && "bg-gradient-to-r from-[#da3633]/10 to-transparent",
-                    risk.severity === "high" && "bg-gradient-to-r from-[#d29922]/10 to-transparent"
-                  )}>
-                    <div className="flex items-start gap-4">
+                <Card key={risk.id} className="p-5">
+                  <div className="flex items-start justify-between gap-4 mb-4">
+                    <div className="flex items-start gap-3">
                       <div className={cn(
-                        "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl",
-                        risk.severity === "critical" && "bg-[#da3633]/20",
-                        risk.severity === "high" && "bg-[#d29922]/20",
-                        risk.severity === "medium" && "bg-[#f0883e]/20"
+                        "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-xs font-bold",
+                        risk.severity === "critical" && "bg-[#da3633]/20 text-[#ff7b72]",
+                        risk.severity === "high" && "bg-[#d29922]/20 text-[#d29922]",
+                        risk.severity === "medium" && "bg-[#58a6ff]/20 text-[#58a6ff]"
                       )}>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={
-                          risk.severity === "critical" ? "#da3633" : 
-                          risk.severity === "high" ? "#d29922" : "#f0883e"
-                        } strokeWidth="2">
-                          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-                          <path d="M12 9v4M12 17h.01" />
-                        </svg>
+                        !
                       </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <h3 className="text-base font-semibold text-[#f0f6fc]">{risk.title}</h3>
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="text-sm font-semibold text-[#f0f6fc]">{risk.title}</h3>
                           <span className={cn(
-                            "rounded-full border px-2 py-0.5 text-[10px] font-medium uppercase",
-                            risk.severity === "critical" && "border-[#da3633]/50 bg-[#da3633]/20 text-[#da3633]",
-                            risk.severity === "high" && "border-[#d29922]/50 bg-[#d29922]/20 text-[#d29922]",
-                            risk.severity === "medium" && "border-[#f0883e]/50 bg-[#f0883e]/20 text-[#f0883e]"
+                            "rounded-full px-2 py-0.5 text-[10px] font-medium uppercase",
+                            risk.severity === "critical" && "bg-[#da3633]/20 text-[#ff7b72]",
+                            risk.severity === "high" && "bg-[#d29922]/20 text-[#d29922]",
+                            risk.severity === "medium" && "bg-[#58a6ff]/20 text-[#58a6ff]"
                           )}>
                             {risk.severity}
                           </span>
                         </div>
-                        <div className="mt-1 flex items-center gap-2 text-xs text-[#6e7681]">
-                          <span>{risk.source}</span>
-                          <span>·</span>
-                          <span>{risk.detectedAt}</span>
-                        </div>
-                        <p className="mt-2 text-sm text-[#8b949e]">{risk.summary}</p>
+                        <p className="text-xs text-[#8b949e]">{risk.source} · {risk.detectedAt}</p>
+                        <p className="mt-2 text-sm text-[#c9d1d9]">{risk.summary}</p>
                       </div>
                     </div>
-                  </div>
-
-                  {/* Disclosure gap analysis */}
-                  <div className="border-t border-[#30363d] bg-[#0d1117]/50 px-5 py-4">
-                    <div className="grid gap-4 md:grid-cols-2">
-                      <div>
-                        <p className="text-xs font-medium uppercase tracking-wider text-[#6e7681] mb-2">Current Disclosure</p>
-                        <p className="text-sm text-[#8b949e] bg-[#21262d] rounded-lg p-3 border border-[#30363d]">
-                          {risk.currentDisclosure || <span className="italic text-[#6e7681]">No specific disclosure found</span>}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-xs font-medium uppercase tracking-wider text-[#da3633] mb-2 flex items-center gap-1">
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <circle cx="12" cy="12" r="10" />
-                            <path d="M12 8v4M12 16h.01" />
-                          </svg>
-                          Disclosure Gap
-                        </p>
-                        <p className="text-sm text-[#f0f6fc] bg-[#da3633]/10 rounded-lg p-3 border border-[#da3633]/30">
-                          {risk.disclosureGap}
-                        </p>
-                      </div>
-                    </div>
-                    
-                    {/* Affected filings */}
-                    <div className="mt-4 flex items-center gap-2 flex-wrap">
-                      <span className="text-xs text-[#6e7681]">Affected filings:</span>
-                      {risk.affectedFilings.map((filing) => (
-                        <span key={filing} className="rounded-full border border-[#30363d] bg-[#21262d] px-2 py-0.5 text-xs text-[#8b949e]">
-                          {filing}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Recommended action */}
-                  <div className="border-t border-[#30363d] px-5 py-3 flex items-center justify-between bg-[#161b22]">
-                    <div className="flex items-center gap-2">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3fb950" strokeWidth="2">
-                        <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" />
-                        <path d="M12 16v-4M12 8h.01" />
-                      </svg>
-                      <span className="text-xs text-[#8b949e]">
-                        <span className="text-[#3fb950] font-medium">Recommended:</span> {risk.recommendedAction}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <button className="rounded-lg border border-[#30363d] bg-[#161b22] px-3 py-1.5 text-xs text-[#8b949e] hover:bg-[#21262d] hover:text-[#f0f6fc]">
+                    <div className="flex items-center gap-2 shrink-0">
+                      <Link
+                        href="/now/agentic-hero/superhero/coordinator"
+                        className="inline-flex items-center rounded-lg border border-[#58a6ff]/50 bg-transparent px-3 py-1.5 text-xs font-medium text-[#58a6ff] hover:bg-[#58a6ff]/10 transition-colors"
+                      >
                         View Details
-                      </button>
-                      <button 
-                        onClick={() => onOpenCanvas("document")}
-                        className="rounded-lg border border-[#58a6ff] bg-[#58a6ff]/10 px-3 py-1.5 text-xs font-medium text-[#58a6ff] hover:bg-[#58a6ff]/20"
+                      </Link>
+                      <Link
+                        href="/now/agentic-hero/superhero/coordinator"
+                        className="inline-flex items-center rounded-lg bg-[#58a6ff] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#79b8ff] transition-colors"
                       >
                         Draft Update
-                      </button>
+                      </Link>
                     </div>
                   </div>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {risk.currentDisclosure && (
+                      <div className="rounded-lg border border-[#30363d] bg-[#161b22] p-3">
+                        <p className="text-[10px] font-medium uppercase tracking-wider text-[#6e7681] mb-1">Current disclosure</p>
+                        <p className="text-xs text-[#8b949e]">{risk.currentDisclosure}</p>
+                      </div>
+                    )}
+                    <div className="rounded-lg border border-[#da3633]/30 bg-[#da3633]/5 p-3">
+                      <p className="text-[10px] font-medium uppercase tracking-wider text-[#ff7b72] mb-1">Disclosure gap</p>
+                      <p className="text-xs text-[#c9d1d9]">{risk.disclosureGap}</p>
+                    </div>
+                  </div>
+                  <div className="mt-3 flex flex-wrap items-center gap-2">
+                    {risk.affectedFilings.map((f) => (
+                      <span key={f} className="rounded-full border border-[#30363d] bg-[#21262d] px-2.5 py-0.5 text-[10px] text-[#8b949e]">
+                        {f}
+                      </span>
+                    ))}
+                  </div>
+                  <p className="mt-3 flex items-start gap-2 text-xs text-[#3fb950]">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0 mt-0.5"><path d="M9 12l2 2 4-4" /></svg>
+                    <span>{risk.recommendedAction}</span>
+                  </p>
                 </Card>
-                </React.Fragment>
               ))}
             </div>
           </section>
         )}
 
-        {/* Mobile risk summary for iPhone */}
-        {isIphone && (
-          <section className="mt-6 space-y-3">
-            {detectedRisks.map((risk) => (
-              <div key={risk.id} className={cn(
-                "rounded-2xl border p-4",
-                risk.severity === "critical" && "border-[#da3633]/40 bg-[#da3633]/5",
-                risk.severity === "high" && "border-[#d29922]/40 bg-[#d29922]/5"
-              )}>
-                <div className="flex items-start gap-3">
-                  <div className={cn(
-                    "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl",
-                    risk.severity === "critical" && "bg-[#da3633]/20",
-                    risk.severity === "high" && "bg-[#d29922]/20"
-                  )}>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={
-                      risk.severity === "critical" ? "#da3633" : "#d29922"
-                    } strokeWidth="2">
-                      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-                      <path d="M12 9v4M12 17h.01" />
-                    </svg>
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-semibold text-[#f0f6fc]">{risk.title}</p>
-                    <p className="text-xs text-[#8b949e] mt-1">{risk.summary.substring(0, 80)}...</p>
-                    <button className="mt-2 text-xs font-medium text-[#58a6ff]">
-                      Review →
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </section>
-        )}
-
-        {/* Quick Actions for Risk Response */}
-        {!isIphone && (
-          <section className="mt-8">
+        {/* Board meeting prep — Feb 28 (only when ceoApproved — later narrative) */}
+        {!isIphone && ceoApproved && (
+          <section id="board-prep" className="mt-8 scroll-mt-6">
             <Card className="p-5">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-semibold text-[#f0f6fc]">Risk Response Actions</h3>
-                <span className="text-xs text-[#6e7681]">Complete these steps to address detected risks</span>
+              <div className="flex items-center justify-between mb-5">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#d29922]/10">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d29922" strokeWidth="1.5">
+                      <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-semibold text-[#f0f6fc]">Feb 28 Board Meeting</h3>
+                    <p className="text-xs text-[#d29922] font-medium">16 days to go — plenty to coordinate</p>
+                  </div>
+                </div>
+                <span className="rounded-full border border-[#d29922]/40 bg-[#d29922]/10 px-2.5 py-0.5 text-xs font-medium text-[#d29922]">5 tasks outstanding</span>
               </div>
-              <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
-                <button 
-                  onClick={() => onOpenCanvas("document")}
-                  className="flex items-center gap-3 rounded-xl border border-[#30363d] bg-[#21262d] p-4 text-left hover:border-[#58a6ff]/50 hover:bg-[#30363d] transition"
-                >
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#58a6ff]/10">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#58a6ff" strokeWidth="2">
-                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                      <path d="M14 2v6h6M12 18v-6M9 15h6" />
-                    </svg>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-[#f0f6fc]">Draft 10K Updates</p>
-                    <p className="text-xs text-[#6e7681]">AI-assisted risk factor drafting</p>
-                  </div>
-                </button>
-                
-                <button 
-                  onClick={() => onOpenCanvas("reporting")}
-                  className="flex items-center gap-3 rounded-xl border border-[#30363d] bg-[#21262d] p-4 text-left hover:border-[#58a6ff]/50 hover:bg-[#30363d] transition"
-                >
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#a371f7]/10">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#a371f7" strokeWidth="2">
-                      <path d="M18 20V10M12 20V4M6 20v-6" />
-                    </svg>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-[#f0f6fc]">Compare Disclosures</p>
-                    <p className="text-xs text-[#6e7681]">Gap analysis vs. current filings</p>
-                  </div>
-                </button>
-                
-                <button 
-                  onClick={() => onOpenCanvas("email")}
-                  className="flex items-center gap-3 rounded-xl border border-[#30363d] bg-[#21262d] p-4 text-left hover:border-[#58a6ff]/50 hover:bg-[#30363d] transition"
-                >
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#3fb950]/10">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3fb950" strokeWidth="2">
-                      <rect x="2" y="4" width="20" height="16" rx="2" />
-                      <path d="m22 6-10 7L2 6" />
-                    </svg>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-[#f0f6fc]">Notify Board</p>
-                    <p className="text-xs text-[#6e7681]">Draft memo to Audit Committee</p>
-                  </div>
-                </button>
-                
-                <button 
-                  onClick={() => onOpenCanvas("workflow")}
-                  className="flex items-center gap-3 rounded-xl border border-[#30363d] bg-[#21262d] p-4 text-left hover:border-[#58a6ff]/50 hover:bg-[#30363d] transition"
-                >
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#f0883e]/10">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f0883e" strokeWidth="2">
-                      <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-[#f0f6fc]">Start Full Workflow</p>
-                    <p className="text-xs text-[#6e7681]">Coordinate all stakeholders</p>
-                  </div>
-                </button>
-              </div>
-            </Card>
-          </section>
-        )}
+              
+              <p className="text-sm text-[#8b949e] mb-5">
+                Your whole day won&apos;t be EDGAR filings. Here&apos;s what still needs attention before the Board.
+              </p>
 
-        {/* Stakeholder Coordination Panel */}
-        {!isIphone && (
-          <section className="mt-8">
-            <Card className="p-5">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-semibold text-[#f0f6fc]">Stakeholders to Involve</h3>
-                <button className="text-xs text-[#58a6ff] hover:underline">
-                  Add stakeholder +
-                </button>
+              {/* Outstanding tasks + who to delegate to */}
+              <div className="space-y-3 mb-6">
+                <p className="text-[11px] font-medium uppercase tracking-wider text-[#6e7681]">Outstanding tasks</p>
+                <div className="grid gap-3 md:grid-cols-2">
+                  <div className="rounded-xl border border-[#30363d] bg-[#21262d] p-4">
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <p className="text-sm font-medium text-[#f0f6fc]">Add emerging risks to agenda</p>
+                        <p className="text-xs text-[#8b949e] mt-1">Taiwan Strait, vendor breach, EU DMA — discuss at Board</p>
+                      </div>
+                      <span className="rounded-full border border-[#d29922]/40 bg-[#d29922]/10 px-2 py-0.5 text-[10px] font-medium text-[#d29922] shrink-0">Delegate</span>
+                    </div>
+                    <p className="mt-3 text-[11px] text-[#6e7681]">→ Sarah Chen (Securities Counsel) or Board Secretary</p>
+                  </div>
+                  <div className="rounded-xl border border-[#30363d] bg-[#21262d] p-4">
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <p className="text-sm font-medium text-[#f0f6fc]">10-K EDGAR package ready</p>
+                        <p className="text-xs text-[#8b949e] mt-1">
+                          {edgarApproved ? "Approved — submission queued." : "Agents prepared it — your approval to submit."}
+                        </p>
+                      </div>
+                      <span className={cn(
+                        "rounded-full border px-2 py-0.5 text-[10px] font-medium shrink-0",
+                        edgarApproved ? "border-[#3fb950]/40 bg-[#3fb950]/10 text-[#3fb950]" : "border-[#3fb950]/40 bg-[#3fb950]/10 text-[#3fb950]"
+                      )}>{edgarApproved ? "Done" : "You"}</span>
+                    </div>
+                    {!edgarApproved && (
+                      <p className="mt-3 text-[11px] text-[#6e7681]">→ <a href="#edgar-approval" className="text-[#58a6ff] hover:underline">Approve EDGAR</a></p>
+                    )}
+                  </div>
+                  <div className="rounded-xl border border-[#30363d] bg-[#21262d] p-4">
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <p className="text-sm font-medium text-[#f0f6fc]">Audit committee pre-read</p>
+                        <p className="text-xs text-[#8b949e] mt-1">Risk summary and disclosure changes</p>
+                      </div>
+                      <span className="rounded-full border border-[#d29922]/40 bg-[#d29922]/10 px-2 py-0.5 text-[10px] font-medium text-[#d29922] shrink-0">Delegate</span>
+                    </div>
+                    <p className="mt-3 text-[11px] text-[#6e7681]">→ Rachel Green (VP Risk) to draft; you review</p>
+                  </div>
+                  <div className="rounded-xl border border-[#30363d] bg-[#21262d] p-4">
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <p className="text-sm font-medium text-[#f0f6fc]">Executive session prep</p>
+                        <p className="text-xs text-[#8b949e] mt-1">Legal matters for closed-door discussion</p>
+                      </div>
+                      <span className="rounded-full border border-[#d29922]/40 bg-[#d29922]/10 px-2 py-0.5 text-[10px] font-medium text-[#d29922] shrink-0">Delegate</span>
+                    </div>
+                    <p className="mt-3 text-[11px] text-[#6e7681]">→ Deputy GC or Sarah Chen</p>
+                  </div>
+                </div>
               </div>
-              <div className="grid gap-3 md:grid-cols-3">
-                <div className="rounded-xl border border-[#30363d] bg-[#21262d] p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-gradient-to-br from-[#58a6ff] to-[#a371f7]" />
-                    <div>
-                      <p className="text-sm font-medium text-[#f0f6fc]">Sarah Chen</p>
-                      <p className="text-xs text-[#6e7681]">Securities Counsel</p>
-                    </div>
-                  </div>
-                  <p className="mt-3 text-xs text-[#8b949e]">Review 10K disclosure language and materiality assessment</p>
-                  <button className="mt-3 w-full rounded-lg border border-[#30363d] bg-[#161b22] px-3 py-1.5 text-xs text-[#8b949e] hover:bg-[#21262d] hover:text-[#f0f6fc]">
-                    Assign Task
-                  </button>
+
+              {/* Document Data Room — who has uploaded */}
+              <div className="border-t border-[#30363d] pt-5">
+                <p className="text-[11px] font-medium uppercase tracking-wider text-[#6e7681] mb-3">Diligent Document Data Room — materials uploaded</p>
+                <div className="flex flex-wrap gap-2">
+                  <span className="inline-flex items-center gap-1.5 rounded-lg border border-[#3fb950]/40 bg-[#3fb950]/10 px-3 py-1.5 text-xs text-[#3fb950]">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 6L9 17l-5-5" /></svg>
+                    ERM deck
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 rounded-lg border border-[#3fb950]/40 bg-[#3fb950]/10 px-3 py-1.5 text-xs text-[#3fb950]">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 6L9 17l-5-5" /></svg>
+                    CRO assessment
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 rounded-lg border border-[#3fb950]/40 bg-[#3fb950]/10 px-3 py-1.5 text-xs text-[#3fb950]">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 6L9 17l-5-5" /></svg>
+                    10-K draft
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 rounded-lg border border-[#d29922]/40 bg-[#d29922]/10 px-3 py-1.5 text-xs text-[#d29922]">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" /></svg>
+                    CFO materials — pending
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 rounded-lg border border-[#484f58]/50 bg-[#21262d] px-3 py-1.5 text-xs text-[#6e7681]">
+                    Outside counsel — not yet
+                  </span>
                 </div>
-                
-                <div className="rounded-xl border border-[#30363d] bg-[#21262d] p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-gradient-to-br from-[#3fb950] to-[#58a6ff]" />
-                    <div>
-                      <p className="text-sm font-medium text-[#f0f6fc]">Michael Torres</p>
-                      <p className="text-xs text-[#6e7681]">CFO</p>
-                    </div>
-                  </div>
-                  <p className="mt-3 text-xs text-[#8b949e]">Financial impact assessment and MD&A implications</p>
-                  <button className="mt-3 w-full rounded-lg border border-[#30363d] bg-[#161b22] px-3 py-1.5 text-xs text-[#8b949e] hover:bg-[#21262d] hover:text-[#f0f6fc]">
-                    Assign Task
-                  </button>
-                </div>
-                
-                <div className="rounded-xl border border-[#30363d] bg-[#21262d] p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-gradient-to-br from-[#f0883e] to-[#da3633]" />
-                    <div>
-                      <p className="text-sm font-medium text-[#f0f6fc]">Board Audit Committee</p>
-                      <p className="text-xs text-[#6e7681]">3 members</p>
-                    </div>
-                  </div>
-                  <p className="mt-3 text-xs text-[#8b949e]">Risk oversight and disclosure approval</p>
-                  <button className="mt-3 w-full rounded-lg border border-[#30363d] bg-[#161b22] px-3 py-1.5 text-xs text-[#8b949e] hover:bg-[#21262d] hover:text-[#f0f6fc]">
-                    Schedule Briefing
-                  </button>
-                </div>
+              </div>
+
+              {/* What we need to discuss */}
+              <div className="border-t border-[#30363d] pt-5 mt-5">
+                <p className="text-[11px] font-medium uppercase tracking-wider text-[#6e7681] mb-3">What we need to discuss</p>
+                <ul className="space-y-2 text-sm text-[#8b949e]">
+                  <li className="flex gap-2">
+                    <span className="text-[#58a6ff]">•</span>
+                    <span>Taiwan Strait / supply chain — escalation since Q3, timeline for Vietnam qualification (12–18 months). CRO and Diana Reyes can present.</span>
+                  </li>
+                  <li className="flex gap-2">
+                    <span className="text-[#58a6ff]">•</span>
+                    <span>Vendor breach (CloudSecure) — incident status, remediation, and why we elevated to Top 5. Marcus Webb has the technical brief.</span>
+                  </li>
+                  <li className="flex gap-2">
+                    <span className="text-[#58a6ff]">•</span>
+                    <span>EU Digital Markets Act — compliance posture, potential gatekeeper designation, and budget impact. James Park to cover.</span>
+                  </li>
+                  <li className="flex gap-2">
+                    <span className="text-[#58a6ff]">•</span>
+                    <span>ERM deck vs. 10-K — how the board deck narrative aligns with (or differs from) SEC disclosure. Audit committee may ask.</span>
+                  </li>
+                  <li className="flex gap-2">
+                    <span className="text-[#58a6ff]">•</span>
+                    <span>Outside counsel timeline — Davis Polk final sign-off before audit committee. Need to confirm dates.</span>
+                  </li>
+                </ul>
+              </div>
+
+              {/* What we need to decide */}
+              <div className="border-t border-[#30363d] pt-5 mt-5">
+                <p className="text-[11px] font-medium uppercase tracking-wider text-[#6e7681] mb-3">What we need to decide</p>
+                <ul className="space-y-2 text-sm text-[#8b949e]">
+                  <li className="flex gap-2">
+                    <span className="text-[#d29922]">•</span>
+                    <span><strong className="text-[#f0f6fc]">Vietnam disclosure level</strong> — How much detail in 10-K risk factors vs. board-only memo? Diana recommends explicit mention; some counsel prefer keeping geographic specifics out of filings.</span>
+                  </li>
+                  <li className="flex gap-2">
+                    <span className="text-[#d29922]">•</span>
+                    <span><strong className="text-[#f0f6fc]">Vendor breach naming</strong> — Include CloudSecure by name in 10-K or anonymize? SEC guidance and competitive sensitivity to weigh.</span>
+                  </li>
+                  <li className="flex gap-2">
+                    <span className="text-[#d29922]">•</span>
+                    <span><strong className="text-[#f0f6fc]">EU DMA treatment</strong> — New standalone risk factor or fold into existing regulatory section? James Park has draft language for both.</span>
+                  </li>
+                  <li className="flex gap-2">
+                    <span className="text-[#d29922]">•</span>
+                    <span><strong className="text-[#f0f6fc]">Executive session items</strong> — What goes into closed session vs. open Board? Litigation hold on vendor matter; any privileged updates.</span>
+                  </li>
+                  <li className="flex gap-2">
+                    <span className="text-[#d29922]">•</span>
+                    <span><strong className="text-[#f0f6fc]">Board deck scope</strong> — Full ERM update or focused emerging-risks addendum? Rachel suggests addendum to keep main deck tight.</span>
+                  </li>
+                </ul>
               </div>
             </Card>
           </section>
@@ -2852,8 +2896,14 @@ function DashboardContent({
   );
 }
 
+const GC_NAME = "Sarah Mitchell";
+const GC_AVATAR_URL = "https://randomuser.me/api/portraits/med/women/65.jpg";
+
 // Main page content component
 function PageContent({ hasTamboProvider = false }: { hasTamboProvider?: boolean }) {
+  const searchParams = useSearchParams();
+  const ceoApproved = searchParams.get("ceo_approved") === "1";
+  const [edgarApproved, setEdgarApproved] = React.useState(false);
   const [vision, setVision] = React.useState<Vision>("near-term");
   const [device, setDevice] = React.useState<DeviceType>("desktop");
   const [activityOpen, setActivityOpen] = React.useState(false);
@@ -2985,6 +3035,9 @@ function PageContent({ hasTamboProvider = false }: { hasTamboProvider?: boolean 
   const currentWhatsNew = whatsNew[vision];
 
   const dashboardProps = {
+    ceoApproved,
+    edgarApproved,
+    onEdgarApproved: () => setEdgarApproved(true),
     vision,
     activityOpen,
     setActivityOpen,
@@ -3078,5 +3131,9 @@ function PageContent({ hasTamboProvider = false }: { hasTamboProvider?: boolean 
 
 // Main export (running in demo mode - Tambo not available in VibeSharing)
 export default function Page() {
-  return <PageContent hasTamboProvider={false} />;
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#0d1117] flex items-center justify-center"><div className="h-8 w-8 border-2 border-[#58a6ff] border-t-transparent rounded-full animate-spin" /></div>}>
+      <PageContent hasTamboProvider={false} />
+    </Suspense>
+  );
 }

@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { StakeholderFooter, PrototypeControlButton } from "../StakeholderFooter";
+import { StakeholderFooter, PrototypeControlLink } from "../StakeholderFooter";
 
 function cn(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
@@ -42,35 +42,6 @@ export default function CeoApprovalPage() {
   const handleRequestChanges = () => {
     setShowRequestChanges(true);
   };
-
-  if (approved === true) {
-    return (
-      <div className="min-h-screen bg-[#0d1117] flex flex-col">
-        <div className="flex-1 flex items-center justify-center p-6">
-          <div className="max-w-lg text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#3fb950]/20 mb-4">
-              <svg className="w-8 h-8 text-[#3fb950]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-            <h1 className="text-xl font-semibold text-[#f0f6fc] mb-2">Approved</h1>
-            <p className="text-sm text-[#8b949e] mb-6">
-              The 10-K disclosure updates have been approved. Routing to outside counsel for final review, then to the audit committee for sign-off.
-            </p>
-            <Link
-              href="/now/agentic-hero/superhero/finisher"
-              className="inline-flex items-center gap-2 rounded-lg bg-[#3fb950] px-5 py-2.5 text-sm font-medium text-[#0d1117] hover:bg-[#46c35a]"
-            >
-              Continue to Notify Board
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M5 12h14M12 5l7 7-7 7" />
-              </svg>
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-[#0d1117] flex flex-col">
@@ -115,70 +86,90 @@ export default function CeoApprovalPage() {
             <span className="text-xs text-[#6b7280]">10-K Approval</span>
           </div>
 
-          {/* Page content — simple approval view */}
+          {/* Page content — approval view or confirmation (both in white canvas) */}
           <div className="flex-1 overflow-y-auto bg-[#fafafa] min-h-0">
             <div className="max-w-xl mx-auto p-6 space-y-6">
-              {/* Approval status: GC done, CEO current, next steps */}
-              <div className="rounded-lg border border-[#e5e7eb] bg-white p-4 shadow-sm">
-                <p className="text-xs font-medium text-[#6b7280] uppercase tracking-wider mb-3">Approval status</p>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-[#d1fae5] px-2.5 py-1 text-xs font-medium text-[#065f46]">
-                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                    General Counsel approved
-                  </span>
-                  <span className="text-[#9ca3af]">→</span>
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-[#dbeafe] border border-[#3b82f6]/30 px-2.5 py-1 text-xs font-medium text-[#1e40af]">
-                    CEO approval (you)
-                  </span>
-                  <span className="text-[#9ca3af]">→</span>
-                  <span className="text-xs text-[#9ca3af]">Outside counsel</span>
-                  <span className="text-[#9ca3af]">→</span>
-                  <span className="text-xs text-[#9ca3af]">Audit committee</span>
-                </div>
-              </div>
-
-              <div>
-                <h1 className="text-lg font-semibold text-[#111827]">Approve 10-K disclosure updates</h1>
-                <p className="text-sm text-[#6b7280] mt-1">Review the document and approve or request changes</p>
-              </div>
-
-              <div className="rounded-lg border border-[#e5e7eb] bg-white overflow-hidden shadow-sm">
-                <div className="border-b border-[#e5e7eb] px-4 py-2.5 bg-[#f9fafb]">
-                  <p className="text-xs font-medium text-[#6b7280] uppercase tracking-wider">10-K Risk Factor Updates — FY2025</p>
-                </div>
-                <div className="p-4 max-h-64 overflow-y-auto">
-                  <pre className="text-sm text-[#374151] whitespace-pre-wrap font-sans leading-relaxed">{DRAFT_PREVIEW}</pre>
-                </div>
-              </div>
-
-              {showRequestChanges ? (
-                <div className="rounded-lg border border-[#f59e0b]/40 bg-[#fffbeb] p-4">
-                  <p className="text-sm font-medium text-[#92400e] mb-2">Request changes</p>
-                  <p className="text-xs text-[#6b7280] mb-4">
-                    In the full prototype, this would open a form to send feedback to the General Counsel. For this demo, you can approve to continue the flow.
+              {approved ? (
+                /* Confirmation — appears in same white canvas */
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#d1fae5] mb-4">
+                    <svg className="w-8 h-8 text-[#059669]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <h1 className="text-xl font-semibold text-[#111827] mb-2">Approved</h1>
+                  <p className="text-sm text-[#6b7280] mb-6 max-w-md">
+                    The 10-K disclosure updates have been approved. Routing to outside counsel for final review, then to the audit committee for sign-off.
                   </p>
-                  <button
-                    onClick={() => setShowRequestChanges(false)}
-                    className="text-xs text-[#2563eb] hover:underline"
-                  >
-                    ← Back to approval
-                  </button>
+                  <p className="text-sm text-[#9ca3af]">
+                    You can close this window.
+                  </p>
                 </div>
               ) : (
-                <div className="flex items-center justify-end gap-3 pt-2">
-                  <button
-                    onClick={handleRequestChanges}
-                    className="rounded-lg border border-[#d1d5db] bg-white px-4 py-2 text-sm font-medium text-[#6b7280] hover:border-[#f59e0b] hover:text-[#d97706]"
-                  >
-                    Request changes
-                  </button>
-                  <button
-                    onClick={handleApprove}
-                    className="rounded-lg bg-[#10b981] px-4 py-2 text-sm font-medium text-white hover:bg-[#059669]"
-                  >
-                    Approve
-                  </button>
-                </div>
+                <>
+                  {/* Approval status: GC done, CEO current, next steps */}
+                  <div className="rounded-lg border border-[#e5e7eb] bg-white p-4 shadow-sm">
+                    <p className="text-xs font-medium text-[#6b7280] uppercase tracking-wider mb-3">Approval status</p>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-[#d1fae5] px-2.5 py-1 text-xs font-medium text-[#065f46]">
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                        General Counsel approved
+                      </span>
+                      <span className="text-[#9ca3af]">→</span>
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-[#dbeafe] border border-[#3b82f6]/30 px-2.5 py-1 text-xs font-medium text-[#1e40af]">
+                        CEO approval (you)
+                      </span>
+                      <span className="text-[#9ca3af]">→</span>
+                      <span className="text-xs text-[#9ca3af]">Outside counsel</span>
+                      <span className="text-[#9ca3af]">→</span>
+                      <span className="text-xs text-[#9ca3af]">Audit committee</span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h1 className="text-lg font-semibold text-[#111827]">Approve 10-K disclosure updates</h1>
+                    <p className="text-sm text-[#6b7280] mt-1">Review the document and approve or request changes</p>
+                  </div>
+
+                  <div className="rounded-lg border border-[#e5e7eb] bg-white overflow-hidden shadow-sm">
+                    <div className="border-b border-[#e5e7eb] px-4 py-2.5 bg-[#f9fafb]">
+                      <p className="text-xs font-medium text-[#6b7280] uppercase tracking-wider">10-K Risk Factor Updates — FY2025</p>
+                    </div>
+                    <div className="p-4 max-h-64 overflow-y-auto">
+                      <pre className="text-sm text-[#374151] whitespace-pre-wrap font-sans leading-relaxed">{DRAFT_PREVIEW}</pre>
+                    </div>
+                  </div>
+
+                  {showRequestChanges ? (
+                    <div className="rounded-lg border border-[#f59e0b]/40 bg-[#fffbeb] p-4">
+                      <p className="text-sm font-medium text-[#92400e] mb-2">Request changes</p>
+                      <p className="text-xs text-[#6b7280] mb-4">
+                        In the full prototype, this would open a form to send feedback to the General Counsel. For this demo, you can approve to continue the flow.
+                      </p>
+                      <button
+                        onClick={() => setShowRequestChanges(false)}
+                        className="text-xs text-[#2563eb] hover:underline"
+                      >
+                        ← Back to approval
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-end gap-3 pt-2">
+                      <button
+                        onClick={handleRequestChanges}
+                        className="rounded-lg border border-[#d1d5db] bg-white px-4 py-2 text-sm font-medium text-[#6b7280] hover:border-[#f59e0b] hover:text-[#d97706]"
+                      >
+                        Request changes
+                      </button>
+                      <button
+                        onClick={handleApprove}
+                        className="rounded-lg bg-[#10b981] px-4 py-2 text-sm font-medium text-white hover:bg-[#059669]"
+                      >
+                        Approve
+                      </button>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </div>
@@ -189,9 +180,9 @@ export default function CeoApprovalPage() {
         <Link href="/now/agentic-hero/superhero/ceo-review/notification" className="text-sm text-[#6b7280] hover:text-[#374151]">
           ← Back to email
         </Link>
-        <PrototypeControlButton onClick={handleApprove}>
-          Approve and route to audit committee →
-        </PrototypeControlButton>
+        <PrototypeControlLink href="/now/agentic-hero/superhero/gc-notification/ceo-approved">
+          Continue to GC&apos;s flow →
+        </PrototypeControlLink>
       </StakeholderFooter>
     </div>
   );

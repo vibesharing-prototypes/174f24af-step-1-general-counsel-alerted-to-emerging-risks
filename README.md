@@ -10,7 +10,7 @@ Multi-step workflow prototype demonstrating how a General Counsel responds when 
 
 | Step | Title | Status | Route |
 |------|-------|--------|-------|
-| 1 | GC Alerted to Emerging Risks | ✅ Ready | `/step-1` |
+| 1 | GC Alerted to Emerging Risks | ✅ Ready | `/gc-commandcenter` |
 | 2 | Review Detection Sources | 🔜 Coming | `/step-2` |
 | 3 | Assign Risk Owners | 🔜 Coming | `/step-3` |
 | 4 | Risk Owner Investigation | 🔜 Coming | `/step-4` |
@@ -24,7 +24,7 @@ app/
   page.tsx              # Index page (lists all steps)
   shared/
     canvases.tsx        # Shared components for all steps
-  step-1/
+  gc-commandcenter/
     page.tsx            # Step 1: GC Command Center
   step-2/               # Create folder when ready
   step-3/               # Create folder when ready

@@ -8,7 +8,7 @@ const steps = [
     title: "GC Alerted to Emerging Risks",
     description: "General Counsel opens Command Center and sees agents have detected new risks not captured in Board materials or regulatory filings.",
     status: "complete" as const,
-    href: "/step-1",
+    href: "/gc-commandcenter",
   },
   {
     id: 2,
@@ -40,10 +40,10 @@ const steps = [
   },
   {
     id: 6,
-    title: "Notify Board",
-    description: "GC prepares and sends board notification with risk summary and actions taken.",
+    title: "EDGAR Approval",
+    description: "GC approves EDGAR submission in Command Center after CEO approval.",
     status: "complete" as const,
-    href: "/now/agentic-hero/superhero/finisher",
+    href: "/gc-commandcenter?ceo_approved=1",
   },
   {
     id: 7,

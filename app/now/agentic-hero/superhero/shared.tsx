@@ -22,7 +22,6 @@ export const PIPELINE_STAGES: PipelineStage[] = [
   { id: "coordinator", name: "The Coordinator", agent: "Validation Workflow", status: "complete", href: "/now/agentic-hero/superhero/coordinator" },
   { id: "investigator", name: "Investigator", agent: "Owner Investigation", status: "complete", href: "/now/agentic-hero/superhero/investigator" },
   { id: "writer", name: "The Writer", agent: "10K Disclosure Draft", status: "active", href: "/now/agentic-hero/superhero/writer" },
-  { id: "finisher", name: "The Finisher", agent: "Filing Prep", status: "pending", href: "/now/agentic-hero/superhero/finisher" },
 ];
 
 export const Icons = {
@@ -43,7 +42,6 @@ export const AGENT_ICONS: Record<string, React.ReactNode> = {
   investigator: Icons.scan,
   producer: Icons.presentation,
   writer: Icons.pen,
-  finisher: Icons.check,
 };
 
 function StatusDot({ status }: { status: AgentStatus }) {
@@ -66,11 +64,11 @@ export function PipelineBanner() {
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2 rounded-full border border-[#30363d] bg-[#21262d] px-3 py-1">
           <div className="flex gap-0.5">
-            {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className={cn("h-1.5 w-4 rounded-full", i <= 3 ? "bg-[#3fb950]" : i === 4 ? "bg-[#58a6ff]" : "bg-[#30363d]")} />
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className={cn("h-1.5 w-4 rounded-full", i <= 3 ? "bg-[#3fb950]" : "bg-[#58a6ff]")} />
             ))}
           </div>
-          <span className="text-[10px] text-[#8b949e]">4/5 stages</span>
+          <span className="text-[10px] text-[#8b949e]">4 stages</span>
         </div>
         <div className="flex items-center gap-1.5 text-[10px] text-[#3fb950]">
           {Icons.clock}
@@ -84,7 +82,7 @@ export function PipelineBanner() {
 export function AgentNav({ activeAgent }: { activeAgent: string }) {
   return (
     <nav className="flex items-center gap-1 border-b border-[#30363d] bg-[#0d1117] px-6">
-      <Link href="/step-1" className={cn("flex items-center gap-2 px-4 py-2.5 text-xs font-medium transition-colors border-b-2", activeAgent === "hub" ? "border-[#58a6ff] text-[#f0f6fc]" : "border-transparent text-[#8b949e] hover:text-[#f0f6fc]")}>
+      <Link href="/gc-commandcenter" className={cn("flex items-center gap-2 px-4 py-2.5 text-xs font-medium transition-colors border-b-2", activeAgent === "hub" ? "border-[#58a6ff] text-[#f0f6fc]" : "border-transparent text-[#8b949e] hover:text-[#f0f6fc]")}>
         <span className="flex h-5 w-5 items-center justify-center rounded bg-[#21262d]">{Icons.shield}</span>
         Hub
       </Link>

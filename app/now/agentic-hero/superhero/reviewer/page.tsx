@@ -37,12 +37,12 @@ type WorkflowStage = {
 const GC_AVATAR_URL = "https://randomuser.me/api/portraits/med/women/65.jpg";
 
 const workflowStages: WorkflowStage[] = [
-  { id: "detect", label: "Detect", status: "completed", href: "/step-1" },
+  { id: "detect", label: "Detect", status: "completed", href: "/gc-commandcenter" },
   { id: "review", label: "Review Sources", status: "current", href: "/now/agentic-hero/superhero/reviewer" },
   { id: "assign", label: "Assign Owners", status: "pending", href: "/now/agentic-hero/superhero/coordinator" },
   { id: "investigate", label: "Investigate", status: "pending", href: "/now/agentic-hero/superhero/investigator" },
   { id: "draft", label: "Draft 10-K", status: "pending", href: "/now/agentic-hero/superhero/writer" },
-  { id: "notify", label: "Notify Board", status: "pending", href: "/now/agentic-hero/superhero/finisher" },
+  { id: "notify", label: "Notify Board", status: "pending", href: "/gc-commandcenter?ceo_approved=1" },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -280,7 +280,7 @@ export default function ReviewerPage() {
                 </span>
               </div>
               <div className="flex items-center gap-3">
-                <Link href="/step-1" className="text-xs text-[#8b949e] hover:text-[#f0f6fc]">
+                <Link href="/gc-commandcenter" className="text-xs text-[#8b949e] hover:text-[#f0f6fc]">
                   ← Back to Dashboard
                 </Link>
                 <img src={GC_AVATAR_URL} alt="General Counsel" className="h-8 w-8 rounded-full object-cover" />
@@ -574,7 +574,7 @@ export default function ReviewerPage() {
       </div>
 
       <StakeholderFooter label="Continue as General Counsel to advance the workflow">
-        <Link href="/step-1" className="text-sm text-[#6b7280] hover:text-[#374151]">
+        <Link href="/gc-commandcenter" className="text-sm text-[#6b7280] hover:text-[#374151]">
           ← Back to Dashboard
         </Link>
         <PrototypeControlLink href="/now/agentic-hero/superhero/coordinator">

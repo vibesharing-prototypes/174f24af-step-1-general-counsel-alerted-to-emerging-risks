@@ -175,11 +175,16 @@ const PROMPT_SUGGESTIONS = [
 
 function WriterContent() {
   const searchParams = useSearchParams();
-  const urlRiskId = searchParams?.get("risk") || "risk-taiwan";
-  const ownerId = searchParams?.get("owner") || "diana-reyes";
-  const layout = searchParams?.get("layout") || "primary"; // "primary" = prompt full width, "sidebar" = prompt in third column
+  const [mounted, setMounted] = useState(false);
 
-  const [activeRiskId, setActiveRiskId] = useState<string>(urlRiskId);
+  // Defer URL params until after mount to avoid hydration mismatch (useSearchParams can differ on server vs client)
+  useEffect(() => setMounted(true), []);
+
+  const urlRiskId = mounted ? (searchParams?.get("risk") || "risk-taiwan") : "risk-taiwan";
+  const ownerId = mounted ? (searchParams?.get("owner") || "diana-reyes") : "diana-reyes";
+  const layout = mounted ? (searchParams?.get("layout") || "primary") : "primary"; // "primary" = prompt full width, "sidebar" = prompt in third column
+
+  const [activeRiskId, setActiveRiskId] = useState<string>("risk-taiwan");
   const [croAssessment, setCroAssessment] = useState<CroAssessment | null>(null);
   const [draftsByRisk, setDraftsByRisk] = useState<Record<string, { title: string; body: string }>>(() =>
     Object.fromEntries(RISK_IDS.map((id) => [id, { title: RISK_DISCLOSURE_DATA[id].defaultTitle, body: RISK_DISCLOSURE_DATA[id].defaultBody }]))
@@ -197,6 +202,7 @@ function WriterContent() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showPolicyManagerUpsell, setShowPolicyManagerUpsell] = useState(false);
+  const [focusMode, setFocusMode] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -214,8 +220,8 @@ function WriterContent() {
   }, []);
 
   useEffect(() => {
-    if (RISK_IDS.includes(urlRiskId as (typeof RISK_IDS)[number])) setActiveRiskId(urlRiskId);
-  }, [urlRiskId]);
+    if (mounted && RISK_IDS.includes(urlRiskId as (typeof RISK_IDS)[number])) setActiveRiskId(urlRiskId);
+  }, [mounted, urlRiskId]);
 
   const handleSendPrompt = () => {
     const trimmed = promptInput.trim();
@@ -302,7 +308,7 @@ function WriterContent() {
 
       {/* Main layout: Left rail + content */}
       <div className="flex-1 flex overflow-hidden min-h-0 min-w-0">
-        <LeftRail actorLabel="General Counsel" activeRiskId={riskId} />
+        {!focusMode && <LeftRail actorLabel="General Counsel" activeRiskId={riskId} />}
 
         <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
           {/* Breadcrumb + risk tabs */}
@@ -468,13 +474,29 @@ function WriterContent() {
                       <span className="text-[11px] font-medium text-[#6e7681] uppercase tracking-wider">10-K Draft — Item 1A</span>
                       <span className="ml-2 rounded-full bg-[#3fb950]/10 border border-[#3fb950]/30 px-2 py-0.5 text-[10px] text-[#3fb950] font-medium">EDITABLE</span>
                     </div>
-                    <Link
-                      href="/now/agentic-hero/superhero/interstitial"
-                      className="inline-flex items-center gap-2 rounded-lg bg-[#3fb950] px-4 py-2 text-sm font-medium text-[#0d1117] hover:bg-[#46c35a] transition-colors"
-                    >
-                      Submit draft
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
-                    </Link>
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => setFocusMode(!focusMode)}
+                        className={cn(
+                          "inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors",
+                          focusMode
+                            ? "border-[#58a6ff]/50 bg-[#58a6ff]/20 text-[#58a6ff]"
+                            : "border-[#30363d] bg-[#21262d] text-[#8b949e] hover:border-[#6e7681] hover:text-[#f0f6fc]"
+                        )}
+                      >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                        {focusMode ? "Exit Focus mode" : "Enter Focus mode"}
+                      </button>
+                      <Link
+                        href="/now/agentic-hero/superhero/interstitial"
+                        className="inline-flex items-center gap-2 rounded-lg bg-[#3fb950] px-4 py-2 text-sm font-medium text-[#0d1117] hover:bg-[#46c35a] transition-colors"
+                      >
+                        Submit draft
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+                      </Link>
+                    </div>
                   </div>
                   <div className="flex-1 overflow-y-auto p-6">
                     <div className="max-w-3xl mx-auto">
@@ -496,8 +518,8 @@ function WriterContent() {
                   </div>
                 </div>
 
-                {/* Right rail: Metadata & resources — away from work area */}
-                {riskData && RISK_METADATA[riskId] && (
+                {/* Right rail: Metadata & resources — away from work area (hidden in focus mode) */}
+                {!focusMode && riskData && RISK_METADATA[riskId] && (
                   <div className="w-[300px] flex-shrink-0 flex flex-col border-l border-[#30363d] bg-[#161b22] overflow-y-auto">
                     <div className="p-4 border-b border-[#30363d]">
                       <h3 className="text-[11px] font-medium text-[#6e7681] uppercase tracking-wider mb-3">Resources</h3>
@@ -657,17 +679,34 @@ function WriterContent() {
                           placeholder="Draft disclosure text..."
                         />
                       </div>
-                      <Link
-                        href="/now/agentic-hero/superhero/interstitial"
-                        className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg bg-[#3fb950] px-4 py-2 text-sm font-medium text-[#0d1117] hover:bg-[#46c35a] transition-colors"
-                      >
-                        Submit draft
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
-                      </Link>
+                      <div className="mt-3 flex items-center gap-2">
+                        <button
+                          onClick={() => setFocusMode(!focusMode)}
+                          className={cn(
+                            "inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors",
+                            focusMode
+                              ? "border-[#58a6ff]/50 bg-[#58a6ff]/20 text-[#58a6ff]"
+                              : "border-[#30363d] bg-[#21262d] text-[#8b949e] hover:border-[#6e7681] hover:text-[#f0f6fc]"
+                          )}
+                        >
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                          {focusMode ? "Exit Focus mode" : "Enter Focus mode"}
+                        </button>
+                        <Link
+                          href="/now/agentic-hero/superhero/interstitial"
+                          className="flex-1 flex items-center justify-center gap-2 rounded-lg bg-[#3fb950] px-4 py-2 text-sm font-medium text-[#0d1117] hover:bg-[#46c35a] transition-colors"
+                        >
+                          Submit draft
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+                        </Link>
+                      </div>
                     </div>
                   </div>
                 </div>
 
+                {!focusMode && (
                 <div className="w-[380px] flex-shrink-0 flex flex-col border-l border-[#30363d] bg-[#161b22]">
                   <div className="p-4 border-b border-[#30363d]">
                     <h3 className="text-xs font-medium text-[#6e7681] uppercase tracking-wider mb-2">Context from workflow</h3>
@@ -767,6 +806,7 @@ function WriterContent() {
                     </div>
                   </div>
                 </div>
+                )}
               </>
             )}
           </div>
@@ -774,7 +814,7 @@ function WriterContent() {
       </div>
 
       <StakeholderFooter label="Continue as General Counsel to advance the workflow">
-        <PrototypeControlLink href="/now/agentic-hero/superhero/finisher">
+        <PrototypeControlLink href="/gc-commandcenter?ceo_approved=1">
           Continue to finalize →
         </PrototypeControlLink>
       </StakeholderFooter>

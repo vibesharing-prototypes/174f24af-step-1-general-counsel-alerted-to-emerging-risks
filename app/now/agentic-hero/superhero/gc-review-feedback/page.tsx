@@ -10,6 +10,7 @@ function cn(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
 }
 
+const GC_NAME = "Sarah Mitchell";
 const GC_AVATAR_URL = "https://randomuser.me/api/portraits/med/women/65.jpg";
 
 // Highlight colors per comment (Word/Docs style)
@@ -34,6 +35,37 @@ type FeedbackItem = {
   suggestion: string;
   status: "pending" | "accepted" | "declined";
 };
+
+type ErmDeckFeedbackItem = {
+  id: string;
+  from: string;
+  role: string;
+  avatarUrl: string;
+  slideOrSection: string;
+  suggestion: string;
+  status: "pending" | "accepted" | "declined";
+};
+
+const ERM_DECK_FEEDBACK: ErmDeckFeedbackItem[] = [
+  {
+    id: "e1",
+    from: "Rachel Green",
+    role: "VP Risk Management",
+    avatarUrl: "https://randomuser.me/api/portraits/med/women/32.jpg",
+    slideOrSection: "Slide 2: Top 5 Risks",
+    suggestion: "Add vendor breach to Top 5 — CloudSecure incident qualifies per CRO assessment.",
+    status: "pending",
+  },
+  {
+    id: "e2",
+    from: "Marcus Webb",
+    role: "CISO",
+    avatarUrl: "https://i.pravatar.cc/150?u=marcus-webb",
+    slideOrSection: "Slide 3: Risk Trends (YoY)",
+    suggestion: "Include year-over-year cyber risk trend (up 23%) from vendor intelligence.",
+    status: "pending",
+  },
+];
 
 const TEAM_FEEDBACK: FeedbackItem[] = [
   {
@@ -82,10 +114,14 @@ const DOC_PARTS: DocPart[] = [
 function GcReviewFeedbackContent() {
   const router = useRouter();
   const [feedback, setFeedback] = useState<FeedbackItem[]>(TEAM_FEEDBACK);
+  const [ermFeedback, setErmFeedback] = useState<ErmDeckFeedbackItem[]>(ERM_DECK_FEEDBACK);
+  const [activeTab, setActiveTab] = useState<"10k" | "erm">("10k");
   const [finalized, setFinalized] = useState(false);
   const [showPolicyManagerUpsell, setShowPolicyManagerUpsell] = useState(false);
 
-  const pendingCount = feedback.filter((f) => f.status === "pending").length;
+  const pending10k = feedback.filter((f) => f.status === "pending").length;
+  const pendingErm = ermFeedback.filter((f) => f.status === "pending").length;
+  const pendingCount = pending10k + pendingErm;
   const allResolved = pendingCount === 0;
 
   const handleAccept = (id: string) => {
@@ -93,6 +129,12 @@ function GcReviewFeedbackContent() {
   };
   const handleDecline = (id: string) => {
     setFeedback((prev) => prev.map((f) => (f.id === id ? { ...f, status: "declined" as const } : f)));
+  };
+  const handleErmAccept = (id: string) => {
+    setErmFeedback((prev) => prev.map((f) => (f.id === id ? { ...f, status: "accepted" as const } : f)));
+  };
+  const handleErmDecline = (id: string) => {
+    setErmFeedback((prev) => prev.map((f) => (f.id === id ? { ...f, status: "declined" as const } : f)));
   };
 
   const handleFinalize = () => {
@@ -110,17 +152,20 @@ function GcReviewFeedbackContent() {
           <div className="flex items-center gap-3">
             <span className="text-xs font-medium uppercase tracking-wider text-[#0369a1]">Prototype</span>
             <span className="text-sm font-semibold text-[#0c4a6e]">Part 2: Review & Approval</span>
+            <Link href="/now/agentic-hero/superhero/gc-review/notification" className="text-xs font-medium text-[#0369a1] hover:underline">
+              ← Notification
+            </Link>
           </div>
           <span className="rounded-full border-2 border-[#0c4a6e] bg-[#7dd3fc]/30 px-3 py-1 text-xs font-semibold text-[#0c4a6e]">
-            Viewing as: General Counsel
+            Viewing as: {GC_NAME} (General Counsel)
           </span>
         </div>
       </div>
 
       <div className="flex-1 flex overflow-hidden min-h-0">
-        <LeftRail actorLabel="General Counsel" activeWorkflowStep="Review Feedback" />
+        <LeftRail actorLabel={GC_NAME} activeWorkflowStep="Review Feedback" />
         <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-          <div className="border-b border-[#30363d] bg-[#161b22] px-6 py-3 flex items-center justify-between flex-shrink-0">
+          <div className="border-b border-[#30363d] bg-[#161b22] px-6 py-3 flex-shrink-0">
             <div className="flex items-center gap-3">
               <img src={GC_AVATAR_URL} alt="GC" className="h-8 w-8 rounded-full object-cover" />
               <div>
@@ -128,141 +173,312 @@ function GcReviewFeedbackContent() {
                 <p className="text-xs text-[#8b949e]">Edits, corrections, and additions from your team</p>
               </div>
             </div>
-            <Link href="/now/agentic-hero/superhero/interstitial" className="text-xs text-[#8b949e] hover:text-[#f0f6fc]">
-              ← Part 1 summary
-            </Link>
           </div>
 
-          <div className="flex-1 flex overflow-hidden min-h-0">
-            {/* Document with inline highlights */}
-            <div className="flex-1 overflow-y-auto min-w-0">
-              <div className="max-w-2xl mx-auto p-6">
-                <h2 className="text-xs font-medium text-[#6e7681] uppercase tracking-wider mb-3">10-K Draft — suggested edits</h2>
-                <div className="rounded-lg border border-[#30363d] bg-[#0d1117] p-5 min-h-[280px]">
-                  <p className="text-sm text-[#c9d1d9] leading-relaxed font-sans">
-                    {DOC_PARTS.map((part, i) => {
-                      if (part.type === "text") return <span key={i}>{part.content}</span>;
-                      const item = feedback.find((f) => f.id === part.commentId)!;
-                      const displayText = item.status === "accepted" ? item.replacementText : item.originalText;
-                      const isPending = item.status === "pending";
-                      return (
-                        <span
-                          key={i}
-                          className={cn(
-                            "rounded-sm px-0.5 cursor-default",
-                            isPending && HIGHLIGHT_COLORS[part.commentId],
-                            item.status === "accepted" && "bg-[#3fb950]/30 border-b-2 border-[#3fb950]",
-                            item.status === "declined" && "bg-transparent border-transparent"
-                          )}
-                          title={item.from}
-                        >
-                          {item.status === "declined" ? (
-                            <span className="line-through opacity-60">{displayText}</span>
-                          ) : (
-                            displayText
-                          )}
-                        </span>
-                      );
-                    })}
-                  </p>
-                </div>
+          {/* Stepper: 1 ✓ Review Document → 2 ☐ Review Slides → Continue */}
+          <div className="flex-shrink-0 border-b border-[#30363d] bg-[#0d1117] px-6 py-3">
+            <div className="flex items-center gap-2 flex-wrap">
+              <button
+                onClick={() => setActiveTab("10k")}
+                className={cn(
+                  "inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-colors",
+                  activeTab === "10k"
+                    ? "border-[#58a6ff]/50 bg-[#58a6ff]/15 text-[#58a6ff]"
+                    : "border-[#30363d] bg-[#21262d] text-[#c9d1d9] hover:border-[#6e7681]"
+                )}
+              >
+                <span className={cn("text-base font-semibold", pending10k === 0 ? "text-[#3fb950]" : "text-[#8b949e]")}>
+                  {pending10k === 0 ? "1 ✓" : "1 ☐"}
+                </span>
+                Review Document
+              </button>
+              <span className="text-[#6e7681]">→</span>
+              <button
+                onClick={() => setActiveTab("erm")}
+                className={cn(
+                  "inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-colors",
+                  activeTab === "erm"
+                    ? "border-[#58a6ff]/50 bg-[#58a6ff]/15 text-[#58a6ff]"
+                    : "border-[#30363d] bg-[#21262d] text-[#c9d1d9] hover:border-[#6e7681]"
+                )}
+              >
+                <span className={cn("text-base font-semibold", pendingErm === 0 ? "text-[#3fb950]" : "text-[#8b949e]")}>
+                  {pendingErm === 0 ? "2 ✓" : "2 ☐"}
+                </span>
+                Review Slides
+              </button>
+              <span className="text-[#6e7681]">→</span>
+              <button
+                onClick={handleFinalize}
+                disabled={!allResolved}
+                className={cn(
+                  "inline-flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-colors",
+                  allResolved
+                    ? "border-[#3fb950]/50 bg-[#3fb950] text-[#0d1117] hover:bg-[#46c35a]"
+                    : "border-[#30363d] bg-[#21262d] text-[#484f58] cursor-not-allowed"
+                )}
+              >
+                Continue
+              </button>
+            </div>
+          </div>
+
+          {/* Tabs: Review 10K | Review ERM Slides — tab bar styling (not segmented toggle) */}
+          <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+            <div className="flex-shrink-0 border-b border-[#30363d] bg-[#0d1117]">
+              <div className="flex gap-0">
+                <button
+                  onClick={() => setActiveTab("10k")}
+                  className={cn(
+                    "px-4 py-3 text-sm font-medium transition-colors border-b-2 -mb-px",
+                    activeTab === "10k"
+                      ? "border-[#58a6ff] text-[#f0f6fc]"
+                      : "border-transparent text-[#8b949e] hover:text-[#c9d1d9]"
+                  )}
+                >
+                  Review 10K {pending10k > 0 && <span className="ml-1.5 rounded-full bg-[#d29922]/30 px-1.5 py-0.5 text-[10px] font-normal">{pending10k}</span>}
+                </button>
+                <button
+                  onClick={() => setActiveTab("erm")}
+                  className={cn(
+                    "px-4 py-3 text-sm font-medium transition-colors border-b-2 -mb-px",
+                    activeTab === "erm"
+                      ? "border-[#58a6ff] text-[#f0f6fc]"
+                      : "border-transparent text-[#8b949e] hover:text-[#c9d1d9]"
+                  )}
+                >
+                  Review ERM Slides {pendingErm > 0 && <span className="ml-1.5 rounded-full bg-[#d29922]/30 px-1.5 py-0.5 text-[10px] font-normal">{pendingErm}</span>}
+                </button>
               </div>
             </div>
 
-            {/* Comments sidebar — Word/Docs style */}
-            <div className="w-[340px] flex-shrink-0 border-l border-[#30363d] bg-[#161b22] overflow-y-auto">
-              <div className="p-4">
-                <h2 className="text-xs font-medium text-[#6e7681] uppercase tracking-wider mb-3">
-                  Comments ({pendingCount} pending)
-                </h2>
-                <div className="space-y-4">
-                  {feedback.map((item) => (
-                    <div
-                      key={item.id}
-                      className={cn(
-                        "rounded-lg border border-l-4 p-3 transition-colors",
-                        COMMENT_BORDER_COLORS[item.id],
-                        item.status === "accepted" && "border-[#3fb950]/40 bg-[#3fb950]/5 border-l-[#3fb950]",
-                        item.status === "declined" && "border-[#30363d] bg-[#0d1117]/50 opacity-60 border-l-[#30363d]",
-                        item.status === "pending" && "border-[#30363d] bg-[#0d1117]/30"
-                      )}
-                    >
-                      <div className="flex items-start gap-2 mb-2">
-                        <img src={item.avatarUrl} alt={item.from} className="h-8 w-8 rounded-full object-cover flex-shrink-0" />
-                        <div className="min-w-0 flex-1">
-                          <p className="text-xs font-semibold text-[#f0f6fc]">{item.from}</p>
-                          <p className="text-[11px] text-[#8b949e]">{item.role}</p>
+            {/* Centered working area — doc/slides + comments, max-width for spatial connection */}
+            <div className="flex-1 flex min-h-0 overflow-hidden">
+              <div className="flex-1 flex justify-center min-w-0 overflow-hidden px-6 lg:px-12">
+                <div className="w-full max-w-6xl flex min-h-0 min-w-0">
+              {activeTab === "10k" ? (
+                /* Tab 1: 10-K — full focus */
+                <>
+                  <div className="flex-1 min-w-0 p-6 border-r border-[#30363d] overflow-y-auto">
+                    <div className="rounded-lg border border-[#30363d] bg-[#0d1117] p-5">
+                      <p className="text-sm text-[#c9d1d9] leading-relaxed font-sans">
+                        {DOC_PARTS.map((part, i) => {
+                          if (part.type === "text") return <span key={i}>{part.content}</span>;
+                          const item = feedback.find((f) => f.id === part.commentId)!;
+                          const displayText = item.status === "accepted" ? item.replacementText : item.originalText;
+                          const isPending = item.status === "pending";
+                          return (
+                            <span
+                              key={i}
+                              className={cn(
+                                "rounded-sm px-0.5 cursor-default",
+                                isPending && HIGHLIGHT_COLORS[part.commentId],
+                                item.status === "accepted" && "bg-[#3fb950]/30 border-b-2 border-[#3fb950]",
+                                item.status === "declined" && "bg-transparent border-transparent"
+                              )}
+                              title={item.from}
+                            >
+                              {item.status === "declined" ? (
+                                <span className="line-through opacity-60">{displayText}</span>
+                              ) : (
+                                displayText
+                              )}
+                            </span>
+                          );
+                        })}
+                      </p>
+                    </div>
+                    <div className="mt-4 rounded-lg border border-[#30363d] bg-[#0d1117] p-3">
+                      <h4 className="text-[11px] font-medium text-[#8b949e] mb-2">Supporting policy</h4>
+                      <div className="flex gap-2">
+                        <button onClick={() => setShowPolicyManagerUpsell(true)} className="flex items-center gap-2 rounded-lg border border-[#30363d] bg-[#21262d] px-3 py-2 text-xs text-[#f0f6fc] hover:border-[#58a6ff]/50 transition-colors">
+                          <span>📄</span> Upload from desktop
+                        </button>
+                        <button onClick={() => setShowPolicyManagerUpsell(true)} className="flex items-center gap-2 rounded-lg border border-[#30363d] bg-[#21262d] px-3 py-2 text-xs text-[#f0f6fc] hover:border-[#58a6ff]/50 transition-colors">
+                          <span>📁</span> Browse SharePoint
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="w-[320px] flex-shrink-0 p-4 overflow-y-auto">
+                    <h3 className="text-[11px] font-medium text-[#6e7681] uppercase tracking-wider mb-3">Comments ({pending10k} pending)</h3>
+                    <div className="space-y-3">
+                      {feedback.map((item) => (
+                        <div
+                          key={item.id}
+                          className={cn(
+                            "rounded-lg border border-l-4 p-3 transition-colors",
+                            COMMENT_BORDER_COLORS[item.id],
+                            item.status === "accepted" && "border-[#3fb950]/40 bg-[#3fb950]/5 border-l-[#3fb950]",
+                            item.status === "declined" && "border-[#30363d] bg-[#0d1117]/50 opacity-60 border-l-[#30363d]",
+                            item.status === "pending" && "border-[#30363d] bg-[#0d1117]/30"
+                          )}
+                        >
+                          <div className="flex items-start gap-2 mb-1">
+                            <img src={item.avatarUrl} alt="" className="h-6 w-6 rounded-full object-cover" />
+                            <p className="text-[11px] font-semibold text-[#f0f6fc]">{item.from}</p>
+                          </div>
+                          <p className="text-[11px] text-[#6e7681] font-mono mb-1">&ldquo;{item.originalText}&rdquo;</p>
+                          <p className="text-xs text-[#c9d1d9] mb-2">{item.suggestion}</p>
+                          {item.status === "pending" ? (
+                            <div className="flex gap-1">
+                              <button onClick={() => handleAccept(item.id)} className="rounded bg-[#3fb950] px-2 py-0.5 text-[10px] font-medium text-[#0d1117]">Accept</button>
+                              <button onClick={() => handleDecline(item.id)} className="rounded border border-[#30363d] px-2 py-0.5 text-[10px] font-medium text-[#8b949e]">Decline</button>
+                            </div>
+                          ) : (
+                            <span className={cn("text-[10px] font-medium", item.status === "accepted" ? "text-[#3fb950]" : "text-[#8b949e]")}>
+                              {item.status === "accepted" ? "✓ Accepted" : "Declined"}
+                            </span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              ) : (
+                /* Tab 2: ERM deck — each slide in its own row/column for focus */
+                <>
+                  <div className="flex-1 min-w-0 p-6 border-r border-[#30363d] overflow-y-auto">
+                    <p className="text-xs text-[#8b949e] mb-4">Generated by the Producer from validated risk owner context and approvals. Each slide in its own cell for focused review.</p>
+                    <div className="grid grid-cols-1 gap-8">
+                      {/* Slide 1 — 16:9 */}
+                      <div className="w-full max-w-3xl aspect-video rounded-xl border border-[#30363d] bg-white shadow-sm overflow-hidden">
+                        <div className="w-full h-full p-5 flex flex-col justify-center">
+                          <p className="text-[10px] text-[#6e7681] uppercase tracking-wider mb-1">Slide 1</p>
+                          <h3 className="text-lg font-semibold text-[#0d1117]">Enterprise Risk Management</h3>
+                          <p className="text-sm text-[#484f58] mt-1">Q1 2026 Board Briefing</p>
+                          <p className="text-xs text-[#8b949e] mt-2">Prepared for Feb 28 Board Meeting</p>
                         </div>
                       </div>
-                      <p className="text-[11px] text-[#6e7681] mb-2 font-mono bg-[#21262d] px-2 py-1 rounded border-l-2 border-[#30363d]">
-                        &ldquo;{item.originalText}&rdquo;
-                      </p>
-                      <p className="text-sm text-[#c9d1d9] leading-relaxed mb-3">{item.suggestion}</p>
-                      {item.status === "pending" ? (
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => handleAccept(item.id)}
-                            className="rounded bg-[#3fb950] px-2.5 py-1 text-[11px] font-medium text-[#0d1117] hover:bg-[#46c35a]"
-                          >
-                            Accept
-                          </button>
-                          <button
-                            onClick={() => handleDecline(item.id)}
-                            className="rounded border border-[#30363d] bg-[#21262d] px-2.5 py-1 text-[11px] font-medium text-[#8b949e] hover:border-[#6e7681] hover:text-[#f0f6fc]"
-                          >
-                            Decline
-                          </button>
+                      {/* Slide 2 — 16:9 */}
+                      <div className="w-full max-w-3xl aspect-video rounded-xl border border-[#30363d] bg-white shadow-sm overflow-hidden">
+                        <div className="w-full h-full p-5 flex flex-col">
+                          <p className="text-[10px] text-[#6e7681] uppercase tracking-wider mb-2">Slide 2 — Top 5 Risks</p>
+                          <div className="space-y-2 flex-1">
+                          {[
+                            { name: "Taiwan Strait / Supply Chain", score: 94, sev: "Critical" },
+                            { name: "Vendor Cybersecurity Breach", score: 91, sev: "High" },
+                            { name: "EU Digital Markets Act", score: 87, sev: "High" },
+                            { name: "Regulatory Compliance", score: 72, sev: "Medium" },
+                            { name: "Geopolitical Instability", score: 68, sev: "Medium" },
+                          ].map((r, i) => (
+                            <div key={i} className="flex items-center justify-between gap-2 text-xs">
+                              <span className="text-[#0d1117] truncate">{r.name}</span>
+                              <span className={cn(
+                                "shrink-0 rounded px-1.5 py-0.5 text-[10px] font-medium",
+                                r.sev === "Critical" && "bg-[#da3633]/20 text-[#da3633]",
+                                r.sev === "High" && "bg-[#d29922]/20 text-[#d29922]",
+                                r.sev === "Medium" && "bg-[#8b949e]/20 text-[#8b949e]"
+                              )}>{r.sev}</span>
+                            </div>
+                          ))}
+                          </div>
                         </div>
-                      ) : (
-                        <span className={cn("text-[11px] font-medium", item.status === "accepted" ? "text-[#3fb950]" : "text-[#8b949e]")}>
-                          {item.status === "accepted" ? "✓ Accepted" : "Declined"}
-                        </span>
-                      )}
+                      </div>
+                      {/* Slide 3 — 16:9 */}
+                      <div className="w-full max-w-3xl aspect-video rounded-xl border border-[#30363d] bg-white shadow-sm overflow-hidden">
+                        <div className="w-full h-full p-5 flex flex-col">
+                          <p className="text-[10px] text-[#6e7681] uppercase tracking-wider mb-2">Slide 3 — Risk Trends (YoY)</p>
+                          <div className="space-y-2 mt-2 flex-1">
+                          {[
+                            { label: "Cybersecurity", curr: 78, prev: 55, chg: "+23%" },
+                            { label: "Supply Chain", curr: 82, prev: 71, chg: "+11%" },
+                            { label: "Regulatory", curr: 65, prev: 58, chg: "+7%" },
+                            { label: "Geopolitical", curr: 91, prev: 62, chg: "+29%" },
+                          ].map((t, i) => (
+                            <div key={i} className="flex items-center gap-2">
+                              <span className="w-16 text-[10px] text-[#484f58] shrink-0">{t.label}</span>
+                              <div className="flex-1 flex gap-1">
+                                <div className="flex-1 h-4 bg-[#e5e7eb] rounded overflow-hidden">
+                                  <div className="h-full bg-[#94a3b8]" style={{ width: `${t.prev}%` }} />
+                                </div>
+                                <div className="flex-1 h-4 bg-[#e5e7eb] rounded overflow-hidden">
+                                  <div className="h-full bg-[#58a6ff]" style={{ width: `${t.curr}%` }} />
+                                </div>
+                              </div>
+                              <span className="text-[10px] font-medium text-[#da3633] w-8 shrink-0">{t.chg}</span>
+                            </div>
+                          ))}
+                        </div>
+                          <p className="text-[10px] text-[#8b949e] mt-2 flex gap-4">
+                            <span><span className="inline-block w-2 h-2 rounded-sm bg-[#94a3b8] align-middle mr-1" />Prior</span>
+                            <span><span className="inline-block w-2 h-2 rounded-sm bg-[#58a6ff] align-middle mr-1" />Current</span>
+                          </p>
+                        </div>
+                      </div>
+                      {/* Slide 4 — 16:9 */}
+                      <div className="w-full max-w-3xl aspect-video rounded-xl border border-[#30363d] bg-white shadow-sm overflow-hidden">
+                        <div className="w-full h-full p-5 flex flex-col">
+                          <p className="text-[10px] text-[#6e7681] uppercase tracking-wider mb-2">Slide 4 — Changes from Prior Cycle</p>
+                          <ul className="text-xs text-[#0d1117] space-y-1 list-disc list-inside">
+                            <li>Taiwan Strait elevated to Critical (new)</li>
+                            <li>CloudSecure vendor breach — added to Top 5</li>
+                            <li>EU DMA enforcement — increased scrutiny</li>
+                            <li>Supply chain diversification (Vietnam) — in progress</li>
+                          </ul>
+                        </div>
+                      </div>
                     </div>
-                  ))}
-                </div>
-                {/* In-situ: Policy upload for Vietnam third parties → Policy Manager upsell */}
-                <div className="mt-4 rounded-lg border border-[#30363d] bg-[#0d1117] p-3">
-                  <h4 className="text-[11px] font-medium text-[#8b949e] mb-2">Supporting policy</h4>
-                  <p className="text-[12px] text-[#8b949e] mb-2">
-                    Attach policy for Vietnam-affiliated third parties to support the disclosure.
-                  </p>
-                  <div className="space-y-2">
-                    <button
-                      onClick={() => setShowPolicyManagerUpsell(true)}
-                      className="flex w-full items-center gap-2 rounded-lg border border-[#30363d] bg-[#21262d] px-3 py-2 text-left text-xs text-[#f0f6fc] hover:border-[#58a6ff]/50 transition-colors"
-                    >
-                      <span>📄</span>
-                      <span>Upload from desktop</span>
-                      <span className="ml-auto text-[10px] text-[#6e7681]">.doc</span>
-                    </button>
-                    <button
-                      onClick={() => setShowPolicyManagerUpsell(true)}
-                      className="flex w-full items-center gap-2 rounded-lg border border-[#30363d] bg-[#21262d] px-3 py-2 text-left text-xs text-[#f0f6fc] hover:border-[#58a6ff]/50 transition-colors"
-                    >
-                      <span>📁</span>
-                      <span>Browse SharePoint</span>
-                    </button>
                   </div>
+                  <div className="w-[320px] flex-shrink-0 p-4 overflow-y-auto border-l border-[#30363d]">
+                    <h3 className="text-[11px] font-medium text-[#6e7681] uppercase tracking-wider mb-3">Comments ({pendingErm} pending)</h3>
+                    <div className="space-y-3">
+                      {ermFeedback.map((item) => (
+                        <div
+                          key={item.id}
+                          className={cn(
+                            "rounded-lg border border-l-4 p-3 transition-colors",
+                            item.id === "e1" && "border-l-[#3b82f6]",
+                            item.id === "e2" && "border-l-[#f0883e]",
+                            item.status === "accepted" && "border-[#3fb950]/40 bg-[#3fb950]/5 border-l-[#3fb950]",
+                            item.status === "declined" && "border-[#30363d] bg-[#0d1117]/50 opacity-60 border-l-[#30363d]",
+                            item.status === "pending" && "border-[#30363d] bg-[#0d1117]/30"
+                          )}
+                        >
+                          <div className="flex items-start gap-2 mb-1">
+                            <img src={item.avatarUrl} alt="" className="h-6 w-6 rounded-full object-cover" />
+                            <p className="text-[11px] font-semibold text-[#f0f6fc]">{item.from}</p>
+                          </div>
+                          <p className="text-[10px] text-[#6e7681] font-mono mb-1">{item.slideOrSection}</p>
+                          <p className="text-xs text-[#c9d1d9] mb-2">{item.suggestion}</p>
+                          {item.status === "pending" ? (
+                            <div className="flex gap-1">
+                              <button onClick={() => handleErmAccept(item.id)} className="rounded bg-[#3fb950] px-2 py-0.5 text-[10px] font-medium text-[#0d1117]">Accept</button>
+                              <button onClick={() => handleErmDecline(item.id)} className="rounded border border-[#30363d] px-2 py-0.5 text-[10px] font-medium text-[#8b949e]">Decline</button>
+                            </div>
+                          ) : (
+                            <span className={cn("text-[10px] font-medium", item.status === "accepted" ? "text-[#3fb950]" : "text-[#8b949e]")}>
+                              {item.status === "accepted" ? "✓ Accepted" : "Declined"}
+                            </span>
+                        )}
+                      </div>
+                    ))}
+                    </div>
+                  </div>
+                </>
+              )}
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="flex-shrink-0 border-t border-[#30363d] bg-[#161b22] px-6 py-4 flex items-center justify-between">
-            <p className="text-xs text-[#8b949e]">
-              {allResolved ? "All feedback resolved. Ready to send to CEO." : `Resolve ${pendingCount} more to finalize.`}
+          {/* GC CTA: Approve edits and advance — within dark UI, not for demo stakeholder */}
+          <div className="flex-shrink-0 border-t border-[#30363d] bg-[#161b22] px-6 py-4 flex items-center justify-between gap-4">
+            <p className="text-sm text-[#c9d1d9]">
+              {allResolved ? "All feedback resolved." : `Resolve ${pendingCount} remaining (10-K: ${pending10k}, ERM: ${pendingErm}).`}
             </p>
             <button
               onClick={handleFinalize}
               disabled={!allResolved}
               className={cn(
-                "inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors",
-                allResolved ? "bg-[#3fb950] text-[#0d1117] hover:bg-[#46c35a]" : "bg-[#21262d] text-[#484f58] cursor-not-allowed"
+                "inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold transition-colors",
+                allResolved
+                  ? "bg-[#3fb950] text-[#0d1117] hover:bg-[#46c35a] shadow-sm"
+                  : "bg-[#21262d] text-[#484f58] cursor-not-allowed border border-[#30363d]"
               )}
             >
-              Finalize and send to CEO
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              Approve edits and send to CEO
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0">
                 <path d="M5 12h14M12 5l7 7-7 7" />
               </svg>
             </button>

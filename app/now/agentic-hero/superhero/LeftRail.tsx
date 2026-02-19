@@ -33,11 +33,11 @@ const WORKFLOW_STEPS = [
   { label: "CRO Review", href: "/now/agentic-hero/superhero/cro-review" },
   { label: "10-K Draft", href: "/now/agentic-hero/superhero/writer" },
   { label: "Review Feedback", href: "/now/agentic-hero/superhero/gc-review-feedback" },
-  { label: "Finalize", href: "/now/agentic-hero/superhero/finisher" },
+  { label: "EDGAR", href: "/gc-commandcenter?ceo_approved=1" },
 ];
 
 const NAV_LINKS = [
-  { label: "Home", href: "/step-1", icon: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" },
+  { label: "Home", href: "/gc-commandcenter", icon: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" },
   { label: "Detection Sources", href: "/now/agentic-hero/superhero/reviewer", icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" },
   { label: "Feedback", href: "#", icon: "M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" },
 ];
@@ -59,7 +59,7 @@ export function LeftRail({ actorLabel = "General Counsel", actorEmail, actorAvat
     <aside className="w-[240px] flex-shrink-0 flex flex-col bg-[#21262d] border-r border-[#30363d]">
       {/* Top: Logo */}
       <div className="p-4 border-b border-[#30363d]">
-        <Link href="/step-1" className="flex items-center gap-2">
+        <Link href="/gc-commandcenter" className="flex items-center gap-2">
           <DiligentLogo className="h-6 w-auto" />
           <span className="text-xs font-semibold text-[#f0f6fc]">GRC Command Center</span>
         </Link>

@@ -68,7 +68,7 @@ export default function GcPostReviewPage() {
 
   return (
     <div className="min-h-screen bg-[#0d1117] pb-28">
-      {/* PrototypeNav — same structure as step-1 */}
+      {/* PrototypeNav — same structure as gc-commandcenter */}
       <div className="border-b-2 border-[#0ea5e9]/40 bg-[#e0f2fe]">
         <div className="border-b border-[#0ea5e9]/30 bg-[#bae6fd] px-4 py-2">
           <p className="text-[10px] font-medium uppercase tracking-widest text-[#0369a1]">Demo controls — not part of prototype</p>
@@ -81,7 +81,7 @@ export default function GcPostReviewPage() {
               <span className="rounded-full border border-[#dc2626]/50 bg-[#fecaca] px-2 py-0.5 text-[10px] font-medium text-[#b91c1c]">Scenario</span>
             </div>
             <div className="flex items-center gap-3">
-              <Link href="/step-1" className="text-xs text-[#0369a1] hover:underline">
+              <Link href="/gc-commandcenter" className="text-xs text-[#0369a1] hover:underline">
                 ← Step 1 (initial state)
               </Link>
               <span className="rounded-full border-2 border-[#0c4a6e] bg-[#7dd3fc]/30 px-3 py-1 text-xs font-semibold text-[#0c4a6e]">
@@ -115,11 +115,11 @@ export default function GcPostReviewPage() {
         </p>
       </div>
 
-      {/* Dashboard — same structure as step-1 */}
+      {/* Dashboard — same structure as gc-commandcenter */}
       <div className="mx-auto w-full max-w-6xl px-6 py-6">
       <div className="rounded-3xl border border-[#30363d] bg-[#161b22] shadow-sm overflow-hidden">
         <div className="px-6">
-          {/* TopNav — step-1 style with GC avatar */}
+          {/* TopNav — gc-commandcenter style with GC avatar */}
           <div className="sticky top-0 z-10 -mx-6 mb-8 border-b border-[#30363d] bg-[#0d1117]/90 px-6 py-4 backdrop-blur">
             <div className="mx-auto flex w-full max-w-6xl items-center justify-between">
               <div className="flex items-center gap-4">
@@ -184,7 +184,7 @@ export default function GcPostReviewPage() {
             </div>
           )}
 
-          {/* Hero — same style as step-1 but "3 risks pending approval" */}
+          {/* Hero — same style as gc-commandcenter but "3 risks pending approval" */}
           <header className="rounded-3xl border border-[#58a6ff]/40 bg-gradient-to-br from-[#58a6ff]/10 to-[#0d1117] p-10 shadow-sm">
             <div className="flex justify-center mb-4">
               <span className="inline-flex items-center gap-2 rounded-full border border-[#58a6ff]/50 bg-[#58a6ff]/20 px-4 py-1.5 text-sm font-medium text-[#58a6ff]">
@@ -279,7 +279,7 @@ export default function GcPostReviewPage() {
                   </span>
                 </div>
                 <Link
-                  href="/now/agentic-hero/superhero/gc-review-feedback"
+                  href="/now/agentic-hero/superhero/gc-review/notification"
                   className="text-xs font-medium text-[#58a6ff] hover:text-[#79c0ff] hover:underline"
                 >
                   Review team feedback →
@@ -373,13 +373,13 @@ export default function GcPostReviewPage() {
       </div>
       </div>
 
-      {/* Pinned prompt — step-1 style */}
+      {/* Pinned prompt — gc-commandcenter style */}
       <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-[#0d1117] via-[#0d1117] to-transparent pb-4 pt-8 z-50">
         <div className="mx-auto max-w-4xl px-6">
           <div className="flex items-center gap-2 mb-3 flex-wrap justify-center">
             <span className="text-[10px] text-[#6e7681]">Advance:</span>
             <Link
-              href="/now/agentic-hero/superhero/gc-review-feedback"
+              href="/now/agentic-hero/superhero/gc-review/notification"
               className="rounded-full border border-[#30363d] bg-[#21262d] px-3 py-1 text-xs text-[#8b949e] hover:border-[#58a6ff]/50 hover:text-[#f0f6fc] transition-colors"
             >
               Review team feedback
@@ -391,7 +391,7 @@ export default function GcPostReviewPage() {
               Finalize and send to CEO →
             </Link>
             <Link
-              href="/now/agentic-hero/superhero/finisher"
+              href="/gc-commandcenter?ceo_approved=1"
               className="rounded-full border border-[#30363d] bg-[#21262d] px-3 py-1 text-xs text-[#8b949e] hover:border-[#58a6ff]/50 hover:text-[#f0f6fc] transition-colors"
             >
               Summarize for the board

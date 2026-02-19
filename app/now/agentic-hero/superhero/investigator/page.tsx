@@ -20,12 +20,12 @@ function DiligentLogo({ className }: { className?: string }) {
 }
 
 const workflowStages = [
-  { id: "detect", label: "Detect", status: "completed" as const, href: "/step-1" },
+  { id: "detect", label: "Detect", status: "completed" as const, href: "/gc-commandcenter" },
   { id: "review", label: "Review Sources", status: "completed" as const, href: "/now/agentic-hero/superhero/reviewer" },
   { id: "assign", label: "Assign Owners", status: "completed" as const, href: "/now/agentic-hero/superhero/coordinator" },
   { id: "investigate", label: "Investigate", status: "current" as const, href: "/now/agentic-hero/superhero/investigator" },
   { id: "draft", label: "Draft 10-K", status: "pending" as const, href: "/now/agentic-hero/superhero/writer" },
-  { id: "notify", label: "Notify Board", status: "pending" as const, href: "/now/agentic-hero/superhero/finisher" },
+  { id: "notify", label: "Notify Board", status: "pending" as const, href: "/gc-commandcenter?ceo_approved=1" },
 ];
 
 const RISK_DETAILS = {
@@ -109,7 +109,7 @@ export default function InvestigatorPage() {
                 <span className="rounded-full border border-[#3fb950]/40 bg-[#3fb950]/10 px-2 py-0.5 text-[10px] font-medium text-[#3fb950]">Risk Owner: {RISK_DETAILS.assignedTo.name}</span>
               </div>
               <div className="flex items-center gap-3">
-                <Link href="/step-1" className="text-xs text-[#8b949e] hover:text-[#f0f6fc]">← Back to Dashboard</Link>
+                <Link href="/gc-commandcenter" className="text-xs text-[#8b949e] hover:text-[#f0f6fc]">← Back to Dashboard</Link>
                 <div className={cn("h-8 w-8 rounded-full bg-gradient-to-br", RISK_DETAILS.assignedTo.avatar)} />
               </div>
             </div>
@@ -263,7 +263,7 @@ export default function InvestigatorPage() {
                   <div className="text-[10px] font-medium uppercase tracking-wider text-[#484f58] mb-3">Quick Links</div>
                   <div className="space-y-2">
                     <Link href="/now/agentic-hero/superhero/coordinator" className="block text-xs text-[#8b949e] hover:text-[#f0f6fc]">← Back to owner assignments</Link>
-                    <Link href="/step-1" className="block text-xs text-[#8b949e] hover:text-[#f0f6fc]">← Back to Command Center</Link>
+                    <Link href="/gc-commandcenter" className="block text-xs text-[#8b949e] hover:text-[#f0f6fc]">← Back to Command Center</Link>
                   </div>
                 </div>
               </div>

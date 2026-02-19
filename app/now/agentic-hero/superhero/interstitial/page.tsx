@@ -51,7 +51,7 @@ export default function InterstitialPage() {
               What&apos;s next (Part 2)
             </h2>
             <p className="text-[15px] text-[#4b5563] leading-relaxed mb-4">
-              Part 2 covers the filing workflow: counsel review, audit committee sign-off, CEO/CFO certification, and EDGAR submission. The Finisher agent prepares the final document and integrates feedback.
+              Part 2 covers the filing workflow: counsel review, audit committee sign-off, CEO/CFO certification, and EDGAR submission. EDGAR approval happens in the Command Center — agents prepare the package, GC approves.
             </p>
             <ul className="space-y-2 text-[15px] text-[#4b5563]">
               <li className="flex gap-2">
@@ -73,7 +73,7 @@ export default function InterstitialPage() {
         <div className="mt-14 pt-10 border-t border-[#e5e7eb]">
           <div className="flex flex-wrap items-center gap-4">
             <Link
-              href="/now/agentic-hero/superhero/gc-review-feedback"
+              href="/now/agentic-hero/superhero/gc-review/notification"
               className="inline-flex items-center gap-2 rounded-lg bg-[#111827] px-6 py-3 text-sm font-semibold text-white hover:bg-[#1f2937] transition-colors"
             >
               Continue to Part 2

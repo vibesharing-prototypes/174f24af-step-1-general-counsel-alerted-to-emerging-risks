@@ -37,12 +37,12 @@ type WorkflowStage = {
 };
 
 const workflowStages: WorkflowStage[] = [
-  { id: "detect", label: "Detect", status: "completed", href: "/step-1" },
+  { id: "detect", label: "Detect", status: "completed", href: "/gc-commandcenter" },
   { id: "review", label: "Review Sources", status: "completed", href: "/now/agentic-hero/superhero/reviewer" },
   { id: "assign", label: "Assign Owners", status: "current", href: "/now/agentic-hero/superhero/coordinator" },
   { id: "investigate", label: "Investigate", status: "pending", href: "/now/agentic-hero/superhero/investigator" },
   { id: "draft", label: "Draft 10-K", status: "pending", href: "/now/agentic-hero/superhero/writer" },
-  { id: "notify", label: "Notify Board", status: "pending", href: "/now/agentic-hero/superhero/finisher" },
+  { id: "notify", label: "Notify Board", status: "pending", href: "/gc-commandcenter?ceo_approved=1" },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -582,7 +582,7 @@ export default function CoordinatorPage() {
                 </span>
               </div>
               <div className="flex items-center gap-3">
-                <Link href="/step-1" className="text-xs text-[#8b949e] hover:text-[#f0f6fc]">
+                <Link href="/gc-commandcenter" className="text-xs text-[#8b949e] hover:text-[#f0f6fc]">
                   ← Back to Dashboard
                 </Link>
                 <img src={GC_AVATAR_URL} alt="General Counsel" className="h-8 w-8 rounded-full object-cover" />
