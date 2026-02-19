@@ -3,6 +3,8 @@
 import React, { useState, useEffect, useRef, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { LeftRail } from "../LeftRail";
+import { StakeholderFooter, PrototypeControlLink } from "../StakeholderFooter";
 
 function cn(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
@@ -31,16 +33,119 @@ const DiligentAgentIcon = () => (
   </svg>
 );
 
-const PRIOR_YEAR_RISKS = [
-  { title: "Cybersecurity and Data Privacy Risks", body: "We face risks related to cybersecurity threats and data privacy obligations across multiple jurisdictions. A breach of our information systems could result in the loss of confidential information, disruption to our business operations, and significant reputational harm. We invest in security infrastructure and employee training programs; however, no assurance can be given that our measures will prevent all cyber incidents." },
-  { title: "Market and Competition Risks", body: "Our business operates in highly competitive markets that are subject to rapid technological change and evolving customer demands. We compete with both established companies and emerging market entrants, and our failure to anticipate market trends or respond to competitive pressures could materially impact our revenue and market share." },
-  { title: "Regulatory and Compliance Risks", body: "We are subject to a wide range of laws and regulations in the jurisdictions in which we operate. Changes in these laws, or our failure to comply with existing requirements, could result in fines, penalties, litigation, or restrictions on our business activities. Regulatory developments may also increase our compliance costs and operational complexity." },
-  { title: "Operational and Supply Chain Risks", body: "Our operations depend on the continuous and uninterrupted performance of our supply chain and key operational processes. Disruptions caused by natural disasters, geopolitical events, or failures of key vendors could adversely affect our ability to deliver products and services to our customers." },
-  { title: "Financial and Economic Risks", body: "We are exposed to macroeconomic conditions including interest rate fluctuations, inflation, and foreign exchange volatility. Adverse economic conditions could reduce demand for our products and services, increase our borrowing costs, and negatively impact our financial results." },
-];
+/** Per-risk prior-year language, gap, and default draft — so GC sees what they had and what's missing */
+const RISK_DISCLOSURE_DATA: Record<
+  string,
+  { label: string; priorYearTitle: string; priorYearBody: string; gap: string; defaultTitle: string; defaultBody: string }
+> = {
+  "risk-taiwan": {
+    label: "Taiwan Strait",
+    priorYearTitle: "Operational and Supply Chain Risks",
+    priorYearBody:
+      "Our operations depend on the continuous and uninterrupted performance of our supply chain and key operational processes. Disruptions caused by natural disasters, geopolitical events, or failures of key vendors could adversely affect our ability to deliver products and services to our customers.",
+    gap: "No geographic concentration disclosure. Current language does not address Taiwan Strait exposure, semiconductor supplier concentration (47% Taiwan-based), or board-level diversification initiatives.",
+    defaultTitle: "Semiconductor Supply Chain and Geopolitical Risks",
+    defaultBody: `We face risks related to semiconductor supply chain concentration and geopolitical exposure. Approximately 47% of our chip suppliers have Taiwan-based operations. Escalating tensions in the Taiwan Strait may disrupt our semiconductor supply chain, extend lead times, and materially impact our ability to source critical components. We are pursuing supplier diversification initiatives, including evaluation of alternative sourcing regions as discussed at the board level; however, qualification of alternative suppliers typically requires 12-18 months.`,
+  },
+  "risk-vendor": {
+    label: "Vendor Breach",
+    priorYearTitle: "Cybersecurity and Data Privacy Risks",
+    priorYearBody:
+      "We face risks related to cybersecurity threats and data privacy obligations across multiple jurisdictions. A breach of our information systems could result in the loss of confidential information, disruption to our business operations, and significant reputational harm. We invest in security infrastructure and employee training programs; however, no assurance can be given that our measures will prevent all cyber incidents.",
+    gap: "No third-party vendor concentration disclosure. Current language focuses on internal systems; does not address critical vendor incidents (e.g., CloudSecure ransomware), DPA exposure, or vendor-specific breach response.",
+    defaultTitle: "Third-Party Vendor Cybersecurity Risks",
+    defaultBody: `We face risks related to cybersecurity threats affecting our operations and those of our critical vendors. A breach of our information systems or those of key third-party service providers could result in the loss of confidential information, disruption to our business operations, and significant reputational harm. We rely on third-party vendors for data processing and cloud infrastructure; we maintain vendor risk assessments and incident response procedures; however, no assurance can be given that our measures or those of our vendors will prevent all cyber incidents.`,
+  },
+  "risk-dma": {
+    label: "EU DMA",
+    priorYearTitle: "Regulatory and Compliance Risks",
+    priorYearBody:
+      "We are subject to a wide range of laws and regulations in the jurisdictions in which we operate. Changes in these laws, or our failure to comply with existing requirements, could result in fines, penalties, litigation, or restrictions on our business activities. Regulatory developments may also increase our compliance costs and operational complexity.",
+    gap: "No EU Digital Markets Act disclosure. Current language is generic; does not address DMA enforcement, EC scrutiny of peer companies, or our 23% EU revenue exposure.",
+    defaultTitle: "EU Digital Markets Act and Regulatory Risks",
+    defaultBody: `We are subject to a wide range of laws and regulations in the jurisdictions in which we operate, including the EU Digital Markets Act (DMA). Enforcement actions by the European Commission against companies in our sector may affect our regulatory approach and compliance obligations. We derive approximately 23% of annual revenue from EU operations. Changes in these laws, or our failure to comply with existing requirements, could result in fines, penalties, litigation, or restrictions on our business activities. Regulatory developments may also increase our compliance costs and operational complexity.`,
+  },
+};
 
-const DEFAULT_NEW_RISK_TITLE = "Semiconductor Supply Chain and Geopolitical Risks";
-const DEFAULT_NEW_RISK_BODY = `We face risks related to semiconductor supply chain concentration and geopolitical exposure. Approximately 47% of our chip suppliers have Taiwan-based operations. Escalating tensions in the Taiwan Strait may disrupt our semiconductor supply chain, extend lead times, and materially impact our ability to source critical components. We are evaluating supplier diversification strategies; however, qualification of alternative suppliers typically requires 12-18 months.`;
+const RISK_IDS = ["risk-taiwan", "risk-vendor", "risk-dma"] as const;
+
+const GC_AVATAR_URL = "https://randomuser.me/api/portraits/med/women/65.jpg";
+
+/** Metadata for right rail — away from work area, extra resources for GC */
+const RISK_METADATA: Record<
+  string,
+  {
+    avgWordCount: number;
+    shortDraftSuggestions: string[];
+    riskLibraryMentions: string[];
+    peerInsights: { count: number; examples: string[] };
+  }
+> = {
+  "risk-taiwan": {
+    avgWordCount: 142,
+    shortDraftSuggestions: [
+      "Consider describing additional mitigations or diversification plans.",
+      "Consider adding the supplier diversification timeline (e.g., 12–18 month qualification).",
+      "Consider mentioning board-level initiatives discussed in prior materials.",
+    ],
+    riskLibraryMentions: [
+      "supplier diversification timeline",
+      "geographic concentration percentage",
+      "lead time / qualification period",
+      "board-level initiatives",
+    ],
+    peerInsights: {
+      count: 4,
+      examples: [
+        "TechCorp: \"Approximately 52% of our semiconductor procurement is sourced from Taiwan-based facilities.\"",
+        "GlobalChip: \"We are evaluating alternative sourcing in Vietnam and Malaysia; qualification typically requires 12–18 months.\"",
+        "MegaElectronics: \"Geopolitical tensions in the Taiwan Strait could materially disrupt our supply chain.\"",
+      ],
+    },
+  },
+  "risk-vendor": {
+    avgWordCount: 128,
+    shortDraftSuggestions: [
+      "Consider describing additional mitigations or incident response procedures.",
+      "Consider adding vendor risk assessment or DPA coverage.",
+      "Consider mentioning third-party concentration or reliance on key vendors.",
+    ],
+    riskLibraryMentions: [
+      "third-party / vendor concentration",
+      "incident response procedures",
+      "DPA / data processing agreements",
+      "vendor risk assessments",
+    ],
+    peerInsights: {
+      count: 3,
+      examples: [
+        "SecureData Inc: \"A breach affecting our key cloud infrastructure vendor could disrupt operations across multiple business lines.\"",
+        "CloudFirst: \"We maintain incident response procedures with critical vendors; however, vendor compliance cannot be guaranteed.\"",
+      ],
+    },
+  },
+  "risk-dma": {
+    avgWordCount: 118,
+    shortDraftSuggestions: [
+      "Consider describing additional mitigations or compliance readiness.",
+      "Consider adding EU revenue exposure or geographic breakdown.",
+      "Consider mentioning EC enforcement actions or peer designation.",
+    ],
+    riskLibraryMentions: [
+      "EU revenue exposure",
+      "EC enforcement actions",
+      "designation / gatekeeper status",
+      "compliance costs",
+    ],
+    peerInsights: {
+      count: 3,
+      examples: [
+        "EuroTech: \"The European Commission has designated three companies in our sector under the DMA; we are monitoring implications.\"",
+        "GlobalPlatform: \"Approximately 28% of revenue is derived from EU operations; regulatory changes could materially impact our business model.\"",
+      ],
+    },
+  },
+};
 
 type CroAssessment = {
   riskName?: string;
@@ -70,14 +175,28 @@ const PROMPT_SUGGESTIONS = [
 
 function WriterContent() {
   const searchParams = useSearchParams();
-  const riskId = searchParams?.get("risk") || "risk-taiwan";
+  const urlRiskId = searchParams?.get("risk") || "risk-taiwan";
+  const ownerId = searchParams?.get("owner") || "diana-reyes";
+  const layout = searchParams?.get("layout") || "primary"; // "primary" = prompt full width, "sidebar" = prompt in third column
 
+  const [activeRiskId, setActiveRiskId] = useState<string>(urlRiskId);
   const [croAssessment, setCroAssessment] = useState<CroAssessment | null>(null);
-  const [draftTitle, setDraftTitle] = useState(DEFAULT_NEW_RISK_TITLE);
-  const [draftBody, setDraftBody] = useState(DEFAULT_NEW_RISK_BODY);
+  const [draftsByRisk, setDraftsByRisk] = useState<Record<string, { title: string; body: string }>>(() =>
+    Object.fromEntries(RISK_IDS.map((id) => [id, { title: RISK_DISCLOSURE_DATA[id].defaultTitle, body: RISK_DISCLOSURE_DATA[id].defaultBody }]))
+  );
+
+  const riskId = activeRiskId;
+  const riskData = RISK_DISCLOSURE_DATA[riskId];
+  const draftTitle = draftsByRisk[riskId]?.title ?? riskData?.defaultTitle ?? "";
+  const draftBody = draftsByRisk[riskId]?.body ?? riskData?.defaultBody ?? "";
+  const setDraftTitle = (v: string) =>
+    setDraftsByRisk((prev) => ({ ...prev, [riskId]: { title: v, body: prev[riskId]?.body ?? riskData?.defaultBody ?? "" } }));
+  const setDraftBody = (v: string) =>
+    setDraftsByRisk((prev) => ({ ...prev, [riskId]: { title: prev[riskId]?.title ?? riskData?.defaultTitle ?? "", body: v } }));
   const [promptInput, setPromptInput] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [showPolicyManagerUpsell, setShowPolicyManagerUpsell] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -93,6 +212,10 @@ function WriterContent() {
       }
     }
   }, []);
+
+  useEffect(() => {
+    if (RISK_IDS.includes(urlRiskId as (typeof RISK_IDS)[number])) setActiveRiskId(urlRiskId);
+  }, [urlRiskId]);
 
   const handleSendPrompt = () => {
     const trimmed = promptInput.trim();
@@ -113,20 +236,20 @@ function WriterContent() {
 
     if (lower.includes("strengthen") || lower.includes("taiwan")) {
       suggestedEdit = "I've strengthened the Taiwan-specific language and added the 47% supplier concentration figure more prominently.";
-      newBody = "We face significant risks related to semiconductor supply chain concentration and geopolitical exposure in the Taiwan Strait region. Approximately 47% of our chip suppliers have Taiwan-based operations, creating material concentration risk. Escalating tensions may disrupt our semiconductor supply chain, extend lead times, and materially impact our ability to source critical components. We are evaluating supplier diversification strategies; however, qualification of alternative suppliers typically requires 12-18 months.";
+      newBody = "We face significant risks related to semiconductor supply chain concentration and geopolitical exposure in the Taiwan Strait region. Approximately 47% of our chip suppliers have Taiwan-based operations, creating material concentration risk. Escalating tensions may disrupt our semiconductor supply chain, extend lead times, and materially impact our ability to source critical components. We are pursuing supplier diversification initiatives, including evaluation of alternative sourcing regions as discussed at the board level; however, qualification of alternative suppliers typically requires 12-18 months.";
     } else if (lower.includes("diversification") || lower.includes("timeline")) {
-      suggestedEdit = "I've added language about the supplier diversification timeline and qualification progress.";
-      newBody = "We face risks related to semiconductor supply chain concentration and geopolitical exposure. Approximately 47% of our chip suppliers have Taiwan-based operations. Escalating tensions in the Taiwan Strait may disrupt our semiconductor supply chain, extend lead times, and materially impact our ability to source critical components. We have initiated a supplier diversification program; qualification of alternative suppliers (including Samsung) is in progress, with a typical timeline of 12-18 months to complete.";
+      suggestedEdit = "I've added language about the supplier diversification timeline, including board-level initiatives.";
+      newBody = "We face risks related to semiconductor supply chain concentration and geopolitical exposure. Approximately 47% of our chip suppliers have Taiwan-based operations. Escalating tensions in the Taiwan Strait may disrupt our semiconductor supply chain, extend lead times, and materially impact our ability to source critical components. We have initiated a supplier diversification program aligned with initiatives discussed at the board level; qualification of alternative suppliers is in progress, with a typical timeline of 12-18 months to complete.";
     } else if (lower.includes("controls") || lower.includes("mitigation")) {
       suggestedEdit = "I've incorporated the CRO's controls and mitigations into the draft.";
-      newBody = "We face risks related to semiconductor supply chain concentration and geopolitical exposure. Approximately 47% of our chip suppliers have Taiwan-based operations. Escalating tensions in the Taiwan Strait may disrupt our semiconductor supply chain, extend lead times, and materially impact our ability to source critical components. We maintain dual-sourcing arrangements for certain critical components and are evaluating supplier diversification strategies; however, qualification of alternative suppliers typically requires 12-18 months.";
+      newBody = "We face risks related to semiconductor supply chain concentration and geopolitical exposure. Approximately 47% of our chip suppliers have Taiwan-based operations. Escalating tensions in the Taiwan Strait may disrupt our semiconductor supply chain, extend lead times, and materially impact our ability to source critical components. We maintain dual-sourcing arrangements for certain critical components and are pursuing supplier diversification initiatives as discussed at the board level; however, qualification of alternative suppliers typically requires 12-18 months.";
     } else if (lower.includes("tone down") || lower.includes("severity")) {
       suggestedEdit = "I've softened the severity language and added appropriate qualifiers.";
-      newBody = "We face risks related to semiconductor supply chain concentration and geopolitical exposure. Approximately 47% of our chip suppliers have Taiwan-based operations. In the event of escalating tensions in the Taiwan Strait, our semiconductor supply chain could be disrupted, potentially extending lead times and adversely affecting our ability to source certain critical components. We are evaluating supplier diversification strategies; however, qualification of alternative suppliers typically requires 12-18 months.";
+      newBody = "We face risks related to semiconductor supply chain concentration and geopolitical exposure. Approximately 47% of our chip suppliers have Taiwan-based operations. In the event of escalating tensions in the Taiwan Strait, our semiconductor supply chain could be disrupted, potentially extending lead times and adversely affecting our ability to source certain critical components. We are pursuing supplier diversification initiatives as discussed at the board level; however, qualification of alternative suppliers typically requires 12-18 months.";
     } else if (lower.includes("align") || lower.includes("cro")) {
       suggestedEdit = "I've aligned the draft with the CRO assessment. Review the updated language.";
       newBody = croAssessment?.controls
-        ? `We face risks related to semiconductor supply chain concentration and geopolitical exposure. Approximately 47% of our chip suppliers have Taiwan-based operations. Escalating tensions in the Taiwan Strait may disrupt our semiconductor supply chain, extend lead times, and materially impact our ability to source critical components. ${croAssessment.controls} We are evaluating supplier diversification strategies; however, qualification of alternative suppliers typically requires 12-18 months.`
+        ? `We face risks related to semiconductor supply chain concentration and geopolitical exposure. Approximately 47% of our chip suppliers have Taiwan-based operations. Escalating tensions in the Taiwan Strait may disrupt our semiconductor supply chain, extend lead times, and materially impact our ability to source critical components. ${croAssessment.controls} We are pursuing supplier diversification initiatives as discussed at the board level; however, qualification of alternative suppliers typically requires 12-18 months.`
         : draftBody;
     } else {
       suggestedEdit = "I've reviewed your request and updated the draft. Please review the changes in the editable panel.";
@@ -164,6 +287,12 @@ function WriterContent() {
           <div className="flex items-center gap-3">
             <span className="text-xs font-medium uppercase tracking-wider text-[#0369a1]">Prototype</span>
             <span className="text-sm font-semibold text-[#0c4a6e]">Risk Detection → 10K Update → Board Notification</span>
+            <Link
+              href={`/now/agentic-hero/superhero/writer?risk=${activeRiskId}&owner=${ownerId}&layout=${layout === "sidebar" ? "primary" : "sidebar"}`}
+              className="text-xs font-medium text-[#0369a1] hover:underline"
+            >
+              {layout === "sidebar" ? "View Cursor-style layout" : "View alternative layout"}
+            </Link>
           </div>
           <span className="rounded-full border-2 border-[#0c4a6e] bg-[#7dd3fc]/30 px-3 py-1 text-xs font-semibold text-[#0c4a6e]">
             Viewing as: General Counsel
@@ -171,173 +300,521 @@ function WriterContent() {
         </div>
       </div>
 
-      {/* Header */}
-      <div className="border-b border-[#30363d] bg-[#161b22] flex-shrink-0">
-        <div className="mx-auto max-w-7xl px-6 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <DiligentLogo className="h-7 w-auto" />
-                <span className="text-sm font-semibold text-[#f0f6fc]">GRC Command Center</span>
-              </div>
-              <span className="rounded-full border border-[#58a6ff]/40 bg-[#58a6ff]/10 px-2 py-0.5 text-[10px] font-medium text-[#58a6ff]">
-                10-K Disclosure Draft
-              </span>
+      {/* Main layout: Left rail + content */}
+      <div className="flex-1 flex overflow-hidden min-h-0 min-w-0">
+        <LeftRail actorLabel="General Counsel" activeRiskId={riskId} />
+
+        <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+          {/* Breadcrumb + risk tabs */}
+          <div className="border-b border-[#30363d] bg-[#161b22] px-6 py-2.5 flex items-center justify-between flex-shrink-0 flex-wrap gap-2">
+            <div className="flex items-center gap-2 text-xs text-[#8b949e]">
+              <Link href="/now/agentic-hero/superhero/coordinator" className="hover:text-[#f0f6fc]">Assign Owners</Link>
+              <span>›</span>
+              <Link href="/now/agentic-hero/superhero/cro-review" className="hover:text-[#f0f6fc]">CRO Review</Link>
+              <span>›</span>
+              <span className="text-[#f0f6fc] font-medium">10-K Draft</span>
             </div>
-            <div className="flex items-center gap-3">
-              <Link href="/now/agentic-hero/superhero/cro-review" className="text-xs text-[#8b949e] hover:text-[#f0f6fc]">
-                ← CRO Review
-              </Link>
-              <Link href="/step-1" className="text-xs text-[#8b949e] hover:text-[#f0f6fc]">
-                Command Center
-              </Link>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Split view content */}
-      <div className="flex-1 flex overflow-hidden min-h-0">
-        {/* Left: Prior year + editable draft */}
-        <div className="flex-1 overflow-y-auto border-r border-[#30363d]">
-          <div className="p-6 space-y-6">
-            <div>
-              <h2 className="text-xs font-medium text-[#6e7681] uppercase tracking-wider mb-3">Prior year — Item 1A Risk Factors</h2>
-              <div className="rounded-xl border border-[#30363d] bg-[#161b22] p-4 max-h-48 overflow-y-auto">
-                <div className="space-y-3 text-xs leading-relaxed">
-                  {PRIOR_YEAR_RISKS.slice(0, 3).map((r, i) => (
-                    <div key={i}>
-                      <div className="font-semibold text-[#f0f6fc] text-sm">{i + 1}. {r.title}</div>
-                      <p className="text-[#8b949e] mt-0.5">{r.body.slice(0, 120)}...</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <h2 className="text-xs font-medium text-[#6e7681] uppercase tracking-wider mb-3 flex items-center gap-2">
-                Draft — New risk factor
-                <span className="rounded-full bg-[#3fb950]/10 border border-[#3fb950]/30 px-1.5 py-0 text-[9px] text-[#3fb950] font-medium">EDITABLE</span>
-              </h2>
-              <div className="rounded-xl border border-[#58a6ff]/30 bg-[#58a6ff]/5 p-4">
-                <input
-                  value={draftTitle}
-                  onChange={(e) => setDraftTitle(e.target.value)}
-                  className="w-full bg-transparent text-sm font-semibold text-[#f0f6fc] mb-3 focus:outline-none placeholder-[#484f58]"
-                  placeholder="Risk factor title..."
-                />
-                <textarea
-                  value={draftBody}
-                  onChange={(e) => setDraftBody(e.target.value)}
-                  rows={8}
-                  className="w-full rounded-lg border border-[#30363d] bg-[#161b22] px-3 py-2 text-sm text-[#f0f6fc] placeholder-[#484f58] focus:border-[#58a6ff] focus:outline-none resize-none"
-                  placeholder="Draft disclosure text..."
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Right: Context + prompt */}
-        <div className="w-[380px] flex-shrink-0 flex flex-col border-l border-[#30363d] bg-[#161b22]">
-          <div className="p-4 border-b border-[#30363d]">
-            <h3 className="text-xs font-medium text-[#6e7681] uppercase tracking-wider mb-2">Context from workflow</h3>
-            <div className="text-xs text-[#8b949e] space-y-1">
-              <p><span className="text-[#f0f6fc]">Risk:</span> {croAssessment?.riskName || "Taiwan Strait Geopolitical Tensions"}</p>
-              <p><span className="text-[#f0f6fc]">Owner:</span> {croAssessment?.ownerName || "Diana Reyes"}</p>
-              {croAssessment?.likelihood && <p><span className="text-[#f0f6fc]">CRO likelihood:</span> {croAssessment.likelihood}</p>}
-              {croAssessment?.impact && <p><span className="text-[#f0f6fc]">CRO impact:</span> {croAssessment.impact}</p>}
-              {croAssessment?.controls && <p className="mt-1"><span className="text-[#f0f6fc]">Controls:</span> {croAssessment.controls.slice(0, 80)}...</p>}
-            </div>
-          </div>
-
-          <div className="flex-1 overflow-y-auto p-4">
-            <h3 className="text-xs font-medium text-[#6e7681] uppercase tracking-wider mb-2">Work with AI</h3>
-            <p className="text-xs text-[#8b949e] mb-3">
-              Edit the draft directly or prompt AI to suggest changes.
-            </p>
-
-            {messages.length > 0 && (
-              <div className="space-y-3 mb-4">
-                {messages.map((m) => (
-                  <div
-                    key={m.id}
-                    className={cn(
-                      "rounded-lg px-3 py-2 text-xs",
-                      m.role === "user"
-                        ? "ml-4 bg-[#58a6ff]/10 border border-[#58a6ff]/20 text-[#f0f6fc]"
-                        : "mr-4 bg-[#21262d] border border-[#30363d] text-[#c9d1d9]"
-                    )}
-                  >
-                    <p className="font-medium text-[#8b949e] mb-0.5">{m.role === "user" ? "You" : "Diligent AI"}</p>
-                    <p className="leading-relaxed">{m.content}</p>
-                  </div>
-                ))}
-                {isLoading && (
-                  <div className="flex items-center gap-2 text-xs text-[#8b949e]">
-                    <div className="h-1.5 w-1.5 rounded-full bg-[#58a6ff] animate-pulse" />
-                    AI is updating the draft...
-                  </div>
-                )}
-                <div ref={messagesEndRef} />
-              </div>
-            )}
-
-            <div className="flex flex-wrap gap-2 mb-3">
-              <span className="text-[10px] text-[#6e7681]">Try:</span>
-              {PROMPT_SUGGESTIONS.map((s) => (
+            <div className="flex rounded-lg border border-[#30363d] bg-[#0d1117] p-0.5">
+              {RISK_IDS.map((id) => (
                 <button
-                  key={s}
-                  onClick={() => handleSuggestionClick(s)}
-                  className="rounded-full border border-[#30363d] bg-[#21262d] px-2.5 py-1 text-[10px] text-[#8b949e] hover:border-[#58a6ff]/50 hover:text-[#f0f6fc] transition-colors"
+                  key={id}
+                  onClick={() => setActiveRiskId(id)}
+                  className={cn(
+                    "rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
+                    activeRiskId === id
+                      ? "bg-[#58a6ff]/20 text-[#58a6ff] border border-[#58a6ff]/30"
+                      : "text-[#8b949e] hover:text-[#f0f6fc] hover:bg-[#21262d]"
+                  )}
                 >
-                  {s}
+                  {RISK_DISCLOSURE_DATA[id].label}
                 </button>
               ))}
             </div>
-
-            <div className="rounded-xl border border-[#30363d] bg-[#0d1117] p-2">
-              <div className="flex gap-2">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white flex-shrink-0 p-1">
-                  <DiligentAgentIcon />
-                </div>
-                <textarea
-                  ref={inputRef}
-                  value={promptInput}
-                  onChange={(e) => setPromptInput(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), handleSendPrompt())}
-                  placeholder="Ask AI to add or change disclosure language..."
-                  rows={2}
-                  className="flex-1 bg-transparent text-sm text-[#f0f6fc] placeholder-[#484f58] focus:outline-none resize-none"
-                  disabled={isLoading}
-                />
-              </div>
-              <button
-                onClick={handleSendPrompt}
-                disabled={!promptInput.trim() || isLoading}
-                className={cn(
-                  "mt-2 w-full rounded-lg py-2 text-xs font-medium transition-colors",
-                  promptInput.trim() && !isLoading
-                    ? "bg-[#58a6ff] text-white hover:bg-[#79c0ff]"
-                    : "bg-[#21262d] text-[#484f58] cursor-not-allowed"
-                )}
-              >
-                Apply changes
-              </button>
-            </div>
           </div>
 
-          <div className="p-4 border-t border-[#30363d]">
-            <Link
-              href="/now/agentic-hero/superhero/finisher"
-              className="block w-full rounded-lg bg-[#3fb950] px-4 py-2 text-center text-sm font-medium text-white hover:bg-[#46c35a] transition-colors"
-            >
-              Continue to finalize →
-            </Link>
+          {/* Split view content */}
+          <div className="flex-1 flex overflow-hidden min-h-0">
+            {layout === "primary" ? (
+              /* Cursor-style: left working column (readable) + right editable document */
+              <>
+                {/* Left: Working column — prior year, gap, context, chat, prompt (contained) */}
+                <div className="w-[420px] flex-shrink-0 flex flex-col border-r border-[#30363d] bg-[#161b22] overflow-hidden">
+                  <div className="flex-1 overflow-y-auto">
+                    <div className="p-5 max-w-[380px] space-y-5">
+                      {riskData && (
+                        <>
+                          <div>
+                            <h2 className="text-[11px] font-medium text-[#6e7681] uppercase tracking-wider mb-2">
+                              Prior year — language we&apos;re updating
+                            </h2>
+                            <div className="rounded-lg border border-[#30363d] bg-[#0d1117] p-3">
+                              <div className="font-semibold text-[#f0f6fc] text-[13px] mb-1.5 leading-snug">{riskData.priorYearTitle}</div>
+                              <p className="text-[13px] text-[#8b949e] leading-relaxed" style={{ lineHeight: 1.6 }}>{riskData.priorYearBody}</p>
+                            </div>
+                          </div>
+
+                          <div>
+                            <h2 className="text-[11px] font-medium text-[#6e7681] uppercase tracking-wider mb-2">Disclosure gap</h2>
+                            <div className="rounded-lg border border-[#d29922]/40 bg-[#d29922]/5 p-3">
+                              <p className="text-[13px] text-[#f0f6fc] leading-relaxed" style={{ lineHeight: 1.6 }}>{riskData.gap}</p>
+                            </div>
+                          </div>
+                        </>
+                      )}
+
+                      <div className="rounded-lg border border-[#30363d] bg-[#0d1117] p-3">
+                        <h3 className="text-[11px] font-medium text-[#6e7681] uppercase tracking-wider mb-2">Context from workflow</h3>
+                        <div className="text-[13px] text-[#8b949e] space-y-1 leading-relaxed">
+                          <p><span className="text-[#f0f6fc]">Risk:</span> {croAssessment?.riskName || riskData?.priorYearTitle || "—"}</p>
+                          <p><span className="text-[#f0f6fc]">Owner:</span> {croAssessment?.ownerName || "—"}</p>
+                          {croAssessment?.likelihood && <p><span className="text-[#f0f6fc]">CRO likelihood:</span> {croAssessment.likelihood}</p>}
+                          {croAssessment?.impact && <p><span className="text-[#f0f6fc]">CRO impact:</span> {croAssessment.impact}</p>}
+                          {croAssessment?.controls && <p className="mt-1"><span className="text-[#f0f6fc]">Controls:</span> {croAssessment.controls.slice(0, 80)}...</p>}
+                          {!croAssessment && <p className="text-[#6e7681] italic">CRO assessment not yet available for this risk</p>}
+                        </div>
+                      </div>
+
+                      {messages.length > 0 && (
+                        <div className="space-y-3">
+                          <h3 className="text-[11px] font-medium text-[#6e7681] uppercase tracking-wider">AI conversation</h3>
+                          {messages.map((m) => (
+                            <div
+                              key={m.id}
+                              className={cn("flex gap-2", m.role === "user" && "flex-row-reverse")}
+                            >
+                              {m.role === "user" ? (
+                                <img src={GC_AVATAR_URL} alt="General Counsel" className="h-7 w-7 shrink-0 rounded-full object-cover" />
+                              ) : (
+                                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white p-1">
+                                  <DiligentAgentIcon />
+                                </div>
+                              )}
+                              <div
+                                className={cn(
+                                  "flex-1 min-w-0 rounded-lg px-3 py-2 text-[13px] leading-relaxed",
+                                  m.role === "user"
+                                    ? "bg-[#58a6ff]/10 border border-[#58a6ff]/20 text-[#f0f6fc]"
+                                    : "bg-[#21262d] border border-[#30363d] text-[#c9d1d9]"
+                                )}
+                              >
+                                <p className="font-medium text-[#8b949e] mb-0.5 text-[11px]">{m.role === "user" ? "You" : "Diligent AI"}</p>
+                                <p>{m.content}</p>
+                              </div>
+                            </div>
+                          ))}
+                          {isLoading && (
+                            <div className="flex items-center gap-2 text-[13px] text-[#8b949e]">
+                              <div className="h-1.5 w-1.5 rounded-full bg-[#58a6ff] animate-pulse" />
+                              AI is updating the draft...
+                            </div>
+                          )}
+                          <div ref={messagesEndRef} />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Contained prompt box — not full width, Cursor-style */}
+                  <div className="flex-shrink-0 p-4 border-t border-[#30363d] bg-[#0d1117]">
+                    <div className="max-w-[380px] space-y-2">
+                      <div className="flex flex-wrap gap-1.5">
+                        {PROMPT_SUGGESTIONS.map((s) => (
+                          <button
+                            key={s}
+                            onClick={() => handleSuggestionClick(s)}
+                            className="rounded-md border border-[#30363d] bg-[#21262d] px-2 py-1 text-[11px] text-[#8b949e] hover:border-[#58a6ff]/50 hover:text-[#f0f6fc] transition-colors"
+                          >
+                            {s}
+                          </button>
+                        ))}
+                      </div>
+                      <div className="rounded-xl border border-[#30363d] bg-[#161b22] p-2.5 shadow-sm">
+                        <div className="flex gap-2">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white flex-shrink-0 p-1">
+                            <DiligentAgentIcon />
+                          </div>
+                          <textarea
+                            ref={inputRef}
+                            value={promptInput}
+                            onChange={(e) => setPromptInput(e.target.value)}
+                            onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), handleSendPrompt())}
+                            placeholder="Ask AI to add or change disclosure language..."
+                            rows={2}
+                            className="flex-1 bg-transparent text-[13px] text-[#f0f6fc] placeholder-[#484f58] focus:outline-none resize-none leading-relaxed"
+                            disabled={isLoading}
+                          />
+                        </div>
+                        <button
+                          onClick={handleSendPrompt}
+                          disabled={!promptInput.trim() || isLoading}
+                          className={cn(
+                            "mt-2 w-full rounded-lg py-2 text-[12px] font-medium transition-colors",
+                            promptInput.trim() && !isLoading
+                              ? "bg-[#58a6ff] text-white hover:bg-[#79c0ff]"
+                              : "bg-[#21262d] text-[#484f58] cursor-not-allowed"
+                          )}
+                        >
+                          Apply changes
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Center: Editable document — prominent, like Cursor editor */}
+                <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-[#0d1117]">
+                  <div className="flex-shrink-0 px-6 py-3 border-b border-[#30363d] bg-[#161b22] flex items-center justify-between">
+                    <div>
+                      <span className="text-[11px] font-medium text-[#6e7681] uppercase tracking-wider">10-K Draft — Item 1A</span>
+                      <span className="ml-2 rounded-full bg-[#3fb950]/10 border border-[#3fb950]/30 px-2 py-0.5 text-[10px] text-[#3fb950] font-medium">EDITABLE</span>
+                    </div>
+                    <Link
+                      href="/now/agentic-hero/superhero/interstitial"
+                      className="inline-flex items-center gap-2 rounded-lg bg-[#3fb950] px-4 py-2 text-sm font-medium text-[#0d1117] hover:bg-[#46c35a] transition-colors"
+                    >
+                      Submit draft
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+                    </Link>
+                  </div>
+                  <div className="flex-1 overflow-y-auto p-6">
+                    <div className="max-w-3xl mx-auto">
+                      <input
+                        value={draftTitle}
+                        onChange={(e) => setDraftTitle(e.target.value)}
+                        className="w-full bg-transparent text-lg font-semibold text-[#f0f6fc] mb-4 focus:outline-none placeholder-[#484f58] leading-tight"
+                        placeholder="Risk factor title..."
+                      />
+                      <textarea
+                        value={draftBody}
+                        onChange={(e) => setDraftBody(e.target.value)}
+                        rows={16}
+                        className="w-full bg-transparent text-[15px] text-[#f0f6fc] placeholder-[#484f58] focus:outline-none resize-none leading-relaxed"
+                        placeholder="Draft disclosure text..."
+                        style={{ lineHeight: 1.7 }}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right rail: Metadata & resources — away from work area */}
+                {riskData && RISK_METADATA[riskId] && (
+                  <div className="w-[300px] flex-shrink-0 flex flex-col border-l border-[#30363d] bg-[#161b22] overflow-y-auto">
+                    <div className="p-4 border-b border-[#30363d]">
+                      <h3 className="text-[11px] font-medium text-[#6e7681] uppercase tracking-wider mb-3">Resources</h3>
+                    </div>
+                    <div className="p-4 space-y-4">
+                      {/* Word count */}
+                      {(() => {
+                        const wordCount = (draftTitle + " " + draftBody).trim().split(/\s+/).filter(Boolean).length;
+                        const meta = RISK_METADATA[riskId];
+                        const diff = meta.avgWordCount - wordCount;
+                        return (
+                          <div className="rounded-lg border border-[#30363d] bg-[#0d1117] p-3">
+                            <h4 className="text-[11px] font-medium text-[#8b949e] mb-2">Word count</h4>
+                            <p className="text-[13px] text-[#f0f6fc] leading-relaxed">
+                              Your average risk disclosure: <span className="font-medium">{meta.avgWordCount} words</span>.
+                              {diff > 0 ? (
+                                <>
+                                  <span className="block mt-1 text-[#d29922]">This draft: {wordCount} words.</span>
+                                  <span className="block mt-2 text-[#8b949e] text-[12px]">Suggestions:</span>
+                                  <ul className="mt-1 space-y-1 text-[12px] text-[#c9d1d9]">
+                                    {meta.shortDraftSuggestions.map((s, i) => (
+                                      <li key={i} className="flex items-start gap-1.5">
+                                        <span className="text-[#3fb950] mt-0.5">•</span>
+                                        <span>{s}</span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </>
+                              ) : (
+                                <span className="block mt-1 text-[#3fb950]">This draft: {wordCount} words.</span>
+                              )}
+                            </p>
+                          </div>
+                        );
+                      })()}
+
+                      {/* Risk library mentions */}
+                      <div className="rounded-lg border border-[#30363d] bg-[#0d1117] p-3">
+                        <h4 className="text-[11px] font-medium text-[#8b949e] mb-2">Risk libraries also mention</h4>
+                        <p className="text-[13px] text-[#8b949e] mb-2">
+                          Other risk libraries highlighting {riskData.label.toLowerCase()} risks also mention:
+                        </p>
+                        <ul className="space-y-1 text-[13px] text-[#f0f6fc]">
+                          {RISK_METADATA[riskId].riskLibraryMentions.map((m, i) => (
+                            <li key={i} className="flex items-start gap-1.5">
+                              <span className="text-[#58a6ff] mt-0.5">•</span>
+                              <span>{m}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      {/* Peer 10-K insights */}
+                      <div className="rounded-lg border border-[#30363d] bg-[#0d1117] p-3">
+                        <h4 className="text-[11px] font-medium text-[#8b949e] mb-2">Peer 10-K insights</h4>
+                        <p className="text-[13px] text-[#8b949e] mb-2">
+                          {RISK_METADATA[riskId].peerInsights.count} of your peers mentioned similar risks in recent 10-Ks:
+                        </p>
+                        <div className="space-y-2">
+                          {RISK_METADATA[riskId].peerInsights.examples.map((ex, i) => (
+                            <p key={i} className="text-[12px] text-[#c9d1d9] leading-relaxed italic border-l-2 border-[#30363d] pl-2">
+                              {ex}
+                            </p>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* In-situ: Policy upload for Vietnam-affiliated third parties → Policy Manager upsell */}
+                      {riskId === "risk-taiwan" && (
+                        <div className="rounded-lg border border-[#30363d] bg-[#0d1117] p-3">
+                          <h4 className="text-[11px] font-medium text-[#8b949e] mb-2">Supporting policy</h4>
+                          <p className="text-[13px] text-[#8b949e] mb-3">
+                            Attach policy for Vietnam-affiliated third parties to support the disclosure.
+                          </p>
+                          <div className="space-y-2">
+                            <button
+                              onClick={() => setShowPolicyManagerUpsell(true)}
+                              className="flex w-full items-center gap-3 rounded-lg border border-[#30363d] bg-[#21262d] px-3 py-2.5 text-left text-sm text-[#f0f6fc] hover:border-[#58a6ff]/50 hover:bg-[#21262d]/80 transition-colors"
+                            >
+                              <span className="text-lg">📄</span>
+                              <span>Upload from desktop</span>
+                              <span className="ml-auto text-[10px] text-[#6e7681]">.doc, .docx</span>
+                            </button>
+                            <button
+                              onClick={() => setShowPolicyManagerUpsell(true)}
+                              className="flex w-full items-center gap-3 rounded-lg border border-[#30363d] bg-[#21262d] px-3 py-2.5 text-left text-sm text-[#f0f6fc] hover:border-[#58a6ff]/50 hover:bg-[#21262d]/80 transition-colors"
+                            >
+                              <span className="text-lg">📁</span>
+                              <span>Browse SharePoint</span>
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </>
+            ) : (
+              /* Alternative layout: prompt in third column */
+              <>
+                <div className="flex-1 overflow-y-auto border-r border-[#30363d]">
+                  <div className="p-6 space-y-6">
+                    {/* Risk tabs for sidebar layout */}
+                    <div className="flex rounded-lg border border-[#30363d] bg-[#0d1117] p-0.5">
+                      {RISK_IDS.map((id) => (
+                        <button
+                          key={id}
+                          onClick={() => setActiveRiskId(id)}
+                          className={cn(
+                            "flex-1 rounded-md px-2 py-1.5 text-xs font-medium transition-colors",
+                            activeRiskId === id
+                              ? "bg-[#58a6ff]/20 text-[#58a6ff] border border-[#58a6ff]/30"
+                              : "text-[#8b949e] hover:text-[#f0f6fc] hover:bg-[#21262d]"
+                          )}
+                        >
+                          {RISK_DISCLOSURE_DATA[id].label}
+                        </button>
+                      ))}
+                    </div>
+
+                    {riskData && (
+                      <>
+                        <div>
+                          <h2 className="text-xs font-medium text-[#6e7681] uppercase tracking-wider mb-3">Prior year — language we&apos;re updating</h2>
+                          <div className="rounded-xl border border-[#30363d] bg-[#161b22] p-4 max-h-32 overflow-y-auto">
+                            <div className="font-semibold text-[#f0f6fc] text-sm mb-2">{riskData.priorYearTitle}</div>
+                            <p className="text-xs text-[#8b949e] leading-relaxed">{riskData.priorYearBody}</p>
+                          </div>
+                        </div>
+
+                        <div>
+                          <h2 className="text-xs font-medium text-[#6e7681] uppercase tracking-wider mb-2">Disclosure gap</h2>
+                          <div className="rounded-xl border border-[#d29922]/40 bg-[#d29922]/5 p-3">
+                            <p className="text-xs text-[#f0f6fc] leading-relaxed">{riskData.gap}</p>
+                          </div>
+                        </div>
+                      </>
+                    )}
+
+                    <div>
+                      <h2 className="text-xs font-medium text-[#6e7681] uppercase tracking-wider mb-3 flex items-center gap-2">
+                        Draft — New/updated disclosure
+                        <span className="rounded-full bg-[#3fb950]/10 border border-[#3fb950]/30 px-1.5 py-0 text-[9px] text-[#3fb950] font-medium">EDITABLE</span>
+                      </h2>
+                      <div className="rounded-xl border border-[#58a6ff]/30 bg-[#58a6ff]/5 p-4">
+                        <input
+                          value={draftTitle}
+                          onChange={(e) => setDraftTitle(e.target.value)}
+                          className="w-full bg-transparent text-sm font-semibold text-[#f0f6fc] mb-3 focus:outline-none placeholder-[#484f58]"
+                          placeholder="Risk factor title..."
+                        />
+                        <textarea
+                          value={draftBody}
+                          onChange={(e) => setDraftBody(e.target.value)}
+                          rows={8}
+                          className="w-full rounded-lg border border-[#30363d] bg-[#161b22] px-3 py-2 text-sm text-[#f0f6fc] placeholder-[#484f58] focus:border-[#58a6ff] focus:outline-none resize-none"
+                          placeholder="Draft disclosure text..."
+                        />
+                      </div>
+                      <Link
+                        href="/now/agentic-hero/superhero/interstitial"
+                        className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg bg-[#3fb950] px-4 py-2 text-sm font-medium text-[#0d1117] hover:bg-[#46c35a] transition-colors"
+                      >
+                        Submit draft
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="w-[380px] flex-shrink-0 flex flex-col border-l border-[#30363d] bg-[#161b22]">
+                  <div className="p-4 border-b border-[#30363d]">
+                    <h3 className="text-xs font-medium text-[#6e7681] uppercase tracking-wider mb-2">Context from workflow</h3>
+                    <div className="text-xs text-[#8b949e] space-y-1">
+                      <p><span className="text-[#f0f6fc]">Risk:</span> {croAssessment?.riskName || "Taiwan Strait Geopolitical Tensions"}</p>
+                      <p><span className="text-[#f0f6fc]">Owner:</span> {croAssessment?.ownerName || "Diana Reyes"}</p>
+                      {croAssessment?.likelihood && <p><span className="text-[#f0f6fc]">CRO likelihood:</span> {croAssessment.likelihood}</p>}
+                      {croAssessment?.impact && <p><span className="text-[#f0f6fc]">CRO impact:</span> {croAssessment.impact}</p>}
+                      {croAssessment?.controls && <p className="mt-1"><span className="text-[#f0f6fc]">Controls:</span> {croAssessment.controls.slice(0, 80)}...</p>}
+                    </div>
+                  </div>
+
+                  <div className="flex-1 overflow-y-auto p-4">
+                    <h3 className="text-xs font-medium text-[#6e7681] uppercase tracking-wider mb-2">Work with AI</h3>
+                    <p className="text-xs text-[#8b949e] mb-3">
+                      Edit the draft directly or prompt AI to suggest changes.
+                    </p>
+
+                    {messages.length > 0 && (
+                      <div className="space-y-3 mb-4">
+                        {messages.map((m) => (
+                          <div
+                            key={m.id}
+                            className={cn("flex gap-2", m.role === "user" && "flex-row-reverse")}
+                          >
+                            {m.role === "user" ? (
+                              <img src={GC_AVATAR_URL} alt="General Counsel" className="h-7 w-7 shrink-0 rounded-full object-cover" />
+                            ) : (
+                              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white p-1">
+                                <DiligentAgentIcon />
+                              </div>
+                            )}
+                            <div
+                              className={cn(
+                                "flex-1 min-w-0 rounded-lg px-3 py-2 text-xs",
+                                m.role === "user"
+                                  ? "bg-[#58a6ff]/10 border border-[#58a6ff]/20 text-[#f0f6fc]"
+                                  : "bg-[#21262d] border border-[#30363d] text-[#c9d1d9]"
+                              )}
+                            >
+                              <p className="font-medium text-[#8b949e] mb-0.5">{m.role === "user" ? "You" : "Diligent AI"}</p>
+                              <p className="leading-relaxed">{m.content}</p>
+                            </div>
+                          </div>
+                        ))}
+                        {isLoading && (
+                          <div className="flex items-center gap-2 text-xs text-[#8b949e]">
+                            <div className="h-1.5 w-1.5 rounded-full bg-[#58a6ff] animate-pulse" />
+                            AI is updating the draft...
+                          </div>
+                        )}
+                        <div ref={messagesEndRef} />
+                      </div>
+                    )}
+
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      <span className="text-[10px] text-[#6e7681]">Try:</span>
+                      {PROMPT_SUGGESTIONS.map((s) => (
+                        <button
+                          key={s}
+                          onClick={() => handleSuggestionClick(s)}
+                          className="rounded-full border border-[#30363d] bg-[#21262d] px-2.5 py-1 text-[10px] text-[#8b949e] hover:border-[#58a6ff]/50 hover:text-[#f0f6fc] transition-colors"
+                        >
+                          {s}
+                        </button>
+                      ))}
+                    </div>
+
+                    <div className="rounded-xl border border-[#30363d] bg-[#0d1117] p-2">
+                      <div className="flex gap-2">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white flex-shrink-0 p-1">
+                          <DiligentAgentIcon />
+                        </div>
+                        <textarea
+                          ref={inputRef}
+                          value={promptInput}
+                          onChange={(e) => setPromptInput(e.target.value)}
+                          onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), handleSendPrompt())}
+                          placeholder="Ask AI to add or change disclosure language..."
+                          rows={2}
+                          className="flex-1 bg-transparent text-sm text-[#f0f6fc] placeholder-[#484f58] focus:outline-none resize-none"
+                          disabled={isLoading}
+                        />
+                      </div>
+                      <button
+                        onClick={handleSendPrompt}
+                        disabled={!promptInput.trim() || isLoading}
+                        className={cn(
+                          "mt-2 w-full rounded-lg py-2 text-xs font-medium transition-colors",
+                          promptInput.trim() && !isLoading
+                            ? "bg-[#58a6ff] text-white hover:bg-[#79c0ff]"
+                            : "bg-[#21262d] text-[#484f58] cursor-not-allowed"
+                        )}
+                      >
+                        Apply changes
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
+
+      <StakeholderFooter label="Continue as General Counsel to advance the workflow">
+        <PrototypeControlLink href="/now/agentic-hero/superhero/finisher">
+          Continue to finalize →
+        </PrototypeControlLink>
+      </StakeholderFooter>
+
+      {/* In-situ Policy Manager upsell — appears when GC tries to upload policy for Vietnam third parties */}
+      {showPolicyManagerUpsell && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={() => setShowPolicyManagerUpsell(false)}>
+          <div
+            className="max-w-md rounded-2xl border border-[#30363d] bg-[#161b22] p-6 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mb-4 flex items-center gap-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#58a6ff]/20">
+                <span className="text-2xl">📋</span>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-[#f0f6fc]">Try Policy Manager</h3>
+                <p className="text-xs text-[#8b949e]">Instead of static uploads</p>
+              </div>
+            </div>
+            <p className="text-sm text-[#c9d1d9] leading-relaxed mb-5">
+              Before you upload a Word doc or browse SharePoint—consider Policy Manager. Automate drafting, approval chains, attestation, and version control instead of managing static files.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowPolicyManagerUpsell(false)}
+                className="flex-1 rounded-lg border border-[#30363d] bg-[#21262d] px-4 py-2.5 text-sm font-medium text-[#8b949e] hover:border-[#6e7681] hover:text-[#f0f6fc] transition-colors"
+              >
+                Continue with upload
+              </button>
+              <button
+                onClick={() => setShowPolicyManagerUpsell(false)}
+                className="flex-1 rounded-lg bg-[#58a6ff] px-4 py-2.5 text-sm font-medium text-white hover:bg-[#79c0ff] transition-colors"
+              >
+                Try Policy Manager
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

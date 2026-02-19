@@ -693,7 +693,7 @@ const detectedRisks: DetectedRisk[] = [
     severity: "critical",
     source: "Risk Intelligence + News Monitoring",
     detectedAt: "Today, 8:47 AM",
-    summary: "Escalating tensions in the Taiwan Strait may disrupt semiconductor supply chain. 47% of our chip suppliers have Taiwan-based operations.",
+    summary: "Escalating tensions in the Taiwan Strait may disrupt semiconductor supply chain. 47% of our chip suppliers have Taiwan-based operations. Prior board materials (Q3) referenced Vietnam as diversification target under evaluation.",
     currentDisclosure: "Item 1A mentions 'general supply chain risks' but does not specifically address semiconductor concentration or geopolitical exposure.",
     disclosureGap: "No specific disclosure of semiconductor supply concentration or Taiwan geopolitical risk",
     recommendedAction: "Update Item 1A Risk Factors to include specific semiconductor supply chain and geopolitical risk language",
@@ -805,7 +805,7 @@ const nextActions = {
   "near-term": [
     {
       title: "Review Taiwan supply chain risk assessment",
-      detail: "Critical severity. 47% of chip suppliers have Taiwan operations. May require 10K Item 1A update.",
+      detail: "Critical severity. 47% of chip suppliers have Taiwan operations. Board materials (Q3) referenced Vietnam diversification. May require 10K Item 1A update.",
       app: "Risk Intelligence",
     },
     {

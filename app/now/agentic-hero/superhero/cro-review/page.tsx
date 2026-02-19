@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState, useEffect, useRef, Suspense } from "react";
-import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
+import { LeftRail } from "../LeftRail";
+import { StakeholderFooter, PrototypeControlButton } from "../StakeholderFooter";
 
 function cn(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
@@ -74,7 +75,32 @@ function CroReviewContent() {
   const [controls, setControls] = useState("");
   const [mitigations, setMitigations] = useState("");
   const [additionalAssessment, setAdditionalAssessment] = useState("");
+  const [submitted, setSubmitted] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  const handleSubmitAssessment = () => {
+    if (typeof window !== "undefined") {
+      const croAssessment = {
+        ...(reviewData || {}),
+        riskId,
+        ownerId,
+        riskName: reviewData?.riskName || RISK_NAMES[riskId],
+        ownerName: reviewData?.ownerName || owner.name,
+        likelihood,
+        impact,
+        controls,
+        mitigations,
+        additionalAssessment,
+      };
+      sessionStorage.setItem("croAssessment", JSON.stringify(croAssessment));
+    }
+    setSubmitted(true);
+  };
+
+  const handleContinueAsGC = () => {
+    if (!submitted) handleSubmitAssessment();
+    router.push(`/now/agentic-hero/superhero/writer?risk=${riskId}&owner=${ownerId}`);
+  };
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -128,28 +154,11 @@ function CroReviewContent() {
         </div>
       </div>
 
-      {/* Header */}
-      <div className="border-b border-[#30363d] bg-[#161b22] flex-shrink-0">
-        <div className="mx-auto max-w-4xl px-4 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <DiligentLogo className="h-7 w-auto" />
-                <span className="text-sm font-semibold text-[#f0f6fc]">GRC Command Center</span>
-              </div>
-              <span className="rounded-full border border-[#d29922]/40 bg-[#d29922]/10 px-2 py-0.5 text-[10px] font-medium text-[#d29922]">
-                Chief Risk Officer
-              </span>
-            </div>
-            <Link href="/step-1" className="text-xs text-[#8b949e] hover:text-[#f0f6fc]">
-              Command Center
-            </Link>
-          </div>
-        </div>
-      </div>
+      {/* Main layout: Left rail + content */}
+      <div className="flex-1 flex overflow-hidden min-h-0">
+        <LeftRail actorLabel="Chief Risk Officer" activeWorkflowStep="CRO Review" activeRiskId={riskId} />
 
-      {/* Content */}
-      <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto min-w-0">
         <div className="mx-auto max-w-4xl px-4 py-6">
           <h1 className="text-xl font-semibold text-[#f0f6fc] mb-2">Risk Owner Investigation Review</h1>
           <p className="text-sm text-[#8b949e] mb-6">
@@ -294,35 +303,45 @@ function CroReviewContent() {
               </div>
             </div>
 
-            {/* Next steps */}
+            {/* Next steps — CRO submits and is done */}
             <div className="rounded-xl border border-[#58a6ff]/30 bg-[#58a6ff]/5 p-5">
               <h2 className="text-sm font-medium text-[#58a6ff] uppercase tracking-wider mb-2">Next steps</h2>
               <p className="text-sm text-[#8b949e] mb-4">
-                Your assessment will be passed to the writer to inform the 10-K disclosure draft.
+                Submit your assessment to complete your review. Your assessment will be passed to the writer to inform the 10-K disclosure draft.
               </p>
               <button
-                onClick={() => {
-                  if (typeof window !== "undefined") {
-                    const croAssessment = {
-                      ...(reviewData || {}),
-                      likelihood,
-                      impact,
-                      controls,
-                      mitigations,
-                      additionalAssessment,
-                    };
-                    sessionStorage.setItem("croAssessment", JSON.stringify(croAssessment));
-                  }
-                  router.push(`/now/agentic-hero/superhero/writer?risk=${riskId}&owner=${ownerId}`);
-                }}
-                className="inline-flex items-center gap-2 rounded-lg bg-[#58a6ff] px-4 py-2 text-sm font-medium text-white hover:bg-[#79c0ff] transition-colors"
+                onClick={handleSubmitAssessment}
+                disabled={submitted}
+                className={cn(
+                  "inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors",
+                  submitted
+                    ? "bg-[#3fb950]/20 text-[#3fb950] cursor-default"
+                    : "bg-[#58a6ff] text-white hover:bg-[#79c0ff]"
+                )}
               >
-                Continue to 10-K drafting →
+                {submitted ? (
+                  <>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M20 6L9 17l-5-5" />
+                    </svg>
+                    Assessment submitted
+                  </>
+                ) : (
+                  "Submit assessment"
+                )}
               </button>
             </div>
+
           </div>
         </div>
+        </div>
       </div>
+
+      <StakeholderFooter label="Continue as General Counsel to advance the workflow">
+        <PrototypeControlButton onClick={handleContinueAsGC}>
+          Continue to 10-K drafting →
+        </PrototypeControlButton>
+      </StakeholderFooter>
     </div>
   );
 }

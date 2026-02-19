@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import Link from "next/link";
+import { StakeholderFooter, PrototypeControlLink } from "../StakeholderFooter";
 
 /* ------------------------------------------------------------------ */
 /*  Shared Utilities & Components                                      */
@@ -32,6 +33,8 @@ type WorkflowStage = {
   status: "completed" | "current" | "pending";
   href: string;
 };
+
+const GC_AVATAR_URL = "https://randomuser.me/api/portraits/med/women/65.jpg";
 
 const workflowStages: WorkflowStage[] = [
   { id: "detect", label: "Detect", status: "completed", href: "/step-1" },
@@ -187,7 +190,7 @@ const DETECTED_RISKS: DetectedRiskWithReasoning[] = [
       "Internal: Supplier geographic mapping (8:47 AM)",
     ],
     reasoning:
-      "Escalating tensions in the Taiwan Strait may disrupt semiconductor supply chain. Analysis of supplier contracts shows 47% of chip suppliers have Taiwan-based operations. Cross-referenced with current 10-K which mentions 'general supply chain risks' but does not specifically address semiconductor concentration or geopolitical exposure in Taiwan region.",
+      "Escalating tensions in the Taiwan Strait may disrupt semiconductor supply chain. Analysis of supplier contracts shows 47% of chip suppliers have Taiwan-based operations. Cross-referenced with current 10-K and prior board materials: Q3 minutes referenced Vietnam as diversification target under evaluation. Current 10-K mentions 'general supply chain risks' but does not specifically address semiconductor concentration or geopolitical exposure in Taiwan region.",
     disclosureGap: "No specific disclosure of semiconductor supply concentration or Taiwan geopolitical risk in Item 1A",
   },
   {
@@ -229,6 +232,7 @@ const ACTIVITY_LOG = [
   { time: "7:23 AM", action: "Detected DMA enforcement pattern affecting 3 peer companies" },
   { time: "8:12 AM", action: "Risk Intelligence flagged Taiwan geopolitical news from Reuters" },
   { time: "8:47 AM", action: "Cross-referenced supplier data—47% Taiwan exposure identified" },
+  { time: "8:49 AM", action: "Pulled prior board materials—Q3 minutes cited Vietnam as diversification target" },
   { time: "8:50 AM", action: "Compared against current 10-K Item 1A risk factors" },
   { time: "9:08 AM", action: "Vendor Intelligence detected CloudSecure 8-K filing (ransomware)" },
   { time: "9:12 AM", action: "Identified 3 affected data processing agreements" },
@@ -246,7 +250,7 @@ export default function ReviewerPage() {
   const totalItemsScanned = SOURCES_SCANNED.reduce((sum, s) => sum + s.itemsScanned, 0);
 
   return (
-    <div className="min-h-screen bg-[#0d1117]">
+    <div className="min-h-screen bg-[#0d1117] flex flex-col">
       {/* Prototype Nav - matches main Command Center */}
       <div className="w-full border-b border-[#30363d] bg-[#161b22]">
         <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-3">
@@ -261,7 +265,7 @@ export default function ReviewerPage() {
       </div>
 
       {/* Main Dashboard Wrapper */}
-      <div className="mx-auto w-full max-w-6xl px-6 py-6">
+      <div className="flex-1 mx-auto w-full max-w-6xl px-6 py-6">
         <div className="rounded-3xl border border-[#30363d] bg-[#161b22] shadow-sm">
           {/* TopNav */}
           <div className="border-b border-[#30363d] bg-[#0d1117]/90 px-6 py-4 rounded-t-3xl">
@@ -279,7 +283,7 @@ export default function ReviewerPage() {
                 <Link href="/step-1" className="text-xs text-[#8b949e] hover:text-[#f0f6fc]">
                   ← Back to Dashboard
                 </Link>
-                <div className="h-8 w-8 rounded-full bg-gradient-to-br from-[#58a6ff] to-[#a371f7]" />
+                <img src={GC_AVATAR_URL} alt="General Counsel" className="h-8 w-8 rounded-full object-cover" />
               </div>
             </div>
           </div>
@@ -565,21 +569,18 @@ export default function ReviewerPage() {
               </div>
             </div>
 
-            {/* CTA */}
-            <div className="flex items-center justify-between border-t border-[#30363d] pt-6 mt-8">
-              <Link href="/step-1" className="text-sm text-[#8b949e] hover:text-[#f0f6fc]">
-                ← Back to Dashboard
-              </Link>
-              <Link
-                href="/now/agentic-hero/superhero/coordinator"
-                className="inline-flex items-center gap-2 rounded-lg bg-[#58a6ff] px-4 py-2 text-sm font-medium text-[#0d1117] hover:bg-[#79c0ff]"
-              >
-                Assign owners for investigation →
-              </Link>
-            </div>
           </div>
         </div>
       </div>
+
+      <StakeholderFooter label="Continue as General Counsel to advance the workflow">
+        <Link href="/step-1" className="text-sm text-[#6b7280] hover:text-[#374151]">
+          ← Back to Dashboard
+        </Link>
+        <PrototypeControlLink href="/now/agentic-hero/superhero/coordinator">
+          Assign owners for investigation →
+        </PrototypeControlLink>
+      </StakeholderFooter>
     </div>
   );
 }

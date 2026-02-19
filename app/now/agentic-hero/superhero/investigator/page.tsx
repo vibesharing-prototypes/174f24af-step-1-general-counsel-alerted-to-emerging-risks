@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import Link from "next/link";
+import { StakeholderFooter, PrototypeControlLink } from "../StakeholderFooter";
 
 function cn(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
@@ -34,12 +35,13 @@ const RISK_DETAILS = {
   assignedAt: "9:45 AM",
   dueDate: "Feb 5, 2026",
   summary: "Escalating tensions in the Taiwan Strait may disrupt semiconductor supply chain. Analysis shows 47% of chip suppliers have Taiwan-based operations.",
-  aiAnalysis: `Based on analysis of 2,847 news items, 186 supply chain records, and cross-reference with current 10-K disclosures, I've identified a significant disclosure gap:
+  aiAnalysis: `Based on analysis of 2,847 news items, 186 supply chain records, prior board materials, and cross-reference with current 10-K disclosures, I've identified a significant disclosure gap:
 
 CURRENT STATE:
 - 47% of semiconductor suppliers have Taiwan-based manufacturing
 - 23% of annual chip procurement flows through Taiwan facilities
 - Current 10-K mentions "general supply chain risks" but no geographic specificity
+- Prior board materials (Q3 2025 minutes): Vietnam referenced as diversification target under evaluation; supply chain resilience initiative noted
 
 RISK FACTORS:
 1. Recent military exercises increased shipping disruption risk by 340%
@@ -59,14 +61,15 @@ const AI_GATHERED_CONTEXT = [
 ];
 
 const QUESTIONS_FOR_OWNER = [
-  { id: "q1", question: "Have you begun supplier diversification efforts? If so, what's the timeline?", placeholder: "e.g., We initiated Samsung discussions in Q3 2025..." },
-  { id: "q2", question: "What's the realistic timeline to shift 50% of Taiwan-sourced components to alternatives?", placeholder: "e.g., 18-24 months minimum..." },
-  { id: "q3", question: "Are there any internal initiatives or Board-approved plans that should be mentioned?", placeholder: "e.g., Board approved $15M supply chain resilience investment..." },
+  { id: "q1", question: "Have you begun supplier diversification efforts? If so, what's the timeline?", placeholder: "e.g., Diversification initiatives (including Vietnam) are underway per board discussions; qualification typically 12-18 months..." },
+  { id: "q2", question: "What's the realistic timeline to shift Taiwan-sourced components to alternatives?", placeholder: "e.g., 18-24 months minimum for qualification..." },
+  { id: "q3", question: "Can you validate or add context to what the board has already discussed on diversification?", placeholder: "e.g., Q3 board materials reflected Vietnam evaluation; I'm providing operational context on Taiwan exposure..." },
 ];
 
 const ACTIVITY_LOG = [
   { time: "9:45 AM", action: "Risk assigned by General Counsel to Diana Reyes (VP Supply Chain)" },
   { time: "9:46 AM", action: "AI began gathering context from supply chain systems" },
+  { time: "9:48 AM", action: "Cross-referenced prior board materials — Q3 minutes cited Vietnam as diversification target" },
   { time: "9:50 AM", action: "Identified comparable disclosure language from peer 10-K filings" },
   { time: "9:52 AM", action: "Generated investigation questions based on disclosure requirements" },
 ];
@@ -83,7 +86,7 @@ export default function InvestigatorPage() {
   const canSubmit = allAnswered && severityValidated !== null;
 
   return (
-    <div className="min-h-screen bg-[#0d1117]">
+    <div className="min-h-screen bg-[#0d1117] flex flex-col">
       <div className="w-full border-b border-[#30363d] bg-[#161b22]">
         <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-3">
           <div className="flex items-center gap-4">
@@ -94,7 +97,7 @@ export default function InvestigatorPage() {
         </div>
       </div>
 
-      <div className="mx-auto w-full max-w-6xl px-6 py-6">
+      <div className="flex-1 mx-auto w-full max-w-6xl px-6 py-6">
         <div className="rounded-3xl border border-[#30363d] bg-[#161b22] shadow-sm">
           <div className="border-b border-[#30363d] bg-[#0d1117]/90 px-6 py-4 rounded-t-3xl">
             <div className="flex items-center justify-between">
@@ -253,14 +256,13 @@ export default function InvestigatorPage() {
                   <div className="rounded-xl border border-[#3fb950]/30 bg-[#3fb950]/5 p-4">
                     <div className="text-xs font-medium text-[#3fb950] mb-2">Investigation Complete</div>
                     <p className="text-[10px] text-[#8b949e]">Your context has been added to the risk analysis. The General Counsel will proceed to draft the 10-K disclosure update.</p>
-                    <Link href="/now/agentic-hero/superhero/writer" className="mt-3 inline-flex items-center gap-1 text-xs text-[#58a6ff] hover:underline">Continue to 10-K drafting →</Link>
                   </div>
                 )}
 
                 <div className="rounded-xl border border-[#30363d] bg-[#0d1117] p-4">
                   <div className="text-[10px] font-medium uppercase tracking-wider text-[#484f58] mb-3">Quick Links</div>
                   <div className="space-y-2">
-                    <Link href="/now/agentic-hero/superhero/coordinator" className="block text-xs text-[#58a6ff] hover:underline">← Back to owner assignments</Link>
+                    <Link href="/now/agentic-hero/superhero/coordinator" className="block text-xs text-[#8b949e] hover:text-[#f0f6fc]">← Back to owner assignments</Link>
                     <Link href="/step-1" className="block text-xs text-[#8b949e] hover:text-[#f0f6fc]">← Back to Command Center</Link>
                   </div>
                 </div>
@@ -269,6 +271,17 @@ export default function InvestigatorPage() {
           </div>
         </div>
       </div>
+
+      <StakeholderFooter label={submitted ? "Continue as General Counsel to advance the workflow" : "Submit your investigation above to continue"}>
+        <Link href="/now/agentic-hero/superhero/coordinator" className="text-sm text-[#6b7280] hover:text-[#374151]">
+          ← Back to owner assignments
+        </Link>
+        {submitted && (
+          <PrototypeControlLink href="/now/agentic-hero/superhero/writer">
+            Continue to 10-K drafting →
+          </PrototypeControlLink>
+        )}
+      </StakeholderFooter>
     </div>
   );
 }

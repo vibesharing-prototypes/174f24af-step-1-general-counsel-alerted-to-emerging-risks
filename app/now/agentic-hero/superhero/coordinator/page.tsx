@@ -1,6 +1,9 @@
 "use client";
+
 import React, { useState, useRef } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { StakeholderFooter, PrototypeControlLink } from "../StakeholderFooter";
 
 /* ------------------------------------------------------------------ */
 /*  Shared Utilities & Components                                      */
@@ -12,7 +15,7 @@ function cn(...classes: Array<string | false | null | undefined>) {
 
 function DiligentLogo({ className }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 222 222" xmlns="http://www.w3.org/2000/svg">
+    <svg className={className} viewBox="0 0 222 222" width="28" height="28" xmlns="http://www.w3.org/2000/svg">
       <g>
         <path fill="#EE312E" d="M200.87,110.85c0,33.96-12.19,61.94-33.03,81.28c-0.24,0.21-0.42,0.43-0.66,0.64c-15.5,14.13-35.71,23.52-59.24,27.11l-1.59-1.62l35.07-201.75l1.32-3.69C178.64,30.36,200.87,65.37,200.87,110.85z"/>
         <path fill="#AF292E" d="M142.75,12.83l-0.99,1.47L0.74,119.34L0,118.65c0,0,0-0.03,0-0.06V0.45h85.63c5.91,0,11.64,0.34,17.19,1.01h0.21c14.02,1.66,26.93,5.31,38.48,10.78C141.97,12.46,142.75,12.83,142.75,12.83z"/>
@@ -81,6 +84,7 @@ const AVATARS = {
   "marcus-webb": "https://i.pravatar.cc/150?u=marcus-webb",
   "james-park": "https://i.pravatar.cc/150?u=james-park",
 };
+const GC_AVATAR_URL = "https://randomuser.me/api/portraits/med/women/65.jpg";
 
 const SUGGESTED_OWNERS: SuggestedOwner[] = [
   { id: "sarah-chen", name: "Sarah Chen", title: "Deputy General Counsel", department: "Legal", reason: "Securities law expertise, handles 10-K filings", avatar: "from-[#58a6ff] to-[#a371f7]" },
@@ -96,7 +100,7 @@ const RISKS_TO_ASSIGN: RiskToAssign[] = [
     id: "risk-taiwan",
     name: "Taiwan Strait Geopolitical Tensions",
     severity: "critical",
-    summary: "47% of chip suppliers have Taiwan operations. Escalating tensions may disrupt semiconductor supply chain.",
+    summary: "47% of chip suppliers have Taiwan operations. Escalating tensions may disrupt semiconductor supply chain. Prior board materials referenced Vietnam as diversification target.",
     suggestedOwners: [
       SUGGESTED_OWNERS.find(o => o.id === "diana-reyes")!,
       SUGGESTED_OWNERS.find(o => o.id === "michael-torres")!,
@@ -153,26 +157,41 @@ function OwnerAvatar({ owner, size = "h-8 w-8", className }: { owner: SuggestedO
 /*  Diligent Pinned Prompt Box                                        */
 /* ------------------------------------------------------------------ */
 
-function PinnedPromptBox({ onBulkConfirm, canBulkConfirm }: { onBulkConfirm?: () => void; canBulkConfirm?: boolean }) {
+function PinnedPromptBox({ onBulkConfirm, canBulkConfirm, allAssigned }: { onBulkConfirm?: () => void; canBulkConfirm?: boolean; allAssigned?: boolean }) {
   const [input, setInput] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
+  const router = useRouter();
 
   const bulkConfirmSuggestion = "Confirm all suggested risk owners";
   const suggestions = canBulkConfirm
-    ? [bulkConfirmSuggestion, "Who should review Taiwan risk?", "What's the disclosure timeline?", "Summarize for the board"]
-    : ["Who should review Taiwan risk?", "What's the disclosure timeline?", "Summarize for the board"];
+    ? [bulkConfirmSuggestion, "Confirm everyone", "Who should review Taiwan risk?", "What's the disclosure timeline?", "Summarize for the board"]
+    : allAssigned
+      ? ["View email sent to Diana", "Who should review Taiwan risk?", "What's the disclosure timeline?", "Summarize for the board"]
+      : ["Who should review Taiwan risk?", "What's the disclosure timeline?", "Summarize for the board"];
 
-  const handleSubmit = () => {
+  const handleSubmit = (e?: React.MouseEvent | React.KeyboardEvent) => {
+    e?.preventDefault();
     const trimmed = input.trim();
-    if (trimmed) {
-      const lower = trimmed.toLowerCase();
-      if (canBulkConfirm && (lower.includes("confirm all") || lower.includes("bulk confirm") || lower.includes("accept all"))) {
-        onBulkConfirm?.();
-      } else {
-        // Placeholder - GC could ask other questions (no-op for now)
-      }
-      setInput("");
+    // Empty input + Enter = use default prompt (Confirm all suggested / View email)
+    const effectiveInput = trimmed || (canBulkConfirm ? "Confirm all suggested risk owners" : allAssigned ? "View email sent to Diana" : "");
+    const lower = effectiveInput.toLowerCase();
+    const triggersBulkConfirm = canBulkConfirm && (
+      lower.includes("confirm") ||
+      lower.includes("accept all") ||
+      lower.includes("bulk")
+    );
+    const triggersViewEmail = allAssigned && (
+      lower.includes("view email") ||
+      lower.includes("show email") ||
+      lower.includes("email") ||
+      lower.includes("notification")
+    );
+    if (triggersBulkConfirm) {
+      onBulkConfirm?.();
+    } else if (triggersViewEmail) {
+      router.push("/now/agentic-hero/superhero/owner-investigation/notification?risk=risk-taiwan&owner=diana-reyes");
     }
+    setInput("");
   };
 
   const handleSuggestionClick = (suggestion: string) => {
@@ -180,12 +199,20 @@ function PinnedPromptBox({ onBulkConfirm, canBulkConfirm }: { onBulkConfirm?: ()
       onBulkConfirm();
       return;
     }
+    if (suggestion === "Confirm everyone" && onBulkConfirm) {
+      onBulkConfirm();
+      return;
+    }
+    if (suggestion === "View email sent to Diana" && allAssigned) {
+      router.push("/now/agentic-hero/superhero/owner-investigation/notification?risk=risk-taiwan&owner=diana-reyes");
+      return;
+    }
     setInput(suggestion);
     inputRef.current?.focus();
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-[#0d1117] via-[#0d1117] to-transparent pb-4 pt-8 z-50">
+    <div className="border-t border-[#30363d] bg-[#161b22] py-6 mt-6">
       <div className="mx-auto max-w-4xl px-6">
         {suggestions.length > 0 && !input && (
           <div className="flex items-center gap-2 mb-3 flex-wrap justify-center">
@@ -193,15 +220,22 @@ function PinnedPromptBox({ onBulkConfirm, canBulkConfirm }: { onBulkConfirm?: ()
             {suggestions.map((suggestion, i) => (
               <button
                 key={i}
+                type="button"
                 onClick={() => handleSuggestionClick(suggestion)}
-                className="rounded-full border border-[#30363d] bg-[#21262d] px-3 py-1 text-xs text-[#8b949e] hover:border-[#58a6ff]/50 hover:text-[#f0f6fc] transition-colors"
+                className="rounded-full border border-[#30363d] bg-[#21262d] px-3 py-1 text-xs text-[#8b949e] hover:border-[#58a6ff]/50 hover:text-[#f0f6fc] transition-colors cursor-pointer"
               >
                 {suggestion}
               </button>
             ))}
           </div>
         )}
-        <div className="rounded-2xl border border-[#30363d] bg-[#161b22] p-2 shadow-xl shadow-black/50">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSubmit();
+          }}
+          className="rounded-2xl border border-[#30363d] bg-[#161b22] p-2 shadow-xl shadow-black/50"
+        >
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white flex-shrink-0 p-1.5">
               <svg width="22" height="20" viewBox="0 0 22 20" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-5 w-auto">
@@ -223,16 +257,14 @@ function PinnedPromptBox({ onBulkConfirm, canBulkConfirm }: { onBulkConfirm?: ()
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
               placeholder={canBulkConfirm ? "Confirm all suggested risk owners" : "Ask me anything about these risks..."}
-              className="flex-1 bg-transparent text-sm text-[#f0f6fc] placeholder-[#484f58] focus:outline-none"
+              className="flex-1 bg-transparent text-sm text-[#f0f6fc] placeholder-[#484f58] focus:outline-none min-w-0"
             />
             <button
-              onClick={handleSubmit}
-              disabled={!input.trim()}
+              type="submit"
               className={cn(
-                "flex h-10 w-10 items-center justify-center rounded-xl transition-colors",
-                input.trim() ? "bg-[#58a6ff] text-white hover:bg-[#79c0ff]" : "bg-[#21262d] text-[#484f58]"
+                "flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl transition-colors",
+                input.trim() ? "bg-[#58a6ff] text-white hover:bg-[#79c0ff] cursor-pointer" : "bg-[#21262d] text-[#484f58] cursor-default"
               )}
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -240,7 +272,7 @@ function PinnedPromptBox({ onBulkConfirm, canBulkConfirm }: { onBulkConfirm?: ()
               </svg>
             </button>
           </div>
-        </div>
+        </form>
         <div className="text-center mt-2">
           <span className="text-[10px] text-[#484f58]">
             AI assistant powered by Tambo · Press Enter to send
@@ -259,10 +291,12 @@ function RiskAssignmentCard({
   risk,
   onAssign,
   assignedOwner,
+  onViewVendorList,
 }: {
   risk: RiskToAssign;
   onAssign: (riskId: string, owner: SuggestedOwner) => void;
   assignedOwner?: AssignedOwner | null;
+  onViewVendorList?: () => void;
 }) {
   const recommendedOwner = risk.suggestedOwners[0];
   const [expanded, setExpanded] = useState(false);
@@ -330,6 +364,16 @@ function RiskAssignmentCard({
                   </span>
                 ))}
               </div>
+              {risk.id === "risk-vendor" && onViewVendorList && (
+                <button
+                  onClick={onViewVendorList}
+                  className="mt-3 flex items-center gap-2 rounded-lg border border-[#30363d] bg-[#21262d] px-3 py-1.5 text-xs text-[#8b949e] hover:border-[#58a6ff]/50 hover:text-[#f0f6fc] transition-colors"
+                >
+                  <span>📊</span>
+                  <span>View vendor list</span>
+                  <span className="text-[10px] text-[#6e7681]">Excel</span>
+                </button>
+              )}
             </div>
           </div>
           <div className="flex-shrink-0">
@@ -443,8 +487,16 @@ function RiskAssignmentCard({
 /*  Page Component                                                     */
 /* ------------------------------------------------------------------ */
 
+const VENDOR_LIST_DATA = [
+  { vendor: "CloudSecure Inc.", category: "Data Processing", riskLevel: "High", contract: "DPA-2024-001" },
+  { vendor: "TechVendor LLC", category: "Cloud Infrastructure", riskLevel: "Medium", contract: "MSA-2023-089" },
+  { vendor: "SecureLogix", category: "Logging & Analytics", riskLevel: "Low", contract: "SLA-2024-012" },
+];
+
 export default function CoordinatorPage() {
   const [assignments, setAssignments] = useState<Record<string, AssignedOwner>>({});
+  const [showVendorListModal, setShowVendorListModal] = useState(false);
+  const [show3PMUpsell, setShow3PMUpsell] = useState(false);
 
   const handleAssign = (riskId: string, owner: SuggestedOwner) => {
     setAssignments(prev => ({
@@ -461,21 +513,23 @@ export default function CoordinatorPage() {
   };
 
   const handleBulkConfirm = () => {
-    const newAssignments = { ...assignments };
-    RISKS_TO_ASSIGN.forEach((risk) => {
-      if (!newAssignments[risk.id] && risk.suggestedOwners[0]) {
-        const owner = risk.suggestedOwners[0];
-        newAssignments[risk.id] = {
-          id: owner.id,
-          name: owner.name,
-          title: owner.title,
-          assignedAt: new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }),
-          status: "pending",
-          dueDate: "Feb 5, 2026",
-        };
-      }
+    setAssignments((prev) => {
+      const next = { ...prev };
+      RISKS_TO_ASSIGN.forEach((risk) => {
+        if (!next[risk.id] && risk.suggestedOwners[0]) {
+          const owner = risk.suggestedOwners[0];
+          next[risk.id] = {
+            id: owner.id,
+            name: owner.name,
+            title: owner.title,
+            assignedAt: new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }),
+            status: "pending",
+            dueDate: "Feb 5, 2026",
+          };
+        }
+      });
+      return next;
     });
-    setAssignments(newAssignments);
   };
 
   const assignedCount = Object.keys(assignments).length;
@@ -484,7 +538,7 @@ export default function CoordinatorPage() {
   const canBulkConfirm = unassignedCount > 0;
 
   return (
-    <div className="min-h-screen bg-[#0d1117] pb-28">
+    <div className="min-h-screen bg-[#0d1117] flex flex-col">
       {/* Meta-Prototype-Info blue banner */}
       <div className="border-b-2 border-[#0ea5e9]/40 bg-[#e0f2fe]">
         <div className="border-b border-[#0ea5e9]/30 bg-[#bae6fd] px-4 py-2">
@@ -513,7 +567,8 @@ export default function CoordinatorPage() {
         </div>
       </div>
 
-      <div className="mx-auto w-full max-w-6xl px-6 py-6">
+      <main className="flex-1 min-h-0 overflow-y-auto min-w-0 bg-[#0d1117]">
+      <div className="mx-auto w-full max-w-6xl px-6 py-6 min-h-full">
         <div className="rounded-3xl border border-[#30363d] bg-[#161b22] shadow-sm">
           <div className="border-b border-[#30363d] bg-[#0d1117]/90 px-6 py-4 rounded-t-3xl">
             <div className="flex items-center justify-between">
@@ -530,7 +585,7 @@ export default function CoordinatorPage() {
                 <Link href="/step-1" className="text-xs text-[#8b949e] hover:text-[#f0f6fc]">
                   ← Back to Dashboard
                 </Link>
-                <div className="h-8 w-8 rounded-full bg-gradient-to-br from-[#58a6ff] to-[#a371f7]" />
+                <img src={GC_AVATAR_URL} alt="General Counsel" className="h-8 w-8 rounded-full object-cover" />
               </div>
             </div>
           </div>
@@ -611,8 +666,9 @@ export default function CoordinatorPage() {
               </div>
               {canBulkConfirm && (
                 <button
+                  type="button"
                   onClick={handleBulkConfirm}
-                  className="inline-flex items-center gap-2 rounded-lg bg-[#3fb950] px-4 py-2 text-sm font-medium text-[#0d1117] hover:bg-[#56d364] transition-colors"
+                  className="inline-flex items-center gap-2 rounded-lg bg-[#3fb950] px-4 py-2 text-sm font-medium text-[#0d1117] hover:bg-[#56d364] transition-colors cursor-pointer"
                 >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M20 6L9 17l-5-5" />
@@ -629,11 +685,63 @@ export default function CoordinatorPage() {
                   risk={risk}
                   onAssign={handleAssign}
                   assignedOwner={assignments[risk.id]}
+                  onViewVendorList={risk.id === "risk-vendor" ? () => setShowVendorListModal(true) : undefined}
                 />
               ))}
             </div>
 
-            {assignedCount > 0 && (
+            {allAssigned && (
+              <div className="rounded-xl border border-[#3fb950]/30 bg-[#3fb950]/5 p-5 mb-8">
+                <h3 className="text-sm font-semibold text-[#f0f6fc] mb-4 flex items-center gap-2">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3fb950" strokeWidth="2">
+                    <path d="M20 6L9 17l-5-5" />
+                  </svg>
+                  Notifications sent
+                </h3>
+                <p className="text-xs text-[#8b949e] mb-4">
+                  Risk owners have been notified. Here is the email sent to Diana Reyes (Taiwan Strait risk):
+                </p>
+                <div className="rounded-xl border border-[#30363d] bg-[#161b22] overflow-hidden">
+                  <div className="border-b border-[#30363d] bg-[#0d1117] px-4 py-3">
+                    <div className="flex items-center gap-2 text-[#6e7681] text-xs mb-1">
+                      <span>From:</span>
+                      <span className="text-[#f0f6fc]">GRC Command Center &lt;noreply@diligent.com&gt;</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-[#6e7681] text-xs mb-1">
+                      <span>To:</span>
+                      <span className="text-[#f0f6fc]">Diana Reyes &lt;diana.reyes@company.com&gt;</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-[#6e7681] text-xs">
+                      <span>Subject:</span>
+                      <span className="text-[#f0f6fc] font-medium">Risk investigation required: Taiwan Strait Geopolitical Tensions</span>
+                    </div>
+                  </div>
+                  <div className="p-4 space-y-3">
+                    <p className="text-sm text-[#f0f6fc]">Hi Diana,</p>
+                    <p className="text-sm text-[#8b949e] leading-relaxed">
+                      The General Counsel has assigned you to investigate an emerging risk that requires your domain expertise.
+                      Your input is needed before the team can draft 10-K disclosure updates.
+                    </p>
+                    <div className="rounded-lg border border-[#30363d] bg-[#0d1117] p-3">
+                      <p className="text-[10px] font-medium uppercase tracking-wider text-[#6e7681] mb-0.5">Assigned risk</p>
+                      <p className="text-sm font-semibold text-[#f0f6fc]">Taiwan Strait Geopolitical Tensions</p>
+                    </div>
+                    <p className="text-sm text-[#8b949e] leading-relaxed">
+                      Please review the AI analysis, add context from your expertise, and validate the severity and disclosure recommendations.
+                      The investigation is due by Feb 5, 2026.
+                    </p>
+                    <Link
+                      href="/now/agentic-hero/superhero/owner-investigation/notification?risk=risk-taiwan&owner=diana-reyes"
+                      className="inline-flex items-center gap-2 rounded-lg border-2 border-[#ec4899] bg-[#ec4899]/10 px-4 py-2 text-sm font-semibold text-[#ec4899] hover:bg-[#ec4899]/20 transition-colors"
+                    >
+                      View full notification & continue as Diana →
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {assignedCount > 0 && !allAssigned && (
               <div className="rounded-xl border border-[#58a6ff]/30 bg-[#58a6ff]/5 p-5 mb-8">
                 <div className="flex items-start gap-4">
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#58a6ff]/20">
@@ -645,50 +753,155 @@ export default function CoordinatorPage() {
                   <div className="flex-1">
                     <h3 className="text-sm font-semibold text-[#f0f6fc]">What happens next?</h3>
                     <p className="mt-1 text-xs text-[#8b949e]">
-                      Assigned owners will receive a notification to investigate their assigned risk. They will review
-                      the AI analysis, provide additional context from their domain expertise, and validate the severity
-                      and disclosure recommendations. Once all owners complete their investigation, the workflow continues
-                      to drafting 10-K disclosure updates.
+                      Assigned owners will receive a notification to investigate their assigned risk. Confirm all suggested owners to send notifications.
                     </p>
-                    <div className="mt-3">
-                      <Link href="/now/agentic-hero/superhero/owner-investigation/notification?risk=risk-taiwan&owner=diana-reyes" className="text-xs text-[#58a6ff] hover:underline">
-                        Preview notification → investigation (chat) →
-                      </Link>
-                    </div>
                   </div>
                 </div>
               </div>
             )}
 
             <div className="flex items-center justify-between border-t border-[#30363d] pt-6">
-              <Link href="/now/agentic-hero/superhero/reviewer" className="text-sm text-[#8b949e] hover:text-[#f0f6fc]">
-                ← Back to Detection Sources
-              </Link>
-              <div className="flex items-center gap-3">
-                {allAssigned && (
-                  <span className="text-xs text-[#3fb950] flex items-center gap-1">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M20 6L9 17l-5-5" />
-                    </svg>
-                    All owners assigned
-                  </span>
-                )}
-                <Link
-                  href={allAssigned ? "/now/agentic-hero/superhero/owner-investigation/notification?risk=risk-taiwan&owner=diana-reyes" : "#"}
-                  className={cn(
-                    "inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors",
-                    allAssigned ? "bg-[#58a6ff] text-[#0d1117] hover:bg-[#79c0ff]" : "border border-[#30363d] bg-[#21262d] text-[#8b949e] cursor-not-allowed"
-                  )}
-                >
-                  {allAssigned ? "Continue to owner investigations →" : `Assign ${RISKS_TO_ASSIGN.length - assignedCount} more owners`}
-                </Link>
-              </div>
+              {allAssigned && (
+                <span className="text-xs text-[#3fb950] flex items-center gap-1">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M20 6L9 17l-5-5" />
+                  </svg>
+                  All owners assigned
+                </span>
+              )}
+              {!allAssigned && (
+                <span className="text-xs text-[#8b949e]">
+                  Assign {RISKS_TO_ASSIGN.length - assignedCount} more owners to continue
+                </span>
+              )}
             </div>
+
+            <PinnedPromptBox onBulkConfirm={handleBulkConfirm} canBulkConfirm={canBulkConfirm} allAssigned={allAssigned} />
           </div>
         </div>
       </div>
+      </main>
 
-      <PinnedPromptBox onBulkConfirm={handleBulkConfirm} canBulkConfirm={canBulkConfirm} />
+      {/* In-situ: Vendor list (Excel) → 3PM upsell */}
+      {showVendorListModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={() => setShowVendorListModal(false)}>
+          <div
+            className="w-full max-w-2xl rounded-2xl border border-[#30363d] bg-[#161b22] overflow-hidden shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="border-b border-[#30363d] bg-[#0d1117] px-4 py-3 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-lg">📊</span>
+                <h3 className="text-base font-semibold text-[#f0f6fc]">Vendor list</h3>
+                <span className="rounded border border-[#6e7681] bg-[#21262d] px-1.5 py-0.5 text-[10px] text-[#8b949e]">Excel</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setShow3PMUpsell(true)}
+                  className="rounded-lg border border-[#30363d] bg-[#21262d] px-3 py-1.5 text-xs text-[#8b949e] hover:border-[#58a6ff]/50 hover:text-[#f0f6fc] transition-colors"
+                >
+                  Export
+                </button>
+                <button
+                  onClick={() => setShow3PMUpsell(true)}
+                  className="rounded-lg bg-[#3fb950] px-3 py-1.5 text-xs font-medium text-[#0d1117] hover:bg-[#46c35a] transition-colors"
+                >
+                  + Add vendor
+                </button>
+                <button onClick={() => setShowVendorListModal(false)} className="rounded-lg p-1.5 text-[#8b949e] hover:bg-[#21262d] hover:text-[#f0f6fc]">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                </button>
+              </div>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-[#30363d] bg-[#0d1117]">
+                    <th className="px-4 py-2.5 text-left text-[10px] font-medium uppercase tracking-wider text-[#6e7681]">Vendor</th>
+                    <th className="px-4 py-2.5 text-left text-[10px] font-medium uppercase tracking-wider text-[#6e7681]">Category</th>
+                    <th className="px-4 py-2.5 text-left text-[10px] font-medium uppercase tracking-wider text-[#6e7681]">Risk Level</th>
+                    <th className="px-4 py-2.5 text-left text-[10px] font-medium uppercase tracking-wider text-[#6e7681]">Contract</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {VENDOR_LIST_DATA.map((row, i) => (
+                    <tr
+                      key={i}
+                      className="border-b border-[#30363d] hover:bg-[#21262d]/50 cursor-pointer"
+                      onClick={() => setShow3PMUpsell(true)}
+                    >
+                      <td className="px-4 py-2.5 text-[#f0f6fc]">{row.vendor}</td>
+                      <td className="px-4 py-2.5 text-[#8b949e]">{row.category}</td>
+                      <td className="px-4 py-2.5">
+                        <span className={cn(
+                          "rounded px-2 py-0.5 text-[10px] font-medium",
+                          row.riskLevel === "High" && "bg-[#da3633]/20 text-[#da3633]",
+                          row.riskLevel === "Medium" && "bg-[#d29922]/20 text-[#d29922]",
+                          row.riskLevel === "Low" && "bg-[#3fb950]/20 text-[#3fb950]"
+                        )}>
+                          {row.riskLevel}
+                        </span>
+                      </td>
+                      <td className="px-4 py-2.5 text-[#8b949e]">{row.contract}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="border-t border-[#30363d] px-4 py-2 bg-[#0d1117]">
+              <p className="text-[10px] text-[#6e7681]">Vendor_List_Q1_2026.xlsx · Last saved 9:12 AM</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 3PM in-situ upsell — appears when user interacts with vendor list */}
+      {show3PMUpsell && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-4" onClick={() => setShow3PMUpsell(false)}>
+          <div
+            className="max-w-md rounded-2xl border border-[#30363d] bg-[#161b22] p-6 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mb-4 flex items-center gap-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#3fb950]/20">
+                <span className="text-2xl">🛡️</span>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-[#f0f6fc]">Try Diligent 3PM</h3>
+                <p className="text-xs text-[#8b949e]">Third-Party Risk Management</p>
+              </div>
+            </div>
+            <p className="text-sm text-[#c9d1d9] leading-relaxed mb-5">
+              Managing vendors in Excel? 3PM centralizes screening, due diligence, and AI Media Monitor—so you get real-time alerts (like the CloudSecure breach) instead of manual tracking.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShow3PMUpsell(false)}
+                className="flex-1 rounded-lg border border-[#30363d] bg-[#21262d] px-4 py-2.5 text-sm font-medium text-[#8b949e] hover:border-[#6e7681] hover:text-[#f0f6fc] transition-colors"
+              >
+                Keep using Excel
+              </button>
+              <button
+                onClick={() => { setShow3PMUpsell(false); setShowVendorListModal(false); }}
+                className="flex-1 rounded-lg bg-[#3fb950] px-4 py-2.5 text-sm font-medium text-[#0d1117] hover:bg-[#46c35a] transition-colors"
+              >
+                Try 3PM
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <StakeholderFooter label={allAssigned ? "Continue as General Counsel to advance the workflow" : "Complete owner assignments above to continue"}>
+        <Link href="/now/agentic-hero/superhero/reviewer" className="text-sm text-[#6b7280] hover:text-[#374151]">
+          ← Back to Detection Sources
+        </Link>
+        {allAssigned && (
+          <PrototypeControlLink href="/now/agentic-hero/superhero/owner-investigation/notification?risk=risk-taiwan&owner=diana-reyes">
+            Continue to owner investigation →
+          </PrototypeControlLink>
+        )}
+      </StakeholderFooter>
     </div>
   );
 }

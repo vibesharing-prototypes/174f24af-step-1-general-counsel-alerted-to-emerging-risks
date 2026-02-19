@@ -41,7 +41,7 @@ Revenue Concentration Risk — Our business is subject to significant revenue co
 
 Third-Party Cybersecurity Risk — We rely on third-party service providers for critical business functions. A cybersecurity incident affecting any of our key vendors could disrupt our operations and expose sensitive data.
 
-Supply Chain Concentration — Approximately 68% of our cost of goods sold is tied to two primary suppliers. Approximately 47% of our chip suppliers have Taiwan-based operations, exposing us to geopolitical supply chain disruption risk.
+Supply Chain Concentration — Approximately 68% of our cost of goods sold is tied to two primary suppliers. Approximately 47% of our chip suppliers have Taiwan-based operations, exposing us to geopolitical supply chain disruption risk. We are pursuing supplier diversification initiatives as discussed at the board level; qualification of alternative suppliers typically requires 12-18 months.
 
 Regulatory and Compliance Risks — We are subject to evolving regulatory frameworks including the EU Digital Markets Act. Compliance costs associated with these regulations have not been fully budgeted.`;
 
@@ -169,6 +169,22 @@ export default function FinisherPage() {
               Begin filing prep
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
             </button>
+          </div>
+
+          <div className="mt-8 rounded-xl border border-[#58a6ff]/30 bg-[#58a6ff]/5 p-5">
+            <p className="text-sm text-[#c9d1d9] leading-relaxed mb-3">
+              <span className="font-medium text-[#f0f6fc]">Map leadership and subsidiary structure</span> for your Vietnamese entities (and other subsidiaries) before the next filing—who&apos;s in charge, what&apos;s registered where, and how it aligns with your attestation policies.
+            </p>
+            <p className="text-sm text-[#c9d1d9] leading-relaxed mb-4">
+              With Diligent Entities, you can do this in minutes instead of hours—automatically sync org structure with Policy Manager and keep regulatory filings current.
+            </p>
+            <a
+              href="#"
+              className="inline-flex items-center gap-2 rounded-lg bg-[#58a6ff] px-4 py-2 text-sm font-medium text-white hover:bg-[#79c0ff] transition-colors"
+            >
+              Start your 90-day full feature trial now
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+            </a>
           </div>
         </AgentPageShell>
       </main>
