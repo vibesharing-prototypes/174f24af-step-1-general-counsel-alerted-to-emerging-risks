@@ -1,142 +1,186 @@
 "use client";
 
+import React from "react";
 import Link from "next/link";
 
-const steps = [
+const sections = [
   {
-    id: 1,
-    title: "GC Alerted to Emerging Risks",
-    description: "General Counsel opens Command Center and sees agents have detected new risks not captured in Board materials or regulatory filings.",
-    status: "complete" as const,
-    href: "/gc-commandcenter",
+    heading: "General Counsel",
+    steps: [
+      {
+        id: 1,
+        title: "GC Alerted to Emerging Risks",
+        description: "Command Center — agents have detected new risks not captured in Board materials or filings.",
+        href: "/gc-commandcenter",
+      },
+      {
+        id: 2,
+        title: "Review Detection Sources",
+        description: "GC reviews what agents scanned and where the emerging risks originated.",
+        href: "/superhero/reviewer",
+      },
+      {
+        id: 3,
+        title: "Assign Risk Owners",
+        description: "GC assigns owners to each detected risk and kicks off investigation workflows.",
+        href: "/superhero/coordinator",
+      },
+    ],
   },
   {
-    id: 2,
-    title: "Review Detection Sources",
-    description: "GC reviews what agents scanned and where the emerging risks originated from.",
-    status: "complete" as const,
-    href: "/superhero/reviewer",
+    heading: "Risk Owner & CRO",
+    steps: [
+      {
+        id: 4,
+        title: "Owner Investigation Notification",
+        description: "Diana Reyes receives an email notification to investigate Taiwan Strait risk.",
+        href: "/superhero/owner-investigation/notification?risk=risk-taiwan&owner=diana-reyes",
+      },
+      {
+        id: 5,
+        title: "Owner Investigation",
+        description: "Risk owner investigates the risk, provides context, validates severity.",
+        href: "/superhero/owner-investigation?risk=risk-taiwan&owner=diana-reyes",
+      },
+      {
+        id: 6,
+        title: "CRO Review",
+        description: "Chief Risk Officer reviews the owner's findings and adds assessment.",
+        href: "/superhero/cro-review?risk=risk-taiwan&owner=diana-reyes",
+      },
+    ],
   },
   {
-    id: 3,
-    title: "Assign Risk Owners",
-    description: "GC assigns owners to each detected risk and kicks off investigation workflows.",
-    status: "complete" as const,
-    href: "/superhero/coordinator",
+    heading: "General Counsel — Drafting & Review",
+    steps: [
+      {
+        id: 7,
+        title: "Draft 10-K Risk Disclosures",
+        description: "AI-assisted drafting of updated risk disclosure language for all 3 risks.",
+        href: "/superhero/writer",
+      },
+      {
+        id: 8,
+        title: "GC Review & Feedback",
+        description: "GC reviews the 10-K and ERM deck, then creates a Context Packet.",
+        href: "/superhero/gc-review-feedback",
+      },
+      {
+        id: 9,
+        title: "Context Packet",
+        description: "Build a Context Packet with peer filings, transcripts, news, and Q&A prep.",
+        href: "/superhero/context-packet",
+      },
+    ],
   },
   {
-    id: 4,
-    title: "Risk Owner Investigation",
-    description: "Risk managers investigate individual risks and provide context and recommendations.",
-    status: "complete" as const,
-    href: "/superhero/owner-investigation/notification?risk=risk-taiwan&owner=diana-reyes",
+    heading: "Data Room & CEO Approval",
+    steps: [
+      {
+        id: 10,
+        title: "Diligent Data Room",
+        description: "View the Context Packet and official documents in the Data Room.",
+        href: "/superhero/data-room",
+      },
+      {
+        id: 11,
+        title: "Taiwan Strait — Detail",
+        description: "Drill into the Taiwan Strait context packet files.",
+        href: "/superhero/data-room/taiwan-strait",
+      },
+      {
+        id: 12,
+        title: "CEO Notification",
+        description: "CEO receives consolidated notification for all undisclosed risks.",
+        href: "/superhero/ceo-review/notification",
+      },
+      {
+        id: 13,
+        title: "CEO Approval",
+        description: "CEO reviews and approves all disclosures.",
+        href: "/superhero/ceo-review",
+      },
+    ],
   },
   {
-    id: 5,
-    title: "Update 10K Risk Disclosure",
-    description: "Legal team updates regulatory filings based on investigation findings.",
-    status: "complete" as const,
-    href: "/superhero/writer",
-  },
-  {
-    id: 6,
-    title: "EDGAR Approval",
-    description: "GC approves EDGAR submission in Command Center after CEO approval.",
-    status: "complete" as const,
-    href: "/gc-commandcenter?ceo_approved=1",
-  },
-  {
-    id: 7,
-    title: "GC Post-Review (Legal Review)",
-    description: "Disclosure in legal review—review team feedback, finalize, and route to CEO for approval.",
-    status: "complete" as const,
-    href: "/gc-post-review",
+    heading: "Finalize",
+    steps: [
+      {
+        id: 14,
+        title: "EDGAR Approval",
+        description: "GC approves EDGAR submission in Command Center after CEO approval.",
+        href: "/gc-commandcenter?ceo_approved=1",
+      },
+      {
+        id: 15,
+        title: "GC Post-Review",
+        description: "Disclosure in legal review — review feedback, finalize, route to CEO.",
+        href: "/gc-post-review",
+      },
+    ],
   },
 ];
 
 export default function PrototypeIndex() {
   return (
-    <div className="min-h-screen bg-[#0d1117] text-[#f0f6fc]">
-      {/* Header */}
-      <header className="border-b border-[#30363d] bg-[#161b22]">
-        <div className="mx-auto max-w-4xl px-6 py-8">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-              </svg>
-            </div>
-            <div>
-              <h1 className="text-2xl font-semibold">GC Emerging Risk Response</h1>
-              <p className="text-sm text-[#8b949e]">Multi-step workflow prototype</p>
-            </div>
-          </div>
-          <p className="text-[#8b949e] leading-relaxed">
-            This prototype demonstrates the General Counsel&apos;s workflow when AI agents detect 
-            emerging risks that need to be addressed in Board materials and regulatory filings.
+    <div className="min-h-screen bg-[#f9fafb] text-[#111827]">
+      <header className="border-b border-[#e5e7eb] bg-white">
+        <div className="mx-auto max-w-3xl px-6 py-8">
+          <p className="text-xs font-medium uppercase tracking-widest text-[#6b7280] mb-2">
+            Prototype Navigation — Not Part of Demo
+          </p>
+          <h1 className="text-xl font-semibold text-[#111827]">
+            GC Emerging Risk Response — Page Index
+          </h1>
+          <p className="text-sm text-[#6b7280] mt-2 leading-relaxed">
+            Jump to any page in the prototype. Use this as a cheat sheet to skip
+            ahead or revisit a specific step without clicking through the full flow.
           </p>
         </div>
       </header>
 
-      {/* Steps */}
-      <main className="mx-auto max-w-4xl px-6 py-8">
-        <h2 className="text-lg font-medium mb-6 text-[#8b949e]">Workflow Steps</h2>
-        <div className="space-y-4">
-          {steps.map((step) => (
-            <div
-              key={step.id}
-              className={`rounded-lg border ${
-                step.status === "complete"
-                  ? "border-[#238636] bg-[#161b22]"
-                  : "border-[#30363d] bg-[#0d1117]"
-              }`}
-            >
-              {step.status === "complete" ? (
-                <Link href={step.href} className="block p-5 hover:bg-[#21262d] transition-colors rounded-lg">
-                  <div className="flex items-start gap-4">
-                    <div className="flex-shrink-0 h-8 w-8 rounded-full bg-[#238636] flex items-center justify-center text-sm font-medium">
-                      {step.id}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-medium text-[#f0f6fc]">{step.title}</h3>
-                        <span className="text-xs px-2 py-0.5 rounded-full bg-[#238636]/20 text-[#3fb950]">
-                          Ready
-                        </span>
-                      </div>
-                      <p className="text-sm text-[#8b949e] mt-1">{step.description}</p>
-                    </div>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8b949e" strokeWidth="2">
-                      <path d="M9 18l6-6-6-6" />
-                    </svg>
+      <main className="mx-auto max-w-3xl px-6 py-8 space-y-8">
+        {sections.map((section) => (
+          <div key={section.heading}>
+            <h2 className="text-[11px] font-semibold uppercase tracking-wider text-[#9ca3af] mb-3">
+              {section.heading}
+            </h2>
+            <div className="rounded-lg border border-[#e5e7eb] bg-white divide-y divide-[#f3f4f6] overflow-hidden">
+              {section.steps.map((step) => (
+                <Link
+                  key={step.id}
+                  href={step.href}
+                  className="flex items-center gap-4 px-5 py-3.5 hover:bg-[#f9fafb] transition-colors group"
+                >
+                  <span className="flex-shrink-0 h-7 w-7 rounded-full bg-[#f3f4f6] flex items-center justify-center text-xs font-medium text-[#6b7280] group-hover:bg-[#e5e7eb] transition-colors">
+                    {step.id}
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-sm font-medium text-[#111827] group-hover:text-[#2563eb] transition-colors">
+                      {step.title}
+                    </h3>
+                    <p className="text-xs text-[#9ca3af] mt-0.5 truncate">{step.description}</p>
                   </div>
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#d1d5db"
+                    strokeWidth="2"
+                    className="flex-shrink-0 group-hover:stroke-[#2563eb] transition-colors"
+                  >
+                    <path d="M9 18l6-6-6-6" />
+                  </svg>
                 </Link>
-              ) : (
-                <div className="p-5 opacity-50">
-                  <div className="flex items-start gap-4">
-                    <div className="flex-shrink-0 h-8 w-8 rounded-full bg-[#30363d] flex items-center justify-center text-sm font-medium text-[#8b949e]">
-                      {step.id}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-medium text-[#8b949e]">{step.title}</h3>
-                        <span className="text-xs px-2 py-0.5 rounded-full bg-[#30363d] text-[#8b949e]">
-                          Coming soon
-                        </span>
-                      </div>
-                      <p className="text-sm text-[#484f58] mt-1">{step.description}</p>
-                    </div>
-                  </div>
-                </div>
-              )}
+              ))}
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
 
-        {/* Footer */}
-        <div className="mt-12 pt-8 border-t border-[#30363d] text-center">
-          <p className="text-sm text-[#484f58]">
-            Prototype built with Next.js • Hosted on VibeSharing
+        <div className="pt-6 border-t border-[#e5e7eb] text-center">
+          <p className="text-xs text-[#d1d5db]">
+            Prototype built with Next.js · Hosted on VibeSharing
           </p>
         </div>
       </main>
