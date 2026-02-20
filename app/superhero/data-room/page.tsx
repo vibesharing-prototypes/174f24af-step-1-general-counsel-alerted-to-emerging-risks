@@ -408,19 +408,14 @@ function DataRoomContent() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {CONTEXT_PACKETS.map((packet) => {
                   const isClickable = packet.href !== null;
-                  const Wrapper = isClickable ? Link : "div";
-                  const wrapperProps = isClickable ? { href: packet.href! } : {};
-                  return (
-                    <Wrapper
-                      key={packet.id}
-                      {...wrapperProps}
-                      className={cn(
-                        "rounded-lg border p-4 transition-all",
-                        isClickable
-                          ? "border-[#d1d5db] bg-white hover:border-[#3b82f6] hover:shadow-md cursor-pointer"
-                          : "border-[#e5e7eb] bg-[#f9fafb] opacity-75 cursor-default"
-                      )}
-                    >
+                  const cardClass = cn(
+                    "rounded-lg border p-4 transition-all",
+                    isClickable
+                      ? "border-[#d1d5db] bg-white hover:border-[#3b82f6] hover:shadow-md cursor-pointer"
+                      : "border-[#e5e7eb] bg-[#f9fafb] opacity-75 cursor-default"
+                  );
+                  const inner = (
+                    <>
                       <div className="flex items-start justify-between mb-3">
                         <svg className="w-8 h-8 text-[#d29922]" fill="currentColor" viewBox="0 0 24 24">
                           <path d="M10 4H4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V8a2 2 0 00-2-2h-8l-2-2z" />
@@ -435,7 +430,12 @@ function DataRoomContent() {
                       <h3 className="text-sm font-semibold text-[#111827] mb-1">{packet.riskLabel}</h3>
                       <p className="text-xs text-[#6b7280]">{packet.fileCount} files &middot; {packet.lastModified}</p>
                       {!isClickable && <p className="text-[10px] text-[#9ca3af] mt-2 italic">Coming soon</p>}
-                    </Wrapper>
+                    </>
+                  );
+                  return isClickable ? (
+                    <Link key={packet.id} href={packet.href!} className={cardClass}>{inner}</Link>
+                  ) : (
+                    <div key={packet.id} className={cardClass}>{inner}</div>
                   );
                 })}
               </div>
