@@ -328,7 +328,7 @@ function InlineAssignmentCard({
             </div>
           </div>
           <a 
-            href="/now/agentic-hero/superhero/coordinator"
+            href="/superhero/coordinator"
             className="ml-auto rounded-lg border border-[#30363d] bg-[#21262d] px-3 py-1.5 text-[11px] text-[#f0f6fc] hover:bg-[#30363d]"
           >
             View Details →
@@ -417,7 +417,7 @@ function InlineAssignmentCard({
 
       <div className="px-4 py-3 border-t border-[#30363d] bg-[#0d1117]/30 flex items-center justify-between">
         <a 
-          href="/now/agentic-hero/superhero/coordinator"
+          href="/superhero/coordinator"
           className="text-[11px] text-[#58a6ff] hover:underline"
         >
           Deep dive in Coordinator →
@@ -2437,13 +2437,13 @@ Regulatory and Compliance Risks — We are subject to evolving regulatory framew
               </div>
               <div className="flex items-center gap-2">
                 <Link
-                  href="/now/agentic-hero/superhero/reviewer"
+                  href="/superhero/reviewer"
                   className="inline-flex items-center rounded-lg border border-[#58a6ff]/50 bg-[#58a6ff]/10 px-3 py-2 text-xs font-medium text-[#58a6ff] hover:bg-[#58a6ff]/20 transition-colors"
                 >
                   Review detection sources
                 </Link>
                 <Link
-                  href="/now/agentic-hero/superhero/coordinator"
+                  href="/superhero/coordinator"
                   className="inline-flex items-center gap-2 rounded-lg bg-[#58a6ff] px-4 py-2.5 text-sm font-medium text-white hover:bg-[#79b8ff] transition-colors"
                 >
                   Assign Owners
@@ -2482,13 +2482,13 @@ Regulatory and Compliance Risks — We are subject to evolving regulatory framew
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
                       <Link
-                        href="/now/agentic-hero/superhero/coordinator"
+                        href="/superhero/coordinator"
                         className="inline-flex items-center rounded-lg border border-[#58a6ff]/50 bg-transparent px-3 py-1.5 text-xs font-medium text-[#58a6ff] hover:bg-[#58a6ff]/10 transition-colors"
                       >
                         View Details
                       </Link>
                       <Link
-                        href="/now/agentic-hero/superhero/coordinator"
+                        href="/superhero/coordinator"
                         className="inline-flex items-center rounded-lg bg-[#58a6ff] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#79b8ff] transition-colors"
                       >
                         Draft Update
@@ -2969,7 +2969,7 @@ function PageContent({ hasTamboProvider = false }: { hasTamboProvider?: boolean 
 
   const handleConfirmAssignments = (assignments: Record<string, string>) => {
     // Navigate to coordinator page to complete the assign-owners workflow
-    router.push("/now/agentic-hero/superhero/coordinator");
+    router.push("/superhero/coordinator");
   };
 
   const handlePromptSubmit = (message: string) => {

@@ -279,7 +279,7 @@ export default function GcPostReviewPage() {
                   </span>
                 </div>
                 <Link
-                  href="/now/agentic-hero/superhero/gc-review/notification"
+                  href="/superhero/gc-review/notification"
                   className="text-xs font-medium text-[#58a6ff] hover:text-[#79c0ff] hover:underline"
                 >
                   Review team feedback →
@@ -304,7 +304,7 @@ export default function GcPostReviewPage() {
                       <span className="text-sm font-medium text-[#f0f6fc]">{risk.label}</span>
                     </div>
                     <Link
-                      href={`/now/agentic-hero/superhero/writer?risk=${risk.id}&owner=${risk.owner}`}
+                      href={`/superhero/writer?risk=${risk.id}&owner=${risk.owner}`}
                       className="text-xs font-medium text-[#58a6ff] hover:text-[#79c0ff] hover:underline shrink-0"
                     >
                       View disclosure draft →
@@ -379,13 +379,13 @@ export default function GcPostReviewPage() {
           <div className="flex items-center gap-2 mb-3 flex-wrap justify-center">
             <span className="text-[10px] text-[#6e7681]">Advance:</span>
             <Link
-              href="/now/agentic-hero/superhero/gc-review/notification"
+              href="/superhero/gc-review/notification"
               className="rounded-full border border-[#30363d] bg-[#21262d] px-3 py-1 text-xs text-[#8b949e] hover:border-[#58a6ff]/50 hover:text-[#f0f6fc] transition-colors"
             >
               Review team feedback
             </Link>
             <Link
-              href="/now/agentic-hero/superhero/ceo-review/notification"
+              href="/superhero/ceo-review/notification"
               className="rounded-full border border-[#58a6ff]/50 bg-[#58a6ff]/10 px-3 py-1 text-xs font-medium text-[#58a6ff] hover:bg-[#58a6ff]/20 transition-colors"
             >
               Finalize and send to CEO →
