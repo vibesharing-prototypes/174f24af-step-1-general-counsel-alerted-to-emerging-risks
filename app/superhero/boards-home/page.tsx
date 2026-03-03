@@ -374,11 +374,11 @@ export default function BoardsHomePage() {
         </div>
       </header>
 
-      <div className="flex flex-1 min-h-0">
+      <div className="flex flex-1 overflow-y-auto">
         {/* ------------------------------------------------------------------ */}
         {/*  Left Sidebar                                                       */}
         {/* ------------------------------------------------------------------ */}
-        <aside className="w-[210px] flex-shrink-0 bg-white border-r border-[#e2e5e9] flex flex-col overflow-y-auto">
+        <aside className="w-[210px] flex-shrink-0 bg-white border-r border-[#e2e5e9] flex flex-col self-stretch">
           <div className="px-4 py-4 flex items-center gap-2">
             <div className="flex h-7 w-7 items-center justify-center rounded bg-[#2563eb]">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /></svg>
@@ -418,7 +418,7 @@ export default function BoardsHomePage() {
         {/* ------------------------------------------------------------------ */}
         {/*  Main Content                                                       */}
         {/* ------------------------------------------------------------------ */}
-        <main className="flex-1 overflow-y-auto min-w-0">
+        <main className="flex-1 min-w-0">
           <div className="max-w-[780px] mx-auto px-6 py-6 space-y-5">
 
             {/* Search bar */}
@@ -528,7 +528,7 @@ export default function BoardsHomePage() {
         {/* ------------------------------------------------------------------ */}
         {/*  Right Sidebar                                                      */}
         {/* ------------------------------------------------------------------ */}
-        <aside className="w-[320px] flex-shrink-0 border-l border-[#e2e5e9] bg-white overflow-y-auto">
+        <aside className="w-[320px] flex-shrink-0 border-l border-[#e2e5e9] bg-white">
           <div className="p-5 space-y-6">
 
             {/* News and Insights */}
