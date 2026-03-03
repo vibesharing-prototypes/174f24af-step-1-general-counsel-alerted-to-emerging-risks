@@ -571,7 +571,7 @@ function PinnedPromptBox({
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-              placeholder="Ask me anything about these risks..."
+              placeholder="Show me suggested risk owners"
               className="flex-1 bg-transparent text-sm text-[#f0f6fc] placeholder-[#484f58] focus:outline-none"
               disabled={isLoading}
             />
@@ -1002,34 +1002,35 @@ function Card({ children, className }: { children?: React.ReactNode; className?:
   );
 }
 
-function VisionToggle({ vision, onChange, variant = "dark" }: { vision: Vision; onChange: (v: Vision) => void; variant?: "dark" | "light" }) {
+function VisionToggle({ vision, onChange, variant = "dark", activePage = "command-center" }: { vision: Vision; onChange: (v: Vision) => void; variant?: "dark" | "light"; activePage?: "boards-home" | "command-center" }) {
   const isLight = variant === "light";
+  const router = useRouter();
   return (
     <div className={cn(
       "flex items-center gap-1 rounded-xl border p-1",
       isLight ? "border-[#0ea5e9]/40 bg-white" : "border-[#30363d] bg-[#0d1117]"
     )}>
       <button
-        onClick={() => onChange("near-term")}
+        onClick={() => router.push("/superhero/boards-home")}
         className={cn(
           "rounded-lg px-3 py-1.5 text-xs font-medium transition",
-          vision === "near-term"
+          activePage === "boards-home"
             ? isLight ? "bg-[#0ea5e9] text-white" : "bg-[#21262d] text-[#f0f6fc]"
             : isLight ? "text-[#0369a1] hover:bg-[#bae6fd]" : "text-[#8b949e] hover:text-[#f0f6fc]"
         )}
       >
-        Near-term Vision
+        Near-Term: Boards Entry
       </button>
       <button
-        onClick={() => onChange("future")}
+        onClick={() => router.push("/gc-commandcenter")}
         className={cn(
           "rounded-lg px-3 py-1.5 text-xs font-medium transition",
-          vision === "future"
+          activePage === "command-center"
             ? isLight ? "bg-[#a78bfa] text-white" : "bg-[#a371f7]/20 text-[#a371f7]"
             : isLight ? "text-[#0369a1] hover:bg-[#bae6fd]" : "text-[#8b949e] hover:text-[#f0f6fc]"
         )}
       >
-        1 Year+ Vision
+        Full Vision: Command Center
       </button>
     </div>
   );
@@ -1148,13 +1149,9 @@ function IPadFrame({ children }: { children?: React.ReactNode }) {
 function PrototypeNav({ 
   vision, 
   onVisionChange,
-  device,
-  onDeviceChange,
 }: { 
   vision: Vision; 
   onVisionChange: (v: Vision) => void;
-  device: DeviceType;
-  onDeviceChange: (d: DeviceType) => void;
 }) {
   return (
     <div className="border-b-2 border-[#0ea5e9]/40 bg-[#e0f2fe]">
@@ -1165,23 +1162,15 @@ function PrototypeNav({
         </p>
       </div>
 
-      {/* Top bar with scenario description */}
+      {/* Top bar with vision toggle */}
       <div className="w-full border-b border-[#0ea5e9]/20 bg-[#e0f2fe]">
         <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-3 flex-wrap gap-2">
-          <div className="flex items-center gap-4">
-            <span className="text-xs font-medium uppercase tracking-wider text-[#0369a1]">Prototype</span>
-            <span className="text-sm font-semibold text-[#0c4a6e]">Risk Detection → 10K Update → Board Notification</span>
-            <span className="rounded-full border border-[#dc2626]/50 bg-[#fecaca] px-2 py-0.5 text-[10px] font-medium text-[#b91c1c]">
-              Scenario
-            </span>
-          </div>
-          
           <div className="flex items-center gap-4">
             <span className="rounded-full border-2 border-[#0c4a6e] bg-[#7dd3fc]/30 px-3 py-1 text-xs font-semibold text-[#0c4a6e]">
               Viewing as: General Counsel
             </span>
-            <VisionToggle vision={vision} onChange={onVisionChange} variant="light" />
           </div>
+          <VisionToggle vision={vision} onChange={onVisionChange} variant="light" />
         </div>
       </div>
 
@@ -1203,43 +1192,6 @@ function PrototypeNav({
               </p>
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* Device selector */}
-      <div className="flex flex-col items-center gap-3 bg-[#e0f2fe] py-4">
-        <div className="flex items-center gap-2 rounded-xl border border-[#0ea5e9]/40 bg-white p-1 shadow-sm">
-          {[
-            { id: "desktop" as DeviceType, icon: "🖥️", label: "Desktop" },
-            { id: "ipad" as DeviceType, icon: "📱", label: "iPad" },
-            { id: "iphone" as DeviceType, icon: "📱", label: "iPhone" },
-          ].map((d) => (
-            <button
-              key={d.id}
-              onClick={() => onDeviceChange(d.id)}
-              className={cn(
-                "flex items-center gap-2 rounded-lg px-4 py-2 text-sm transition",
-                device === d.id
-                  ? "bg-[#0ea5e9] text-white shadow-sm"
-                  : "text-[#0369a1] hover:bg-[#bae6fd]"
-              )}
-            >
-              <span>{d.icon}</span>
-              <span>{d.label}</span>
-            </button>
-          ))}
-        </div>
-        
-        {/* Tambo prompt hints */}
-        <div className="flex items-center gap-2 text-xs text-[#0369a1]">
-          <span className="rounded bg-[#a78bfa]/30 px-1.5 py-0.5 text-[10px] font-medium text-[#6d28d9]">Live Mode</span>
-          <span>Try:</span>
-          {["draft 10K update", "compare to current disclosures", "notify the board", "who should review this", "show risk timeline"].map((prompt, i) => (
-            <span key={prompt}>
-              <span className="text-[#0c4a6e]">&ldquo;{prompt}&rdquo;</span>
-              {i < 4 && <span className="ml-2 text-[#0ea5e9]/50">•</span>}
-            </span>
-          ))}
         </div>
       </div>
 
@@ -1669,7 +1621,7 @@ function TamboPromptBoxWithHooks({ vision, onOpenCanvas, onFocusChange }: { visi
             onBlur={() => setIsFocused(false)}
             disabled={isLoading}
             className="flex-1 bg-transparent px-2 py-2 text-base text-[#f0f6fc] placeholder:text-[#6e7681] focus:outline-none"
-            placeholder="Ask a question or describe what you need..."
+            placeholder="Show me suggested risk owners"
           />
           {messages.length > 0 && (
             <button
@@ -1848,7 +1800,7 @@ function TamboPromptBoxDemoOnly({ vision, onOpenCanvas, onFocusChange }: { visio
             onBlur={() => setIsFocused(false)}
             disabled={isLoading}
             className="flex-1 bg-transparent px-2 py-2 text-base text-[#f0f6fc] placeholder:text-[#6e7681] focus:outline-none"
-            placeholder="Ask a question or describe what you need..."
+            placeholder="Show me suggested risk owners"
           />
           {messages.length > 0 && (
             <button
@@ -2905,7 +2857,6 @@ function PageContent({ hasTamboProvider = false }: { hasTamboProvider?: boolean 
   const ceoApproved = searchParams.get("ceo_approved") === "1";
   const [edgarApproved, setEdgarApproved] = React.useState(false);
   const [vision, setVision] = React.useState<Vision>("near-term");
-  const [device, setDevice] = React.useState<DeviceType>("desktop");
   const [activityOpen, setActivityOpen] = React.useState(false);
   const [hoveredAgent, setHoveredAgent] = React.useState<AgentStatus | null>(null);
   const [popoverPos, setPopoverPos] = React.useState({ x: 0, y: 0 });
@@ -2922,11 +2873,7 @@ function PageContent({ hasTamboProvider = false }: { hasTamboProvider?: boolean 
   const [showChat, setShowChat] = React.useState(false);
   const chatEndRef = React.useRef<HTMLDivElement>(null);
 
-  const promptSuggestions = [
-    "Assign risks to owners",
-    "Draft 10-K disclosure updates",
-    "Summarize for the board",
-  ];
+  const promptSuggestions: string[] = [];
 
   // Generate assignment suggestions
   const generateAssignmentSuggestions = (): AssignmentSuggestion[] => [
@@ -3093,27 +3040,11 @@ function PageContent({ hasTamboProvider = false }: { hasTamboProvider?: boolean 
           <PrototypeNav 
             vision={vision} 
             onVisionChange={setVision} 
-            device={device}
-            onDeviceChange={setDevice}
           />
           
-          {device === "desktop" ? (
-            <div className="mx-auto w-full max-w-6xl px-6 py-6">
-              <DashboardContent {...dashboardProps} device="desktop" />
-            </div>
-          ) : device === "ipad" ? (
-            <div className="flex justify-center overflow-x-auto bg-[#0d1117] px-4">
-              <IPadFrame>
-                <DashboardContent {...dashboardProps} device="ipad" />
-              </IPadFrame>
-            </div>
-          ) : (
-            <div className="flex justify-center overflow-x-auto bg-[#0d1117] px-4">
-              <IPhoneFrame>
-                <DashboardContent {...dashboardProps} device="iphone" />
-              </IPhoneFrame>
-            </div>
-          )}
+          <div className="mx-auto w-full max-w-6xl px-6 py-6">
+            <DashboardContent {...dashboardProps} device="desktop" />
+          </div>
           
           {/* Pinned Prompt Box - fixed at bottom when no chat; inline when chat active */}
           {!showChat && (
