@@ -107,12 +107,18 @@ const sections = [
     steps: [
       {
         id: 14,
-        title: "EDGAR Approval",
-        description: "GC approves EDGAR submission in Command Center after CEO approval.",
-        href: "/gc-commandcenter?ceo_approved=1",
+        title: "Board Governance Review",
+        description: "Board Director reviews 10-K risk factor update in Boards with GovernAI.",
+        href: "/superhero/board-governance",
       },
       {
         id: 15,
+        title: "GC — Committee Complete",
+        description: "GC sees all committee members reviewed, proceeds to EDGAR submission.",
+        href: "/superhero/gc-committee-complete",
+      },
+      {
+        id: 16,
         title: "GC Post-Review",
         description: "Disclosure in legal review — review feedback, finalize, route to CEO.",
         href: "/gc-post-review",

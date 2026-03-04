@@ -42,7 +42,7 @@ const workflowStages: WorkflowStage[] = [
   { id: "assign", label: "Assign Owners", status: "pending", href: "/superhero/coordinator" },
   { id: "investigate", label: "Investigate", status: "pending", href: "/superhero/investigator" },
   { id: "draft", label: "Draft 10-K", status: "pending", href: "/superhero/writer" },
-  { id: "notify", label: "Notify Board", status: "pending", href: "/gc-commandcenter?ceo_approved=1" },
+  { id: "notify", label: "Notify Board", status: "pending", href: "/superhero/board-governance" },
 ];
 
 /* ------------------------------------------------------------------ */

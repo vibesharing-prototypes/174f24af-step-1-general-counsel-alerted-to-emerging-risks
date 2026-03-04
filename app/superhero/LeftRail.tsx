@@ -33,7 +33,7 @@ const WORKFLOW_STEPS = [
   { label: "CRO Review", href: "/superhero/cro-review" },
   { label: "10-K Draft", href: "/superhero/writer" },
   { label: "Review Feedback", href: "/superhero/gc-review-feedback" },
-  { label: "EDGAR", href: "/gc-commandcenter?ceo_approved=1" },
+  { label: "Board Review", href: "/superhero/board-governance" },
 ];
 
 const NAV_LINKS = [

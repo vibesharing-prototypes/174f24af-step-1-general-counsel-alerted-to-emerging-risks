@@ -155,7 +155,7 @@ function DataRoomSidebar() {
 }
 
 function PromptBox({ onSubmit }: { onSubmit: () => void }) {
-  const [value, setValue] = useState("Send the context packet to everyone in the Crisis Cohort");
+  const [value, setValue] = useState("Send the context packet to everyone in the Disclosure Committee");
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") onSubmit();
@@ -272,7 +272,7 @@ function TaiwanStraitContent() {
             <nav className="flex items-center gap-1.5 text-xs">
               <button className="text-[#3b82f6] hover:underline">My data room / Files</button>
               <span className="text-[#9ca3af]">&gt;</span>
-              <button className="text-[#6b7280] hover:underline">Crisis Cohort</button>
+              <button className="text-[#6b7280] hover:underline">Disclosure Committee</button>
               <span className="text-[#9ca3af]">&gt;</span>
               <Link href="/superhero/data-room" className="text-[#6b7280] hover:underline">Undisclosed Risks</Link>
               <span className="text-[#9ca3af]">&gt;</span>
@@ -390,7 +390,7 @@ function TaiwanStraitContent() {
           ← Back to Undisclosed Risks
         </Link>
         <PrototypeControlButton onClick={handleNotifyCrisisCohort}>
-          Notify Crisis Cohort →
+          Notify Disclosure Committee →
         </PrototypeControlButton>
       </StakeholderFooter>
     </div>

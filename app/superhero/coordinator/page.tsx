@@ -42,7 +42,7 @@ const workflowStages: WorkflowStage[] = [
   { id: "assign", label: "Assign Owners", status: "current", href: "/superhero/coordinator" },
   { id: "investigate", label: "Investigate", status: "pending", href: "/superhero/investigator" },
   { id: "draft", label: "Draft 10-K", status: "pending", href: "/superhero/writer" },
-  { id: "notify", label: "Notify Board", status: "pending", href: "/gc-commandcenter?ceo_approved=1" },
+  { id: "notify", label: "Notify Board", status: "pending", href: "/superhero/board-governance" },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -730,12 +730,6 @@ export default function CoordinatorPage() {
                       Please review the AI analysis, add context from your expertise, and validate the severity and disclosure recommendations.
                       The investigation is due by Feb 5, 2026.
                     </p>
-                    <Link
-                      href="/superhero/owner-investigation/notification?risk=risk-taiwan&owner=diana-reyes"
-                      className="inline-flex items-center gap-2 rounded-lg border-2 border-[#ec4899] bg-[#ec4899]/10 px-4 py-2 text-sm font-semibold text-[#ec4899] hover:bg-[#ec4899]/20 transition-colors"
-                    >
-                      View full notification & continue as Diana →
-                    </Link>
                   </div>
                 </div>
               </div>

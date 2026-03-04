@@ -25,7 +25,7 @@ const workflowStages = [
   { id: "assign", label: "Assign Owners", status: "completed" as const, href: "/superhero/coordinator" },
   { id: "investigate", label: "Investigate", status: "current" as const, href: "/superhero/investigator" },
   { id: "draft", label: "Draft 10-K", status: "pending" as const, href: "/superhero/writer" },
-  { id: "notify", label: "Notify Board", status: "pending" as const, href: "/gc-commandcenter?ceo_approved=1" },
+  { id: "notify", label: "Notify Board", status: "pending" as const, href: "/superhero/board-governance" },
 ];
 
 const RISK_DETAILS = {

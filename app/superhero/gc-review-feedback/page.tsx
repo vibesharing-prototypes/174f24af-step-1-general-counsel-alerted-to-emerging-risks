@@ -159,7 +159,7 @@ function GcReviewFeedbackContent() {
         <div className="px-4 py-2 flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-3">
             <span className="text-xs font-medium uppercase tracking-wider text-[#0369a1]">Prototype</span>
-            <span className="text-sm font-semibold text-[#0c4a6e]">Part 2: Review & Approval</span>
+            <span className="text-sm font-semibold text-[#0c4a6e]">Review & Approval</span>
             <Link href="/superhero/gc-review/notification" className="text-xs font-medium text-[#0369a1] hover:underline">
               ← Notification
             </Link>
@@ -502,11 +502,11 @@ function GcReviewFeedbackContent() {
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-[#f0f6fc]">Create Context Packet</h3>
-                <p className="text-xs text-[#8b949e]">Recommended before sending to Crisis Cohort</p>
+                <p className="text-xs text-[#8b949e]">Recommended before sending to Disclosure Committee</p>
               </div>
             </div>
             <p className="text-sm text-[#c9d1d9] leading-relaxed mb-4">
-              You have reviewed the 10-K filing and ERM deck. Prior to sending to the Crisis Cohort (CEO, CFO, Audit Committee), Diligent recommends creating a Context Packet that will include:
+              You have reviewed the 10-K filing and ERM deck. Prior to sending to the Disclosure Committee (CEO, CFO, Audit Committee), Diligent recommends creating a Context Packet that will include:
             </p>
             <ul className="text-sm text-[#c9d1d9] space-y-2 list-disc list-inside mb-4">
               <li>Peer 10-K filings</li>

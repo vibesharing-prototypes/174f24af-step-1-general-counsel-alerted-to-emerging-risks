@@ -232,8 +232,8 @@ function OwnerInvestigationContent() {
             <div className="mt-3 flex flex-wrap gap-2">
               {[
                 { value: "agree" as const, label: "Agree with CRITICAL" },
-                { value: "upgrade" as const, label: "Should be higher" },
                 { value: "downgrade" as const, label: "Should be lower" },
+                { value: "upgrade" as const, label: "Not a risk" },
               ].map(opt => (
                 <button
                   key={opt.value}
@@ -255,7 +255,7 @@ function OwnerInvestigationContent() {
 
   const handleSeveritySelect = (choice: "agree" | "upgrade" | "downgrade") => {
     setSeverityChoice(choice);
-    const labels = { agree: "Agree with CRITICAL", upgrade: "Should be higher", downgrade: "Should be lower" };
+    const labels = { agree: "Agree with CRITICAL", upgrade: "Not a risk", downgrade: "Should be lower" };
     setMessages(prev => [...prev, {
       id: `u-${Date.now()}`,
       role: "user",

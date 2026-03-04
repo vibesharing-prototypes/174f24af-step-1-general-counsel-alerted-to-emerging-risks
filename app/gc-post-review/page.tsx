@@ -391,7 +391,7 @@ export default function GcPostReviewPage() {
               Finalize and send to CEO →
             </Link>
             <Link
-              href="/gc-commandcenter?ceo_approved=1"
+              href="/superhero/board-governance"
               className="rounded-full border border-[#30363d] bg-[#21262d] px-3 py-1 text-xs text-[#8b949e] hover:border-[#58a6ff]/50 hover:text-[#f0f6fc] transition-colors"
             >
               Summarize for the board

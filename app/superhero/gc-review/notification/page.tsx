@@ -18,7 +18,7 @@ function NotificationContent() {
         <div className="px-4 py-2 flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-3">
             <span className="text-xs font-medium uppercase tracking-wider text-[#0369a1]">Prototype</span>
-            <span className="text-sm font-semibold text-[#0c4a6e]">Part 2: Review & Approval</span>
+            <span className="text-sm font-semibold text-[#0c4a6e]">Review & Approval</span>
           </div>
           <span className="rounded-full border-2 border-[#0c4a6e] bg-[#7dd3fc]/30 px-3 py-1 text-xs font-semibold text-[#0c4a6e]">
             Viewing as: {GC_NAME} (General Counsel)

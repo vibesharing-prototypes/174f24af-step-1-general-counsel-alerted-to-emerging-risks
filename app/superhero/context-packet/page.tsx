@@ -49,7 +49,7 @@ function ContextPacketContent() {
         <div className="px-4 py-2 flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-3">
             <span className="text-xs font-medium uppercase tracking-wider text-[#0369a1]">Prototype</span>
-            <span className="text-sm font-semibold text-[#0c4a6e]">Part 2: Review & Approval</span>
+            <span className="text-sm font-semibold text-[#0c4a6e]">Review & Approval</span>
             <Link href="/superhero/gc-review-feedback" className="text-xs font-medium text-[#0369a1] hover:underline">
               ← Review Feedback
             </Link>
@@ -115,7 +115,7 @@ function ContextPacketContent() {
                     <h2 className="text-xl font-semibold text-[#f0f6fc]">Context Packet is ready</h2>
                   </div>
                   <p className="text-sm text-[#c9d1d9] leading-relaxed mb-6">
-                    Your Context Packet includes peer 10-K filings, earnings call transcripts, related news, Q&A prep, and a draft press release. You can review it now or proceed to notify the Crisis Cohort.
+                    Your Context Packet includes peer 10-K filings, earnings call transcripts, related news, Q&A prep, and a draft press release. You can review it now or proceed to notify the Disclosure Committee.
                   </p>
                   <div className="flex flex-col sm:flex-row gap-3">
                     <Link
@@ -133,7 +133,7 @@ function ContextPacketContent() {
                       onClick={handleNotifyCrisisCohort}
                       className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#3fb950] px-5 py-2.5 text-sm font-semibold text-[#0d1117] hover:bg-[#46c35a] transition-colors"
                     >
-                      Notify Crisis Cohort
+                      Notify Disclosure Committee
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <path d="M5 12h14M12 5l7 7-7 7" />
                       </svg>
@@ -149,7 +149,7 @@ function ContextPacketContent() {
       <StakeholderFooter label="Continue as General Counsel to advance the workflow">
         {!isBuilding && (
           <PrototypeControlButton onClick={handleNotifyCrisisCohort}>
-            Notify Crisis Cohort →
+            Notify Disclosure Committee →
           </PrototypeControlButton>
         )}
       </StakeholderFooter>

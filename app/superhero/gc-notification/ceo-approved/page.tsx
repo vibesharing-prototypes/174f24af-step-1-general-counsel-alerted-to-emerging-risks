@@ -18,7 +18,7 @@ export default function GcNotificationCeoApprovedPage() {
         <div className="px-4 py-2 flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-3">
             <span className="text-xs font-medium uppercase tracking-wider text-[#0369a1]">Prototype</span>
-            <span className="text-sm font-semibold text-[#0c4a6e]">Part 2: CEO Approved → GC Notification</span>
+            <span className="text-sm font-semibold text-[#0c4a6e]">CEO Approved → GC Notification</span>
           </div>
           <span className="rounded-full border-2 border-[#0c4a6e] bg-[#7dd3fc]/30 px-3 py-1 text-xs font-semibold text-[#0c4a6e]">
             Viewing as: {GC_NAME} (General Counsel)
@@ -57,7 +57,7 @@ export default function GcNotificationCeoApprovedPage() {
 
               {/* Diligent notification - iOS style banner */}
               <button
-                onClick={() => router.push("/gc-commandcenter?ceo_approved=1")}
+                onClick={() => router.push("/superhero/board-governance")}
                 className="absolute top-[70px] left-2 right-2 z-30 text-left rounded-2xl border border-white/20 bg-black/70 backdrop-blur-xl overflow-hidden shadow-xl hover:bg-black/80 active:scale-[0.98] transition-transform"
               >
                 <div className="p-3 flex gap-3">
@@ -70,7 +70,7 @@ export default function GcNotificationCeoApprovedPage() {
                       <span className="text-[11px] text-white/60">now</span>
                     </div>
                     <p className="text-[13px] text-white/90 leading-snug">
-                      CEO has approved the 10-K disclosure updates. Agents have prepared the EDGAR package — your approval is all that&apos;s left.
+                      CEO has approved disclosures and wants you to forward to additional committees for review. Tap to see details.
                     </p>
                   </div>
                 </div>

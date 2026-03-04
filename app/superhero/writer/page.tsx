@@ -490,7 +490,7 @@ function WriterContent() {
                         {focusMode ? "Exit Focus mode" : "Enter Focus mode"}
                       </button>
                       <Link
-                        href="/superhero/interstitial"
+                        href="/superhero/gc-review/notification"
                         className="inline-flex items-center gap-2 rounded-lg bg-[#3fb950] px-4 py-2 text-sm font-medium text-[#0d1117] hover:bg-[#46c35a] transition-colors"
                       >
                         Submit draft
@@ -695,7 +695,7 @@ function WriterContent() {
                           {focusMode ? "Exit Focus mode" : "Enter Focus mode"}
                         </button>
                         <Link
-                          href="/superhero/interstitial"
+                          href="/superhero/gc-review/notification"
                           className="flex-1 flex items-center justify-center gap-2 rounded-lg bg-[#3fb950] px-4 py-2 text-sm font-medium text-[#0d1117] hover:bg-[#46c35a] transition-colors"
                         >
                           Submit draft
