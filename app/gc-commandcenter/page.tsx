@@ -1153,54 +1153,66 @@ function PrototypeNav({
   vision: Vision; 
   onVisionChange: (v: Vision) => void;
 }) {
+  const [open, setOpen] = React.useState(true);
   return (
     <div className="border-b-2 border-[#0ea5e9]/40 bg-[#e0f2fe]">
       {/* Explicit label: these controls are NOT part of the prototype */}
-      <div className="border-b border-[#0ea5e9]/30 bg-[#bae6fd] px-4 py-2">
+      <div className="border-b border-[#0ea5e9]/30 bg-[#bae6fd] px-4 py-2 flex items-center justify-between">
         <p className="text-[10px] font-medium uppercase tracking-widest text-[#0369a1]">
           Demo controls — not part of prototype
         </p>
+        <button
+          onClick={() => setOpen(!open)}
+          className="flex items-center gap-1 rounded px-2 py-0.5 text-[10px] font-medium text-[#0369a1] hover:bg-[#7dd3fc]/30 transition-colors"
+        >
+          {open ? "Hide" : "Show"}
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={cn("transition-transform", open ? "" : "rotate-180")}><polyline points="6 9 12 15 18 9" /></svg>
+        </button>
       </div>
 
-      {/* Top bar with vision toggle */}
-      <div className="w-full border-b border-[#0ea5e9]/20 bg-[#e0f2fe]">
-        <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-3 flex-wrap gap-2">
-          <div className="flex items-center gap-4">
-            <span className="rounded-full border-2 border-[#0c4a6e] bg-[#7dd3fc]/30 px-3 py-1 text-xs font-semibold text-[#0c4a6e]">
-              Viewing as: General Counsel
-            </span>
-          </div>
-          <VisionToggle vision={vision} onChange={onVisionChange} variant="light" />
-        </div>
-      </div>
-
-      {/* Scenario context bar */}
-      <div className="w-full border-b border-[#0ea5e9]/20 bg-[#e0f2fe]">
-        <div className="mx-auto max-w-7xl px-4 py-3">
-          <div className="flex items-start gap-3">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#fecaca]">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b91c1c" strokeWidth="2">
-                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-                <path d="M12 9v4M12 17h.01" />
-              </svg>
-            </div>
-            <div className="flex-1">
-              <p className="text-sm text-[#0c4a6e]">
-                <span className="font-medium text-[#075985]">Scenario:</span> The General Counsel opens their GRC Command Center and sees that monitoring agents have detected 
-                emerging risks not captured in upcoming Board materials or regulatory filings. The GC will assess the risks, 
-                coordinate with stakeholders, update 10K risk disclosures, and notify the Board.
-              </p>
+      {open && (
+        <>
+          {/* Top bar with vision toggle */}
+          <div className="w-full border-b border-[#0ea5e9]/20 bg-[#e0f2fe]">
+            <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-3 flex-wrap gap-2">
+              <div className="flex items-center gap-4">
+                <span className="rounded-full border-2 border-[#0c4a6e] bg-[#7dd3fc]/30 px-3 py-1 text-xs font-semibold text-[#0c4a6e]">
+                  Viewing as: General Counsel
+                </span>
+              </div>
+              <VisionToggle vision={vision} onChange={onVisionChange} variant="light" />
             </div>
           </div>
-        </div>
-      </div>
 
-      {/* Prototype boundary label */}
-      <div className="border-t-2 border-[#0ea5e9] bg-[#0c4a6e] px-4 py-2">
-        <p className="text-[10px] font-medium uppercase tracking-widest text-[#7dd3fc]">
-          ↓ Prototype starts below (Diligent logo & GRC Command Center)
-        </p>
-      </div>
+          {/* Scenario context bar */}
+          <div className="w-full border-b border-[#0ea5e9]/20 bg-[#e0f2fe]">
+            <div className="mx-auto max-w-7xl px-4 py-3">
+              <div className="flex items-start gap-3">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#fecaca]">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b91c1c" strokeWidth="2">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                    <path d="M12 9v4M12 17h.01" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm text-[#0c4a6e]">
+                    <span className="font-medium text-[#075985]">Scenario:</span> The General Counsel opens their GRC Command Center and sees that monitoring agents have detected 
+                    emerging risks not captured in upcoming Board materials or regulatory filings. The GC will assess the risks, 
+                    coordinate with stakeholders, update 10K risk disclosures, and notify the Board.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Prototype boundary label */}
+          <div className="border-t-2 border-[#0ea5e9] bg-[#0c4a6e] px-4 py-2">
+            <p className="text-[10px] font-medium uppercase tracking-widest text-[#7dd3fc]">
+              ↓ Prototype starts below (Diligent logo & GRC Command Center)
+            </p>
+          </div>
+        </>
+      )}
     </div>
   );
 }
