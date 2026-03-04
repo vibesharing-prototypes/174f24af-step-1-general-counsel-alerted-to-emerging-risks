@@ -5,22 +5,33 @@ import Link from "next/link";
 
 const sections = [
   {
-    heading: "General Counsel",
+    heading: "Entry Points",
+    steps: [
+      {
+        id: "A",
+        title: "Boards Home (Near-Term Vision)",
+        description: "GC opens the standard Boards system enhanced with the GRC Command Center panel.",
+        href: "/superhero/boards-home",
+      },
+      {
+        id: "B",
+        title: "GRC Command Center (Full Vision)",
+        description: "GC opens the full GRC Command Center — agents have detected emerging risks.",
+        href: "/gc-commandcenter",
+      },
+    ],
+  },
+  {
+    heading: "General Counsel — Detection & Assignment",
     steps: [
       {
         id: 1,
-        title: "GC Alerted to Emerging Risks",
-        description: "Command Center — agents have detected new risks not captured in Board materials or filings.",
-        href: "/gc-commandcenter",
-      },
-      {
-        id: 2,
         title: "Review Detection Sources",
         description: "GC reviews what agents scanned and where the emerging risks originated.",
         href: "/superhero/reviewer",
       },
       {
-        id: 3,
+        id: 2,
         title: "Assign Risk Owners",
         description: "GC assigns owners to each detected risk and kicks off investigation workflows.",
         href: "/superhero/coordinator",
@@ -31,19 +42,19 @@ const sections = [
     heading: "Risk Owner & CRO",
     steps: [
       {
-        id: 4,
+        id: 3,
         title: "Owner Investigation Notification",
         description: "Diana Reyes receives an email notification to investigate Taiwan Strait risk.",
         href: "/superhero/owner-investigation/notification?risk=risk-taiwan&owner=diana-reyes",
       },
       {
-        id: 5,
+        id: 4,
         title: "Owner Investigation",
         description: "Risk owner investigates the risk, provides context, validates severity.",
         href: "/superhero/owner-investigation?risk=risk-taiwan&owner=diana-reyes",
       },
       {
-        id: 6,
+        id: 5,
         title: "CRO Review",
         description: "Chief Risk Officer reviews the owner's findings and adds assessment.",
         href: "/superhero/cro-review?risk=risk-taiwan&owner=diana-reyes",
@@ -54,10 +65,16 @@ const sections = [
     heading: "General Counsel — Drafting & Review",
     steps: [
       {
-        id: 7,
+        id: 6,
         title: "Draft 10-K Risk Disclosures",
         description: "AI-assisted drafting of updated risk disclosure language for all 3 risks.",
-        href: "/superhero/writer",
+        href: "/superhero/writer?risk=risk-taiwan&owner=diana-reyes",
+      },
+      {
+        id: 7,
+        title: "GC Notification — Draft Ready",
+        description: "GC receives notification that the 10-K draft is ready for review.",
+        href: "/superhero/gc-review/notification",
       },
       {
         id: 8,
@@ -97,31 +114,31 @@ const sections = [
       {
         id: 13,
         title: "CEO Approval",
-        description: "CEO reviews and approves all disclosures.",
+        description: "CEO reviews disclosures, approves, and suggests additional committee routing.",
         href: "/superhero/ceo-review",
       },
     ],
   },
   {
-    heading: "Finalize",
+    heading: "Committee Review & Filing",
     steps: [
       {
         id: 14,
-        title: "Board Governance Review",
+        title: "GC Mobile Notification — CEO Approved",
+        description: "GC notified that CEO approved and wants additional committees to review.",
+        href: "/superhero/gc-notification/ceo-approved",
+      },
+      {
+        id: 15,
+        title: "Board Director Reviews in Boards",
         description: "Board Director reviews 10-K risk factor update in Boards with GovernAI.",
         href: "/superhero/board-governance",
       },
       {
-        id: 15,
-        title: "GC — Committee Complete",
-        description: "GC sees all committee members reviewed, proceeds to EDGAR submission.",
-        href: "/superhero/gc-committee-complete",
-      },
-      {
         id: 16,
-        title: "GC Post-Review",
-        description: "Disclosure in legal review — review feedback, finalize, route to CEO.",
-        href: "/gc-post-review",
+        title: "GC — All Committee Members Reviewed",
+        description: "GC sees all committee members reviewed, EDGAR filing package is ready.",
+        href: "/superhero/gc-committee-complete",
       },
     ],
   },
