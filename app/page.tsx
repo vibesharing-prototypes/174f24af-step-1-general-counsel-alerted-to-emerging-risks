@@ -146,21 +146,27 @@ const sections = [
 
 export default function PrototypeIndex() {
   return (
-    <div className="min-h-screen bg-[#f9fafb] text-[#111827]">
-      <header className="border-b border-[#e5e7eb] bg-white">
+    <div className="min-h-screen bg-[#0d1117] text-[#c9d1d9]">
+      <header className="border-b border-[#21262d] bg-[#161b22]">
         <div className="mx-auto max-w-3xl px-6 py-8">
-          <div className="flex items-center gap-3 mb-2">
-            <p className="text-xs font-medium uppercase tracking-widest text-[#6b7280]">
-              Prototype Navigation — Not Part of Demo
-            </p>
-            <Link href="/light" className="inline-flex items-center rounded-full bg-[#fef3c7] px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[#92400e] hover:bg-[#fde68a] transition-colors">
-              Light Mode →
+          <div className="flex items-center gap-3 mb-4">
+            <span className="inline-flex items-center rounded-full bg-[#30363d] px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-[#c9d1d9]">
+              Dark Mode
+            </span>
+            <Link
+              href="/light"
+              className="inline-flex items-center rounded-full bg-white/10 px-3 py-1 text-[11px] font-medium text-[#8b949e] hover:bg-white/20 hover:text-[#f0f6fc] transition-colors"
+            >
+              Switch to Light Mode →
             </Link>
           </div>
-          <h1 className="text-xl font-semibold text-[#111827]">
+          <p className="text-xs font-medium uppercase tracking-widest text-[#8b949e] mb-2">
+            Prototype Navigation — Not Part of Demo
+          </p>
+          <h1 className="text-xl font-semibold text-[#f0f6fc]">
             GC Emerging Risk Response — Page Index
           </h1>
-          <p className="text-sm text-[#6b7280] mt-2 leading-relaxed">
+          <p className="text-sm text-[#8b949e] mt-2 leading-relaxed">
             Jump to any page in the prototype. Use this as a cheat sheet to skip
             ahead or revisit a specific step without clicking through the full flow.
           </p>
@@ -170,33 +176,33 @@ export default function PrototypeIndex() {
       <main className="mx-auto max-w-3xl px-6 py-8 space-y-8">
         {sections.map((section) => (
           <div key={section.heading}>
-            <h2 className="text-[11px] font-semibold uppercase tracking-wider text-[#9ca3af] mb-3">
+            <h2 className="text-[11px] font-semibold uppercase tracking-wider text-[#6e7681] mb-3">
               {section.heading}
             </h2>
-            <div className="rounded-lg border border-[#e5e7eb] bg-white divide-y divide-[#f3f4f6] overflow-hidden">
+            <div className="rounded-lg border border-[#30363d] bg-[#161b22] divide-y divide-[#21262d] overflow-hidden">
               {section.steps.map((step) => (
                 <Link
                   key={step.id}
                   href={step.href}
-                  className="flex items-center gap-4 px-5 py-3.5 hover:bg-[#f9fafb] transition-colors group"
+                  className="flex items-center gap-4 px-5 py-3.5 hover:bg-[#21262d] transition-colors group"
                 >
-                  <span className="flex-shrink-0 h-7 w-7 rounded-full bg-[#f3f4f6] flex items-center justify-center text-xs font-medium text-[#6b7280] group-hover:bg-[#e5e7eb] transition-colors">
+                  <span className="flex-shrink-0 h-7 w-7 rounded-full bg-[#21262d] flex items-center justify-center text-xs font-medium text-[#8b949e] group-hover:bg-[#30363d] transition-colors">
                     {step.id}
                   </span>
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-sm font-medium text-[#111827] group-hover:text-[#2563eb] transition-colors">
+                    <h3 className="text-sm font-medium text-[#f0f6fc] group-hover:text-[#58a6ff] transition-colors">
                       {step.title}
                     </h3>
-                    <p className="text-xs text-[#9ca3af] mt-0.5 truncate">{step.description}</p>
+                    <p className="text-xs text-[#6e7681] mt-0.5 truncate">{step.description}</p>
                   </div>
                   <svg
                     width="16"
                     height="16"
                     viewBox="0 0 24 24"
                     fill="none"
-                    stroke="#d1d5db"
+                    stroke="#484f58"
                     strokeWidth="2"
-                    className="flex-shrink-0 group-hover:stroke-[#2563eb] transition-colors"
+                    className="flex-shrink-0 group-hover:stroke-[#58a6ff] transition-colors"
                   >
                     <path d="M9 18l6-6-6-6" />
                   </svg>
@@ -206,8 +212,8 @@ export default function PrototypeIndex() {
           </div>
         ))}
 
-        <div className="pt-6 border-t border-[#e5e7eb] text-center">
-          <p className="text-xs text-[#d1d5db]">
+        <div className="pt-6 border-t border-[#21262d] text-center">
+          <p className="text-xs text-[#484f58]">
             Prototype built with Next.js · Hosted on VibeSharing
           </p>
         </div>

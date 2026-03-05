@@ -149,20 +149,26 @@ export default function LightModeIndex() {
     <div className="min-h-screen bg-[#f9fafb] text-[#111827]">
       <header className="border-b border-[#e5e7eb] bg-white">
         <div className="mx-auto max-w-3xl px-6 py-8">
-          <div className="flex items-center gap-3 mb-2">
-            <span className="inline-flex items-center rounded-full bg-[#fef3c7] px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[#92400e]">
+          <div className="flex items-center gap-3 mb-4">
+            <span className="inline-flex items-center rounded-full bg-[#f3f4f6] px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-[#374151] border border-[#e5e7eb]">
               Light Mode
             </span>
-            <Link href="/" className="text-[10px] font-medium text-[#6b7280] hover:text-[#2563eb] transition-colors">
-              ← Dark Mode Index
+            <Link
+              href="/"
+              className="inline-flex items-center rounded-full bg-[#1f2937] px-3 py-1 text-[11px] font-medium text-[#9ca3af] hover:bg-[#111827] hover:text-white transition-colors"
+            >
+              Switch to Dark Mode →
             </Link>
           </div>
+          <p className="text-xs font-medium uppercase tracking-widest text-[#6b7280] mb-2">
+            Prototype Navigation — Not Part of Demo
+          </p>
           <h1 className="text-xl font-semibold text-[#111827]">
-            GC Emerging Risk Response — Light Mode Page Index
+            GC Emerging Risk Response — Page Index
           </h1>
           <p className="text-sm text-[#6b7280] mt-2 leading-relaxed">
-            Light-mode variants of every dark-mode page. Same flow and functionality
-            as the original prototype, rendered with a light color scheme.
+            Jump to any page in the prototype. Use this as a cheat sheet to skip
+            ahead or revisit a specific step without clicking through the full flow.
           </p>
         </div>
       </header>
@@ -208,7 +214,7 @@ export default function LightModeIndex() {
 
         <div className="pt-6 border-t border-[#e5e7eb] text-center">
           <p className="text-xs text-[#d1d5db]">
-            Light-mode prototype · Same flow, different palette
+            Prototype built with Next.js · Hosted on VibeSharing
           </p>
         </div>
       </main>
