@@ -108,6 +108,8 @@ export default function BoardGovernancePage() {
   const [notesOpen, setNotesOpen] = useState(true);
   const [aiPanelMode, setAiPanelMode] = useState<"context" | "meeting" | "actions">("context");
   const [markedAsRead, setMarkedAsRead] = useState(false);
+  const [repOpen, setRepOpen] = useState(false);
+  const [govOpen, setGovOpen] = useState(false);
 
   const slide = SLIDES[currentSlide - 1] || SLIDES[0];
   const slideActions = ACTIONS.filter(a => a.sourceSlide === currentSlide);
@@ -297,39 +299,52 @@ export default function BoardGovernancePage() {
 
           {/* Main Slide Viewer */}
           <main style={{ flex: 1, display: "flex", flexDirection: "column", background: "#E8E8E8", padding: 16 }}>
-            {/* Action buttons above the slide */}
+            {/* Action buttons + verification status above the slide */}
             {!markedAsRead ? (
               <div style={{
-                display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 8,
+                display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8,
                 marginBottom: 10
               }}>
-                <button style={{
-                  padding: "7px 14px", borderRadius: 6, fontSize: 12, fontWeight: 500, cursor: "pointer",
-                  background: "#fff", border: "1px solid #D1D5DB", color: "#374151",
-                  display: "flex", alignItems: "center", gap: 6,
-                }}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                  Ask Clarifying Questions
-                </button>
-                <button style={{
-                  padding: "7px 14px", borderRadius: 6, fontSize: 12, fontWeight: 500, cursor: "pointer",
-                  background: "#fff", border: "1px solid #D1D5DB", color: "#374151",
-                  display: "flex", alignItems: "center", gap: 6,
-                }}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-                  Request Edits
-                </button>
-                <button
-                  onClick={handleMarkAsRead}
-                  style={{
+                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  {["Consistency with financial reporting", "Alignment with MD&A commentary", "No conflicts with audited statements", "Peer language benchmarked"].map((check, i) => (
+                    <div key={i} style={{
+                      display: "flex", alignItems: "center", gap: 4, fontSize: 10, color: "#047857",
+                      background: "#ECFDF5", border: "1px solid #A7F3D0", borderRadius: 12, padding: "3px 8px"
+                    }}>
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                      {check}
+                    </div>
+                  ))}
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+                  <button style={{
                     padding: "7px 14px", borderRadius: 6, fontSize: 12, fontWeight: 500, cursor: "pointer",
-                    background: "#059669", border: "1px solid #059669", color: "#fff",
+                    background: "#fff", border: "1px solid #D1D5DB", color: "#374151",
                     display: "flex", alignItems: "center", gap: 6,
-                  }}
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                  Mark as Read / No Changes
-                </button>
+                  }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    Ask Clarifying Questions
+                  </button>
+                  <button style={{
+                    padding: "7px 14px", borderRadius: 6, fontSize: 12, fontWeight: 500, cursor: "pointer",
+                    background: "#fff", border: "1px solid #D1D5DB", color: "#374151",
+                    display: "flex", alignItems: "center", gap: 6,
+                  }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                    Request Edits
+                  </button>
+                  <button
+                    onClick={handleMarkAsRead}
+                    style={{
+                      padding: "7px 14px", borderRadius: 6, fontSize: 12, fontWeight: 500, cursor: "pointer",
+                      background: "#059669", border: "1px solid #059669", color: "#fff",
+                      display: "flex", alignItems: "center", gap: 6,
+                    }}
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    Mark as Read / No Changes
+                  </button>
+                </div>
               </div>
             ) : null}
 
@@ -646,77 +661,8 @@ export default function BoardGovernancePage() {
                           <span style={{ fontSize: 10, padding: "2px 6px", borderRadius: 4, background: "#F5F3FF", color: "#7C3AED", fontWeight: 600 }}>INSIGHTS</span>
                         </div>
 
-                        {/* Reputational Implications */}
+                        {/* Suggested Questions — moved to top */}
                         <div style={{ marginBottom: 20 }}>
-                          <div style={{ fontSize: 11, fontWeight: 600, color: "#DC2626", marginBottom: 8 }}>⚠ REPUTATIONAL IMPLICATIONS</div>
-                          <div style={{
-                            padding: 12, background: "#FEF2F2",
-                            borderRadius: 8, border: "1px solid #FECACA"
-                          }}>
-                            <div style={{ display: "grid", gap: 10 }}>
-                              <div style={{ fontSize: 12, color: "#991B1B", lineHeight: 1.6 }}>
-                                <strong>Investor confidence risk:</strong> Failure to disclose known supply chain concentration may be viewed as a material omission. 3 shareholder advisory firms have flagged semiconductor risk disclosure as a 2026 proxy season focus area.
-                              </div>
-                              <div style={{ fontSize: 12, color: "#991B1B", lineHeight: 1.6 }}>
-                                <strong>Media exposure:</strong> 12 major news outlets have published Taiwan Strait supply chain articles in the last 30 days. Analysts are likely to ask about this on the next earnings call.
-                              </div>
-                              <div style={{ fontSize: 12, color: "#991B1B", lineHeight: 1.6 }}>
-                                <strong>Peer comparison gap:</strong> 4 of 6 comparable companies have already updated their risk factor language for Taiwan exposure. Delayed disclosure may signal governance weakness.
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Governance Implications */}
-                        <div style={{ marginBottom: 20 }}>
-                          <div style={{ fontSize: 11, fontWeight: 600, color: "#1D4ED8", marginBottom: 8 }}>GOVERNANCE IMPLICATIONS</div>
-                          <div style={{
-                            padding: 12, background: "#EFF6FF",
-                            borderRadius: 8, border: "1px solid #BFDBFE"
-                          }}>
-                            <div style={{ display: "grid", gap: 10 }}>
-                              <div style={{ fontSize: 12, color: "#1E40AF", lineHeight: 1.6 }}>
-                                <strong>Board oversight obligation:</strong> The board has a fiduciary duty to ensure material risks are adequately disclosed. Taiwan Strait risk was discussed in Q3 board materials but not reflected in current SEC filings.
-                              </div>
-                              <div style={{ fontSize: 12, color: "#1E40AF", lineHeight: 1.6 }}>
-                                <strong>Disclosure Committee process:</strong> This risk was identified by monitoring agents 18 days ago. Prompt escalation through the Disclosure Committee demonstrates sound governance practices.
-                              </div>
-                              <div style={{ fontSize: 12, color: "#1E40AF", lineHeight: 1.6 }}>
-                                <strong>Regulatory alignment:</strong> SEC has increased scrutiny on geopolitical risk disclosures per recent Staff Legal Bulletins. Updated language aligns with current guidance.
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* AI Verification */}
-                        <div style={{ marginBottom: 20 }}>
-                          <div style={{ fontSize: 11, fontWeight: 600, color: "#059669", marginBottom: 8 }}>✓ VERIFICATION STATUS</div>
-                          <div style={{
-                            padding: 12, background: "#ECFDF5",
-                            borderRadius: 8, border: "1px solid #A7F3D0"
-                          }}>
-                            <div style={{ display: "grid", gap: 8 }}>
-                              {[
-                                "Consistency with financial reporting",
-                                "Alignment with MD&A commentary",
-                                "No conflicts with audited financial statements",
-                                "Peer disclosure language benchmarked"
-                              ].map((check, i) => (
-                                <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "#047857" }}>
-                                  <span style={{
-                                    width: 18, height: 18, borderRadius: "50%", background: "#059669",
-                                    display: "flex", alignItems: "center", justifyContent: "center",
-                                    fontSize: 10, color: "#fff", flexShrink: 0
-                                  }}>✓</span>
-                                  {check}
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Suggested Questions */}
-                        <div>
                           <div style={{ fontSize: 11, fontWeight: 600, color: "#6B7280", marginBottom: 8 }}>SUGGESTED QUESTIONS</div>
                           <div style={{ display: "grid", gap: 8 }}>
                             <div style={{ padding: 10, background: "#F5F3FF", borderRadius: 6, fontSize: 12, color: "#5B21B6", borderLeft: "3px solid #7C3AED", lineHeight: 1.5 }}>
@@ -729,6 +675,72 @@ export default function BoardGovernancePage() {
                               &quot;How does this disclosure language compare to what our outside counsel recommended?&quot;
                             </div>
                           </div>
+                        </div>
+
+                        {/* Reputational Implications — accordion */}
+                        <div style={{ marginBottom: 8 }}>
+                          <button
+                            onClick={() => setRepOpen(!repOpen)}
+                            style={{
+                              width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
+                              padding: "10px 12px", background: "#FEF2F2", borderRadius: repOpen ? "8px 8px 0 0" : 8,
+                              border: "1px solid #FECACA", cursor: "pointer", textAlign: "left"
+                            }}
+                          >
+                            <span style={{ fontSize: 11, fontWeight: 600, color: "#DC2626" }}>⚠ REPUTATIONAL IMPLICATIONS</span>
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: repOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}><polyline points="6 9 12 15 18 9" /></svg>
+                          </button>
+                          {repOpen && (
+                            <div style={{
+                              padding: 12, background: "#FEF2F2",
+                              borderRadius: "0 0 8px 8px", borderLeft: "1px solid #FECACA", borderRight: "1px solid #FECACA", borderBottom: "1px solid #FECACA"
+                            }}>
+                              <div style={{ display: "grid", gap: 10 }}>
+                                <div style={{ fontSize: 12, color: "#991B1B", lineHeight: 1.6 }}>
+                                  <strong>Investor confidence risk:</strong> Failure to disclose known supply chain concentration may be viewed as a material omission. 3 shareholder advisory firms have flagged semiconductor risk disclosure as a 2026 proxy season focus area.
+                                </div>
+                                <div style={{ fontSize: 12, color: "#991B1B", lineHeight: 1.6 }}>
+                                  <strong>Media exposure:</strong> 12 major news outlets have published Taiwan Strait supply chain articles in the last 30 days. Analysts are likely to ask about this on the next earnings call.
+                                </div>
+                                <div style={{ fontSize: 12, color: "#991B1B", lineHeight: 1.6 }}>
+                                  <strong>Peer comparison gap:</strong> 4 of 6 comparable companies have already updated their risk factor language for Taiwan exposure. Delayed disclosure may signal governance weakness.
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Governance Implications — accordion */}
+                        <div style={{ marginBottom: 20 }}>
+                          <button
+                            onClick={() => setGovOpen(!govOpen)}
+                            style={{
+                              width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
+                              padding: "10px 12px", background: "#EFF6FF", borderRadius: govOpen ? "8px 8px 0 0" : 8,
+                              border: "1px solid #BFDBFE", cursor: "pointer", textAlign: "left"
+                            }}
+                          >
+                            <span style={{ fontSize: 11, fontWeight: 600, color: "#1D4ED8" }}>GOVERNANCE IMPLICATIONS</span>
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1D4ED8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: govOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}><polyline points="6 9 12 15 18 9" /></svg>
+                          </button>
+                          {govOpen && (
+                            <div style={{
+                              padding: 12, background: "#EFF6FF",
+                              borderRadius: "0 0 8px 8px", borderLeft: "1px solid #BFDBFE", borderRight: "1px solid #BFDBFE", borderBottom: "1px solid #BFDBFE"
+                            }}>
+                              <div style={{ display: "grid", gap: 10 }}>
+                                <div style={{ fontSize: 12, color: "#1E40AF", lineHeight: 1.6 }}>
+                                  <strong>Board oversight obligation:</strong> The board has a fiduciary duty to ensure material risks are adequately disclosed. Taiwan Strait risk was discussed in Q3 board materials but not reflected in current SEC filings.
+                                </div>
+                                <div style={{ fontSize: 12, color: "#1E40AF", lineHeight: 1.6 }}>
+                                  <strong>Disclosure Committee process:</strong> This risk was identified by monitoring agents 18 days ago. Prompt escalation through the Disclosure Committee demonstrates sound governance practices.
+                                </div>
+                                <div style={{ fontSize: 12, color: "#1E40AF", lineHeight: 1.6 }}>
+                                  <strong>Regulatory alignment:</strong> SEC has increased scrutiny on geopolitical risk disclosures per recent Staff Legal Bulletins. Updated language aligns with current guidance.
+                                </div>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
                     )}

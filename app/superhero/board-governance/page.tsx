@@ -76,7 +76,7 @@ function SentimentIndicator({ sentiment }: { sentiment: Slide["sentiment"] }) {
   if (!sentiment) return null;
   const config = {
     positive: { icon: "↑", color: "#059669", bg: "#ECFDF5", label: "Positive signal" },
-    neutral: { icon: "→", color: "#6B7280", bg: "#F3F4F6", label: "Neutral" },
+    neutral: { icon: "→", color: "#8b949e", bg: "#F3F4F6", label: "Neutral" },
     caution: { icon: "⚠", color: "#D97706", bg: "#FEF3C7", label: "Needs attention" },
   };
   const c = config[sentiment];
@@ -108,6 +108,8 @@ export default function BoardGovernancePage() {
   const [notesOpen, setNotesOpen] = useState(true);
   const [aiPanelMode, setAiPanelMode] = useState<"context" | "meeting" | "actions">("context");
   const [markedAsRead, setMarkedAsRead] = useState(false);
+  const [repOpen, setRepOpen] = useState(false);
+  const [govOpen, setGovOpen] = useState(false);
 
   const slide = SLIDES[currentSlide - 1] || SLIDES[0];
   const slideActions = ACTIONS.filter(a => a.sourceSlide === currentSlide);
@@ -119,13 +121,13 @@ export default function BoardGovernancePage() {
   };
 
   return (
-    <div style={{ minHeight: "100vh", background: "#F3F4F6", display: "flex", flexDirection: "column" }}>
+    <div style={{ minHeight: "100vh", background: "#0d1117", display: "flex", flexDirection: "column" }}>
 
       {/* Board Book Reader Chrome */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", maxWidth: 1400, margin: "0 auto", width: "100%", background: "#fff", boxShadow: "0 0 40px rgba(0,0,0,0.15)" }}>
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", maxWidth: 1400, margin: "0 auto", width: "100%", background: "#161b22", boxShadow: "0 0 40px rgba(0,0,0,0.5)" }}>
         {/* Top Navigation Bar */}
         <header style={{
-          height: 44, background: "#FFFFFF", borderBottom: "1px solid #E5E7EB",
+          height: 44, background: "#161b22", borderBottom: "1px solid #30363d",
           display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 12px",
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -137,19 +139,19 @@ export default function BoardGovernancePage() {
                 <path fill="#D3222A" d="M142.75,12.83L0,118.65v99.27v3.62h85.96c7.61,0,14.94-0.58,21.99-1.66C107.95,219.89,142.75,12.83,142.75,12.83z"/>
               </g>
             </svg>
-            <span style={{ fontSize: 14, fontWeight: 600, color: "#1B2A4A", letterSpacing: "-0.3px" }}>Boards</span>
-            <div style={{ width: 1, height: 16, background: "#E5E7EB", margin: "0 4px" }} />
+            <span style={{ fontSize: 14, fontWeight: 600, color: "#f0f6fc", letterSpacing: "-0.3px" }}>Boards</span>
+            <div style={{ width: 1, height: 16, background: "#30363d", margin: "0 4px" }} />
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <span style={{ fontSize: 13, color: "#374151", fontWeight: 500 }}>Disclosure Committee — Feb 28 Review</span>
+            <span style={{ fontSize: 13, color: "#c9d1d9", fontWeight: 500 }}>Disclosure Committee — Feb 28 Review</span>
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <button style={{ padding: "5px 10px", background: "none", border: "1px solid #E5E7EB", borderRadius: 4, fontSize: 12, color: "#374151", cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}>
+            <button style={{ padding: "5px 10px", background: "none", border: "1px solid #30363d", borderRadius: 4, fontSize: 12, color: "#c9d1d9", cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}>
               <span style={{ fontSize: 12 }}>🖥</span> Present
             </button>
-            <button style={{ padding: "5px 10px", background: "none", border: "1px solid #E5E7EB", borderRadius: 4, fontSize: 12, color: "#374151", cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}>
+            <button style={{ padding: "5px 10px", background: "none", border: "1px solid #30363d", borderRadius: 4, fontSize: 12, color: "#c9d1d9", cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}>
               <span style={{ fontSize: 12 }}>📧</span> Follow
             </button>
             <button
@@ -165,17 +167,17 @@ export default function BoardGovernancePage() {
             >
               <span style={{ fontSize: 10 }}>✦</span> GovernAI
             </button>
-            <div style={{ width: 1, height: 20, background: "#E5E7EB" }} />
-            <button style={{ background: "none", border: "none", cursor: "pointer", fontSize: 14, color: "#6B7280" }}>↗</button>
-            <button style={{ background: "none", border: "none", cursor: "pointer", fontSize: 14, color: "#6B7280" }}>🔍</button>
+            <div style={{ width: 1, height: 20, background: "#30363d" }} />
+            <button style={{ background: "none", border: "none", cursor: "pointer", fontSize: 14, color: "#8b949e" }}>↗</button>
+            <button style={{ background: "none", border: "none", cursor: "pointer", fontSize: 14, color: "#8b949e" }}>🔍</button>
             <div style={{
               width: 18, height: 18, borderRadius: "50%", background: "#059669", color: "#fff",
               fontSize: 10, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center"
             }}>
               ✓
             </div>
-            <button style={{ background: "none", border: "none", cursor: "pointer", fontSize: 14, color: "#6B7280" }}>?</button>
-            <button style={{ background: "none", border: "none", cursor: "pointer", fontSize: 14, color: "#6B7280" }}>⚙</button>
+            <button style={{ background: "none", border: "none", cursor: "pointer", fontSize: 14, color: "#8b949e" }}>?</button>
+            <button style={{ background: "none", border: "none", cursor: "pointer", fontSize: 14, color: "#8b949e" }}>⚙</button>
           </div>
         </header>
 
@@ -183,26 +185,26 @@ export default function BoardGovernancePage() {
         {markedAsRead && (
           <div style={{
             padding: "8px 16px",
-            background: "#ECFDF5", borderBottom: "1px solid #A7F3D0",
+            background: "#052e16", borderBottom: "1px solid #065f46",
             display: "flex", alignItems: "center", justifyContent: "center", gap: 10
           }}>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#34d399" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
             <span style={{ fontSize: 12, fontWeight: 600, color: "#059669" }}>Review Complete — no changes requested</span>
-            <span style={{ fontSize: 12, color: "#047857" }}>·</span>
-            <span style={{ fontSize: 12, color: "#047857" }}>The General Counsel has been notified</span>
+            <span style={{ fontSize: 12, color: "#34d399" }}>·</span>
+            <span style={{ fontSize: 12, color: "#34d399" }}>The General Counsel has been notified</span>
           </div>
         )}
 
         {/* Secondary Toolbar */}
         <div style={{
-          height: 40, background: "#FAFAFA", borderBottom: "1px solid #E5E7EB",
+          height: 40, background: "#1a1f2e", borderBottom: "1px solid #30363d",
           display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 12px",
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-            <button style={{ width: 28, height: 28, background: "none", border: "none", cursor: "pointer", color: "#6B7280", fontSize: 14 }}>☰</button>
-            <button style={{ width: 28, height: 28, background: "none", border: "none", cursor: "pointer", color: "#6B7280", fontSize: 14 }}>↗</button>
-            <button style={{ width: 28, height: 28, background: "none", border: "none", cursor: "pointer", color: "#6B7280", fontSize: 14 }}>👤</button>
-            <button style={{ width: 28, height: 28, background: "none", border: "none", cursor: "pointer", color: "#6B7280", fontSize: 14 }}>🔍</button>
+            <button style={{ width: 28, height: 28, background: "none", border: "none", cursor: "pointer", color: "#8b949e", fontSize: 14 }}>☰</button>
+            <button style={{ width: 28, height: 28, background: "none", border: "none", cursor: "pointer", color: "#8b949e", fontSize: 14 }}>↗</button>
+            <button style={{ width: 28, height: 28, background: "none", border: "none", cursor: "pointer", color: "#8b949e", fontSize: 14 }}>👤</button>
+            <button style={{ width: 28, height: 28, background: "none", border: "none", cursor: "pointer", color: "#8b949e", fontSize: 14 }}>🔍</button>
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
@@ -220,28 +222,28 @@ export default function BoardGovernancePage() {
         {/* Main Content Area */}
         <div style={{ flex: 1, display: "flex" }}>
           {/* Left Sidebar - Navigation */}
-          <aside style={{ width: 220, background: "#FFFFFF", borderRight: "1px solid #E5E7EB", padding: "12px 0", flexShrink: 0 }}>
+          <aside style={{ width: 220, background: "#161b22", borderRight: "1px solid #30363d", padding: "12px 0", flexShrink: 0 }}>
             <div style={{ padding: "0 12px", marginBottom: 16 }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <span style={{ fontSize: 12, fontWeight: 600, color: "#6B7280" }}>Navigation</span>
-                <button style={{ background: "none", border: "none", cursor: "pointer", color: "#9CA3AF" }}>≡</button>
+                <span style={{ fontSize: 12, fontWeight: 600, color: "#8b949e" }}>Navigation</span>
+                <button style={{ background: "none", border: "none", cursor: "pointer", color: "#6e7681" }}>≡</button>
               </div>
             </div>
 
             {viewMode === "prep" && (
-              <div style={{ padding: "8px 12px", background: "#F5F3FF", margin: "0 8px", borderRadius: 8, marginBottom: 12 }}>
+              <div style={{ padding: "8px 12px", background: "#2e1065", margin: "0 8px", borderRadius: 8, marginBottom: 12 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
                   <span style={{ fontSize: 14 }}>✨</span>
-                  <span style={{ fontSize: 13, fontWeight: 600, color: "#5B21B6" }}>Meeting Prep</span>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: "#a78bfa" }}>Meeting Prep</span>
                 </div>
                 <div style={{ display: "grid", gap: 4 }}>
-                  <div style={{ fontSize: 11, color: "#6B7280", display: "flex", justifyContent: "space-between" }}>
+                  <div style={{ fontSize: 11, color: "#8b949e", display: "flex", justifyContent: "space-between" }}>
                     <span>Open Actions</span>
                     <span style={{ fontWeight: 600, color: overdueActions.length > 0 ? "#DC2626" : "#374151" }}>
                       {allOpenActions.length} {overdueActions.length > 0 && `(${overdueActions.length} overdue)`}
                     </span>
                   </div>
-                  <div style={{ fontSize: 11, color: "#6B7280", display: "flex", justifyContent: "space-between" }}>
+                  <div style={{ fontSize: 11, color: "#8b949e", display: "flex", justifyContent: "space-between" }}>
                     <span>AI Verified</span>
                     <span style={{ fontWeight: 600, color: "#059669" }}>3 checks passed</span>
                   </div>
@@ -251,8 +253,8 @@ export default function BoardGovernancePage() {
 
             <div style={{ padding: "0 8px" }}>
               <div style={{
-                padding: "10px 12px", background: "#F3F4F6", borderRadius: 6,
-                fontSize: 12, color: "#374151", fontWeight: 500
+                padding: "10px 12px", background: "#0d1117", borderRadius: 6,
+                fontSize: 12, color: "#c9d1d9", fontWeight: 500
               }}>
                 {MEETING_INFO.title} ({MEETING_INFO.date})
               </div>
@@ -272,20 +274,20 @@ export default function BoardGovernancePage() {
                   }}
                 >
                   <span style={{
-                    width: 20, height: 20, borderRadius: 4, background: "#E5E7EB",
+                    width: 20, height: 20, borderRadius: 4, background: "#30363d",
                     display: "flex", alignItems: "center", justifyContent: "center",
-                    fontSize: 10, fontWeight: 600, color: "#6B7280"
+                    fontSize: 10, fontWeight: 600, color: "#8b949e"
                   }}>
                     {s.id}
                   </span>
-                  <span style={{ fontSize: 11, color: "#374151", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  <span style={{ fontSize: 11, color: "#c9d1d9", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                     {s.title}
                   </span>
                   {s.hasActions && (
                     <span style={{
-                      width: 16, height: 16, borderRadius: "50%", background: "#FEF3C7",
+                      width: 16, height: 16, borderRadius: "50%", background: "#422006",
                       display: "flex", alignItems: "center", justifyContent: "center",
-                      fontSize: 9, fontWeight: 700, color: "#B45309"
+                      fontSize: 9, fontWeight: 700, color: "#fbbf24"
                     }}>
                       {s.actionCount}
                     </span>
@@ -296,45 +298,58 @@ export default function BoardGovernancePage() {
           </aside>
 
           {/* Main Slide Viewer */}
-          <main style={{ flex: 1, display: "flex", flexDirection: "column", background: "#E8E8E8", padding: 16 }}>
-            {/* Action buttons above the slide */}
+          <main style={{ flex: 1, display: "flex", flexDirection: "column", background: "#0d1117", padding: 16 }}>
+            {/* Action buttons + verification status above the slide */}
             {!markedAsRead ? (
               <div style={{
-                display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 8,
+                display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8,
                 marginBottom: 10
               }}>
-                <button style={{
-                  padding: "7px 14px", borderRadius: 6, fontSize: 12, fontWeight: 500, cursor: "pointer",
-                  background: "#fff", border: "1px solid #D1D5DB", color: "#374151",
-                  display: "flex", alignItems: "center", gap: 6,
-                }}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                  Ask Clarifying Questions
-                </button>
-                <button style={{
-                  padding: "7px 14px", borderRadius: 6, fontSize: 12, fontWeight: 500, cursor: "pointer",
-                  background: "#fff", border: "1px solid #D1D5DB", color: "#374151",
-                  display: "flex", alignItems: "center", gap: 6,
-                }}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-                  Request Edits
-                </button>
-                <button
-                  onClick={handleMarkAsRead}
-                  style={{
+                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  {["Consistency with financial reporting", "Alignment with MD&A commentary", "No conflicts with audited statements", "Peer language benchmarked"].map((check, i) => (
+                    <div key={i} style={{
+                      display: "flex", alignItems: "center", gap: 4, fontSize: 10, color: "#34d399",
+                      background: "#052e16", border: "1px solid #065f46", borderRadius: 12, padding: "3px 8px"
+                    }}>
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#34d399" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                      {check}
+                    </div>
+                  ))}
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+                  <button style={{
                     padding: "7px 14px", borderRadius: 6, fontSize: 12, fontWeight: 500, cursor: "pointer",
-                    background: "#059669", border: "1px solid #059669", color: "#fff",
+                    background: "#161b22", border: "1px solid #30363d", color: "#c9d1d9",
                     display: "flex", alignItems: "center", gap: 6,
-                  }}
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                  Mark as Read / No Changes
-                </button>
+                  }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    Ask Clarifying Questions
+                  </button>
+                  <button style={{
+                    padding: "7px 14px", borderRadius: 6, fontSize: 12, fontWeight: 500, cursor: "pointer",
+                    background: "#161b22", border: "1px solid #30363d", color: "#c9d1d9",
+                    display: "flex", alignItems: "center", gap: 6,
+                  }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                    Request Edits
+                  </button>
+                  <button
+                    onClick={handleMarkAsRead}
+                    style={{
+                      padding: "7px 14px", borderRadius: 6, fontSize: 12, fontWeight: 500, cursor: "pointer",
+                      background: "#059669", border: "1px solid #059669", color: "#fff",
+                      display: "flex", alignItems: "center", gap: 6,
+                    }}
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    Mark as Read / No Changes
+                  </button>
+                </div>
               </div>
             ) : null}
 
             <div style={{
-              flex: 1, background: "#FFFFFF", borderRadius: 8, boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+              flex: 1, background: "#161b22", borderRadius: 8, boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
               display: "flex", flexDirection: "column", overflow: "hidden", padding: 32
             }}>
               {/* Slide 2: 10-K Risk Factor Update */}
@@ -342,41 +357,41 @@ export default function BoardGovernancePage() {
                 <>
                   <div style={{ marginBottom: 24 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-                      <p style={{ fontSize: 12, color: "#6B7280", textTransform: "uppercase", letterSpacing: "1px" }}>Item 1A — Risk Factors</p>
-                      <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 12, background: "#FEF3C7", color: "#B45309", fontWeight: 600, border: "1px solid #FDE68A" }}>UPDATED</span>
+                      <p style={{ fontSize: 12, color: "#8b949e", textTransform: "uppercase", letterSpacing: "1px" }}>Item 1A — Risk Factors</p>
+                      <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 12, background: "#422006", color: "#fbbf24", fontWeight: 600, border: "1px solid #92400e" }}>UPDATED</span>
                     </div>
-                    <h1 style={{ fontSize: 28, fontWeight: 700, color: "#1a1a1a", lineHeight: 1.2 }}>
+                    <h1 style={{ fontSize: 28, fontWeight: 700, color: "#f0f6fc", lineHeight: 1.2 }}>
                       Semiconductor Supply Chain and Geopolitical Risks
                     </h1>
                   </div>
 
                   {/* Risk summary cards */}
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16, marginBottom: 28 }}>
-                    <div style={{ padding: 16, background: "#FEF2F2", borderRadius: 12, borderLeft: "4px solid #DC2626" }}>
-                      <div style={{ fontSize: 12, fontWeight: 600, color: "#991B1B", marginBottom: 4 }}>Severity</div>
+                    <div style={{ padding: 16, background: "#3b1219", borderRadius: 12, borderLeft: "4px solid #dc2626" }}>
+                      <div style={{ fontSize: 12, fontWeight: 600, color: "#fca5a5", marginBottom: 4 }}>Severity</div>
                       <div style={{ fontSize: 22, fontWeight: 800, color: "#DC2626" }}>Critical</div>
-                      <div style={{ fontSize: 11, color: "#991B1B" }}>Escalated from High</div>
+                      <div style={{ fontSize: 11, color: "#fca5a5" }}>Escalated from High</div>
                     </div>
-                    <div style={{ padding: 16, background: "#FEF3C7", borderRadius: 12, borderLeft: "4px solid #D97706" }}>
-                      <div style={{ fontSize: 12, fontWeight: 600, color: "#92400E", marginBottom: 4 }}>Supply Concentration</div>
+                    <div style={{ padding: 16, background: "#422006", borderRadius: 12, borderLeft: "4px solid #d97706" }}>
+                      <div style={{ fontSize: 12, fontWeight: 600, color: "#fbbf24", marginBottom: 4 }}>Supply Concentration</div>
                       <div style={{ fontSize: 22, fontWeight: 800, color: "#D97706" }}>47%</div>
-                      <div style={{ fontSize: 11, color: "#92400E" }}>Taiwan-based suppliers</div>
+                      <div style={{ fontSize: 11, color: "#fbbf24" }}>Taiwan-based suppliers</div>
                     </div>
-                    <div style={{ padding: 16, background: "#EFF6FF", borderRadius: 12, borderLeft: "4px solid #3B82F6" }}>
-                      <div style={{ fontSize: 12, fontWeight: 600, color: "#1D4ED8", marginBottom: 4 }}>Filing Deadline</div>
+                    <div style={{ padding: 16, background: "#0c2d6b", borderRadius: 12, borderLeft: "4px solid #3b82f6" }}>
+                      <div style={{ fontSize: 12, fontWeight: 600, color: "#60a5fa", marginBottom: 4 }}>Filing Deadline</div>
                       <div style={{ fontSize: 22, fontWeight: 800, color: "#3B82F6" }}>13 days</div>
-                      <div style={{ fontSize: 11, color: "#1D4ED8" }}>10-Q due March 15</div>
+                      <div style={{ fontSize: 11, color: "#60a5fa" }}>10-Q due March 15</div>
                     </div>
                   </div>
 
                   {/* The actual 10-K disclosure text */}
                   <div style={{ marginBottom: 24 }}>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: "#374151", marginBottom: 12 }}>Proposed Disclosure Language</div>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: "#c9d1d9", marginBottom: 12 }}>Proposed Disclosure Language</div>
                     <div style={{
-                      padding: 20, background: "#F9FAFB", borderRadius: 8, border: "1px solid #E5E7EB",
-                      borderLeft: "4px solid #3B82F6"
+                      padding: 20, background: "#1a1f2e", borderRadius: 8, border: "1px solid #30363d",
+                      borderLeft: "4px solid #3b82f6"
                     }}>
-                      <p style={{ fontSize: 14, color: "#1a1a1a", lineHeight: 1.8 }}>
+                      <p style={{ fontSize: 14, color: "#f0f6fc", lineHeight: 1.8 }}>
                         We face significant risks related to semiconductor supply chain concentration and geopolitical exposure in the Taiwan Strait region. Approximately 47% of our chip suppliers have Taiwan-based operations, creating material concentration risk. Escalating tensions may disrupt our semiconductor supply chain, extend lead times, and materially impact our ability to source critical components. We are pursuing supplier diversification initiatives, including evaluation of alternative sourcing regions as discussed at the board level; however, qualification of alternative suppliers typically requires 12–18 months.
                       </p>
                     </div>
@@ -384,19 +399,19 @@ export default function BoardGovernancePage() {
 
                   {/* Prior year comparison */}
                   <div style={{ marginBottom: 20 }}>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: "#374151", marginBottom: 12 }}>Changes from Prior Year</div>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: "#c9d1d9", marginBottom: 12 }}>Changes from Prior Year</div>
                     <div style={{
                       display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16
                     }}>
-                      <div style={{ padding: 16, background: "#fff", borderRadius: 8, border: "1px solid #E5E7EB" }}>
-                        <div style={{ fontSize: 11, fontWeight: 600, color: "#9CA3AF", marginBottom: 8 }}>PRIOR YEAR (FY2025)</div>
-                        <p style={{ fontSize: 12, color: "#6B7280", lineHeight: 1.6 }}>
+                      <div style={{ padding: 16, background: "#161b22", borderRadius: 8, border: "1px solid #30363d" }}>
+                        <div style={{ fontSize: 11, fontWeight: 600, color: "#6e7681", marginBottom: 8 }}>PRIOR YEAR (FY2025)</div>
+                        <p style={{ fontSize: 12, color: "#8b949e", lineHeight: 1.6 }}>
                           Our operations depend on the continuous and uninterrupted performance of our supply chain and key operational processes. Disruptions caused by natural disasters, geopolitical events, or failures of key vendors could adversely affect our ability to deliver products and services.
                         </p>
                       </div>
-                      <div style={{ padding: 16, background: "#EFF6FF", borderRadius: 8, border: "1px solid #BFDBFE" }}>
-                        <div style={{ fontSize: 11, fontWeight: 600, color: "#1D4ED8", marginBottom: 8 }}>WHAT&apos;S NEW</div>
-                        <ul style={{ fontSize: 12, color: "#1E40AF", lineHeight: 1.6, paddingLeft: 16, margin: 0 }}>
+                      <div style={{ padding: 16, background: "#0c2d6b", borderRadius: 8, border: "1px solid #1e40af" }}>
+                        <div style={{ fontSize: 11, fontWeight: 600, color: "#60a5fa", marginBottom: 8 }}>WHAT&apos;S NEW</div>
+                        <ul style={{ fontSize: 12, color: "#93c5fd", lineHeight: 1.6, paddingLeft: 16, margin: 0 }}>
                           <li style={{ marginBottom: 4 }}>Specific Taiwan Strait exposure</li>
                           <li style={{ marginBottom: 4 }}>47% supplier concentration figure</li>
                           <li style={{ marginBottom: 4 }}>Board-level diversification initiatives</li>
@@ -408,15 +423,15 @@ export default function BoardGovernancePage() {
 
                   
 
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "auto", paddingTop: 16, borderTop: "1px solid #E5E7EB" }}>
-                    <div style={{ fontSize: 12, color: "#9CA3AF" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "auto", paddingTop: 16, borderTop: "1px solid #30363d" }}>
+                    <div style={{ fontSize: 12, color: "#6e7681" }}>
                       Confidential — Disclosure Committee
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                       <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 12, background: markedAsRead ? "#059669" : "#ECFDF5", color: markedAsRead ? "#fff" : "#059669", fontWeight: 600, border: `1px solid ${markedAsRead ? "#059669" : "#A7F3D0"}` }}>
                         {markedAsRead ? "✓ You Reviewed" : "✓ AI Verified"}
                       </span>
-                      <div style={{ fontSize: 12, color: "#666" }}>2</div>
+                      <div style={{ fontSize: 12, color: "#6e7681" }}>2</div>
                     </div>
                   </div>
                 </>
@@ -426,33 +441,33 @@ export default function BoardGovernancePage() {
               {currentSlide === 1 && (
                 <>
                   <div style={{ marginBottom: 32 }}>
-                    <p style={{ fontSize: 12, color: "#6B7280", textTransform: "uppercase", letterSpacing: "1px", marginBottom: 8 }}>Disclosure Committee</p>
-                    <h1 style={{ fontSize: 32, fontWeight: 700, color: "#1a1a1a", lineHeight: 1.2 }}>
+                    <p style={{ fontSize: 12, color: "#8b949e", textTransform: "uppercase", letterSpacing: "1px", marginBottom: 8 }}>Disclosure Committee</p>
+                    <h1 style={{ fontSize: 32, fontWeight: 700, color: "#f0f6fc", lineHeight: 1.2 }}>
                       Agenda — February 28, 2026
                     </h1>
                   </div>
                   <div style={{ display: "grid", gap: 12 }}>
                     {SLIDES.slice(1).map((s, i) => (
-                      <div key={s.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 16px", background: "#F9FAFB", borderRadius: 8 }}>
+                      <div key={s.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 16px", background: "#1a1f2e", borderRadius: 8 }}>
                         <div style={{
-                          width: 28, height: 28, borderRadius: "50%", background: "#E5E7EB",
+                          width: 28, height: 28, borderRadius: "50%", background: "#30363d",
                           display: "flex", alignItems: "center", justifyContent: "center",
-                          fontSize: 13, fontWeight: 700, color: "#374151", flexShrink: 0
+                          fontSize: 13, fontWeight: 700, color: "#c9d1d9", flexShrink: 0
                         }}>
                           {i + 1}
                         </div>
                         <div style={{ flex: 1 }}>
-                          <div style={{ fontSize: 14, fontWeight: 600, color: "#111827" }}>{s.title}</div>
-                          <div style={{ fontSize: 12, color: "#6B7280", display: "flex", gap: 6, marginTop: 4 }}>
+                          <div style={{ fontSize: 14, fontWeight: 600, color: "#f0f6fc" }}>{s.title}</div>
+                          <div style={{ fontSize: 12, color: "#8b949e", display: "flex", gap: 6, marginTop: 4 }}>
                             {s.topics.map(t => <span key={t}>{t}</span>)}
                           </div>
                         </div>
                       </div>
                     ))}
                   </div>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "auto", paddingTop: 16, borderTop: "1px solid #E5E7EB" }}>
-                    <div style={{ fontSize: 12, color: "#9CA3AF" }}>Confidential — Disclosure Committee</div>
-                    <div style={{ fontSize: 12, color: "#666" }}>1</div>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "auto", paddingTop: 16, borderTop: "1px solid #30363d" }}>
+                    <div style={{ fontSize: 12, color: "#6e7681" }}>Confidential — Disclosure Committee</div>
+                    <div style={{ fontSize: 12, color: "#6e7681" }}>1</div>
                   </div>
                 </>
               )}
@@ -461,23 +476,23 @@ export default function BoardGovernancePage() {
               {currentSlide >= 3 && (
                 <>
                   <div style={{ marginBottom: 32 }}>
-                    <p style={{ fontSize: 12, color: "#6B7280", textTransform: "uppercase", letterSpacing: "1px", marginBottom: 8 }}>
+                    <p style={{ fontSize: 12, color: "#8b949e", textTransform: "uppercase", letterSpacing: "1px", marginBottom: 8 }}>
                       {slide.topics.join(" · ")}
                     </p>
-                    <h1 style={{ fontSize: 28, fontWeight: 700, color: "#1a1a1a", lineHeight: 1.2 }}>
+                    <h1 style={{ fontSize: 28, fontWeight: 700, color: "#f0f6fc", lineHeight: 1.2 }}>
                       {slide.title}
                     </h1>
                   </div>
                   <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <div style={{ textAlign: "center", color: "#9CA3AF" }}>
+                    <div style={{ textAlign: "center", color: "#6e7681" }}>
                       <div style={{ fontSize: 48, marginBottom: 12, opacity: 0.3 }}>📄</div>
                       <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 4 }}>Document Preview</div>
                       <div style={{ fontSize: 12 }}>Full content available in the Context Packet</div>
                     </div>
                   </div>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "auto", paddingTop: 16, borderTop: "1px solid #E5E7EB" }}>
-                    <div style={{ fontSize: 12, color: "#9CA3AF" }}>Confidential — Disclosure Committee</div>
-                    <div style={{ fontSize: 12, color: "#666" }}>{currentSlide}</div>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "auto", paddingTop: 16, borderTop: "1px solid #30363d" }}>
+                    <div style={{ fontSize: 12, color: "#6e7681" }}>Confidential — Disclosure Committee</div>
+                    <div style={{ fontSize: 12, color: "#6e7681" }}>{currentSlide}</div>
                   </div>
                 </>
               )}
@@ -490,19 +505,19 @@ export default function BoardGovernancePage() {
             }}>
               <button
                 onClick={() => setCurrentSlide(Math.max(1, currentSlide - 1))}
-                style={{ fontSize: 12, color: "#6B7280", background: "none", border: "none", cursor: "pointer" }}
+                style={{ fontSize: 12, color: "#8b949e", background: "none", border: "none", cursor: "pointer" }}
               >
                 {currentSlide > 1 ? `Back to page ${currentSlide - 1}` : ""}
               </button>
 
               <div style={{ flex: 1, margin: "0 24px", position: "relative" }}>
-                <div style={{ height: 4, background: "#D1D5DB", borderRadius: 2 }} />
+                <div style={{ height: 4, background: "#30363d", borderRadius: 2 }} />
                 <div
                   style={{
                     position: "absolute",
                     left: `${((currentSlide - 1) / (MEETING_INFO.totalSlides - 1)) * 100}%`,
                     top: "50%", transform: "translate(-50%, -50%)",
-                    width: 14, height: 14, borderRadius: "50%", background: "#3B82F6", border: "2px solid #fff",
+                    width: 14, height: 14, borderRadius: "50%", background: "#58a6ff", border: "2px solid #fff",
                     boxShadow: "0 2px 4px rgba(0,0,0,0.2)", cursor: "pointer"
                   }}
                 />
@@ -511,39 +526,39 @@ export default function BoardGovernancePage() {
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <button
                   onClick={() => setCurrentSlide(Math.max(1, currentSlide - 1))}
-                  style={{ width: 28, height: 28, borderRadius: 4, background: "#fff", border: "1px solid #E5E7EB", cursor: "pointer" }}
+                  style={{ width: 28, height: 28, borderRadius: 4, background: "#161b22", border: "1px solid #30363d", cursor: "pointer" }}
                 >
                   ‹
                 </button>
-                <span style={{ fontSize: 13, color: "#374151", minWidth: 50, textAlign: "center" }}>
+                <span style={{ fontSize: 13, color: "#c9d1d9", minWidth: 50, textAlign: "center" }}>
                   {currentSlide} / {MEETING_INFO.totalSlides}
                 </span>
                 <button
                   onClick={() => setCurrentSlide(Math.min(MEETING_INFO.totalSlides, currentSlide + 1))}
-                  style={{ width: 28, height: 28, borderRadius: 4, background: "#fff", border: "1px solid #E5E7EB", cursor: "pointer" }}
+                  style={{ width: 28, height: 28, borderRadius: 4, background: "#161b22", border: "1px solid #30363d", cursor: "pointer" }}
                 >
                   ›
                 </button>
-                <div style={{ width: 1, height: 20, background: "#E5E7EB", margin: "0 8px" }} />
-                <button style={{ padding: "4px 8px", background: "#fff", border: "1px solid #E5E7EB", borderRadius: 4, fontSize: 12 }}>🔍−</button>
-                <span style={{ fontSize: 12, color: "#6B7280" }}>125%</span>
-                <button style={{ padding: "4px 8px", background: "#fff", border: "1px solid #E5E7EB", borderRadius: 4, fontSize: 12 }}>🔍+</button>
+                <div style={{ width: 1, height: 20, background: "#30363d", margin: "0 8px" }} />
+                <button style={{ padding: "4px 8px", background: "#161b22", border: "1px solid #30363d", borderRadius: 4, fontSize: 12 }}>🔍−</button>
+                <span style={{ fontSize: 12, color: "#8b949e" }}>125%</span>
+                <button style={{ padding: "4px 8px", background: "#161b22", border: "1px solid #30363d", borderRadius: 4, fontSize: 12 }}>🔍+</button>
               </div>
             </div>
           </main>
 
           {/* Right Sidebar — GovernAI Panel */}
           {notesOpen && (
-            <aside style={{ width: 320, background: "#FFFFFF", borderLeft: "1px solid #E5E7EB", display: "flex", flexDirection: "column" }}>
+            <aside style={{ width: 320, background: "#161b22", borderLeft: "1px solid #E5E7EB", display: "flex", flexDirection: "column" }}>
               <div style={{
-                padding: "12px 16px", borderBottom: "1px solid #E5E7EB",
+                padding: "12px 16px", borderBottom: "1px solid #30363d",
                 display: "flex", alignItems: "center", justifyContent: "space-between"
               }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   {viewMode === "prep" ? (
                     <>
                       <span style={{ fontSize: 16 }}>✨</span>
-                      <span style={{ fontSize: 14, fontWeight: 600, color: "#5B21B6" }}>
+                      <span style={{ fontSize: 14, fontWeight: 600, color: "#a78bfa" }}>
                         {userRole === "board-member" ? "Board Prep" : "Exec Prep"}
                       </span>
                       <span style={{
@@ -558,13 +573,13 @@ export default function BoardGovernancePage() {
                   ) : (
                     <>
                       <span style={{ fontSize: 16 }}>📝</span>
-                      <span style={{ fontSize: 14, fontWeight: 600, color: "#374151" }}>Notes</span>
+                      <span style={{ fontSize: 14, fontWeight: 600, color: "#c9d1d9" }}>Notes</span>
                     </>
                   )}
                 </div>
                 <button
                   onClick={() => setNotesOpen(false)}
-                  style={{ background: "none", border: "none", cursor: "pointer", color: "#9CA3AF", fontSize: 18 }}
+                  style={{ background: "none", border: "none", cursor: "pointer", color: "#6e7681", fontSize: 18 }}
                 >
                   ×
                 </button>
@@ -572,23 +587,23 @@ export default function BoardGovernancePage() {
 
               {viewMode === "meeting" && (
                 <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
-                  <div style={{ padding: 16, borderBottom: "1px solid #E5E7EB" }}>
+                  <div style={{ padding: 16, borderBottom: "1px solid #30363d" }}>
                     <button style={{
-                      width: "100%", padding: "10px 12px", background: "#F9FAFB",
-                      border: "1px dashed #D1D5DB", borderRadius: 8, color: "#6B7280",
+                      width: "100%", padding: "10px 12px", background: "#1a1f2e",
+                      border: "1px dashed #30363d", borderRadius: 8, color: "#8b949e",
                       fontSize: 13, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6
                     }}>
                       <span>+</span> Add note
                     </button>
                   </div>
-                  <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 32, color: "#9CA3AF" }}>
+                  <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 32, color: "#6e7681" }}>
                     <div style={{ fontSize: 48, marginBottom: 12, opacity: 0.5 }}>📝</div>
                     <div style={{ fontSize: 13, textAlign: "center" }}>No page notes</div>
                     <div style={{ fontSize: 12, textAlign: "center", marginTop: 4 }}>Click above to add a note to this slide</div>
                   </div>
                   {slideActions.length > 0 && (
-                    <div style={{ padding: 12, borderTop: "1px solid #E5E7EB", background: "#FFFBEB" }}>
-                      <div style={{ fontSize: 11, color: "#92400E", display: "flex", alignItems: "center", gap: 6 }}>
+                    <div style={{ padding: 12, borderTop: "1px solid #30363d", background: "#422006" }}>
+                      <div style={{ fontSize: 11, color: "#fbbf24", display: "flex", alignItems: "center", gap: 6 }}>
                         <span>⚡</span>
                         <span>{slideActions.length} open action{slideActions.length > 1 ? "s" : ""} from this slide</span>
                       </div>
@@ -599,7 +614,7 @@ export default function BoardGovernancePage() {
 
               {viewMode === "prep" && (
                 <>
-                  <div style={{ display: "flex", borderBottom: "1px solid #E5E7EB" }}>
+                  <div style={{ display: "flex", borderBottom: "1px solid #30363d" }}>
                     {[
                       { id: "context" as const, label: "This Slide", count: null },
                       { id: "meeting" as const, label: "Overview", count: null },
@@ -642,93 +657,90 @@ export default function BoardGovernancePage() {
                               <path fill="#D3222A" d="M142.75,12.83L0,118.65v99.27v3.62h85.96c7.61,0,14.94-0.58,21.99-1.66C107.95,219.89,142.75,12.83,142.75,12.83z"/>
                             </g>
                           </svg>
-                          <span style={{ fontSize: 13, fontWeight: 700, color: "#111827" }}>Diligent AI</span>
-                          <span style={{ fontSize: 10, padding: "2px 6px", borderRadius: 4, background: "#F5F3FF", color: "#7C3AED", fontWeight: 600 }}>INSIGHTS</span>
+                          <span style={{ fontSize: 13, fontWeight: 700, color: "#f0f6fc" }}>Diligent AI</span>
+                          <span style={{ fontSize: 10, padding: "2px 6px", borderRadius: 4, background: "#2e1065", color: "#7C3AED", fontWeight: 600 }}>INSIGHTS</span>
                         </div>
 
-                        {/* Reputational Implications */}
+                        {/* Suggested Questions — moved to top */}
                         <div style={{ marginBottom: 20 }}>
-                          <div style={{ fontSize: 11, fontWeight: 600, color: "#DC2626", marginBottom: 8 }}>⚠ REPUTATIONAL IMPLICATIONS</div>
-                          <div style={{
-                            padding: 12, background: "#FEF2F2",
-                            borderRadius: 8, border: "1px solid #FECACA"
-                          }}>
-                            <div style={{ display: "grid", gap: 10 }}>
-                              <div style={{ fontSize: 12, color: "#991B1B", lineHeight: 1.6 }}>
-                                <strong>Investor confidence risk:</strong> Failure to disclose known supply chain concentration may be viewed as a material omission. 3 shareholder advisory firms have flagged semiconductor risk disclosure as a 2026 proxy season focus area.
-                              </div>
-                              <div style={{ fontSize: 12, color: "#991B1B", lineHeight: 1.6 }}>
-                                <strong>Media exposure:</strong> 12 major news outlets have published Taiwan Strait supply chain articles in the last 30 days. Analysts are likely to ask about this on the next earnings call.
-                              </div>
-                              <div style={{ fontSize: 12, color: "#991B1B", lineHeight: 1.6 }}>
-                                <strong>Peer comparison gap:</strong> 4 of 6 comparable companies have already updated their risk factor language for Taiwan exposure. Delayed disclosure may signal governance weakness.
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Governance Implications */}
-                        <div style={{ marginBottom: 20 }}>
-                          <div style={{ fontSize: 11, fontWeight: 600, color: "#1D4ED8", marginBottom: 8 }}>GOVERNANCE IMPLICATIONS</div>
-                          <div style={{
-                            padding: 12, background: "#EFF6FF",
-                            borderRadius: 8, border: "1px solid #BFDBFE"
-                          }}>
-                            <div style={{ display: "grid", gap: 10 }}>
-                              <div style={{ fontSize: 12, color: "#1E40AF", lineHeight: 1.6 }}>
-                                <strong>Board oversight obligation:</strong> The board has a fiduciary duty to ensure material risks are adequately disclosed. Taiwan Strait risk was discussed in Q3 board materials but not reflected in current SEC filings.
-                              </div>
-                              <div style={{ fontSize: 12, color: "#1E40AF", lineHeight: 1.6 }}>
-                                <strong>Disclosure Committee process:</strong> This risk was identified by monitoring agents 18 days ago. Prompt escalation through the Disclosure Committee demonstrates sound governance practices.
-                              </div>
-                              <div style={{ fontSize: 12, color: "#1E40AF", lineHeight: 1.6 }}>
-                                <strong>Regulatory alignment:</strong> SEC has increased scrutiny on geopolitical risk disclosures per recent Staff Legal Bulletins. Updated language aligns with current guidance.
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* AI Verification */}
-                        <div style={{ marginBottom: 20 }}>
-                          <div style={{ fontSize: 11, fontWeight: 600, color: "#059669", marginBottom: 8 }}>✓ VERIFICATION STATUS</div>
-                          <div style={{
-                            padding: 12, background: "#ECFDF5",
-                            borderRadius: 8, border: "1px solid #A7F3D0"
-                          }}>
-                            <div style={{ display: "grid", gap: 8 }}>
-                              {[
-                                "Consistency with financial reporting",
-                                "Alignment with MD&A commentary",
-                                "No conflicts with audited financial statements",
-                                "Peer disclosure language benchmarked"
-                              ].map((check, i) => (
-                                <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "#047857" }}>
-                                  <span style={{
-                                    width: 18, height: 18, borderRadius: "50%", background: "#059669",
-                                    display: "flex", alignItems: "center", justifyContent: "center",
-                                    fontSize: 10, color: "#fff", flexShrink: 0
-                                  }}>✓</span>
-                                  {check}
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Suggested Questions */}
-                        <div>
-                          <div style={{ fontSize: 11, fontWeight: 600, color: "#6B7280", marginBottom: 8 }}>SUGGESTED QUESTIONS</div>
+                          <div style={{ fontSize: 11, fontWeight: 600, color: "#8b949e", marginBottom: 8 }}>SUGGESTED QUESTIONS</div>
                           <div style={{ display: "grid", gap: 8 }}>
-                            <div style={{ padding: 10, background: "#F5F3FF", borderRadius: 6, fontSize: 12, color: "#5B21B6", borderLeft: "3px solid #7C3AED", lineHeight: 1.5 }}>
+                            <div style={{ padding: 10, background: "#2e1065", borderRadius: 6, fontSize: 12, color: "#a78bfa", borderLeft: "3px solid #7c3aed", lineHeight: 1.5 }}>
                               &quot;What is the board&apos;s exposure if we don&apos;t disclose and this becomes material?&quot;
                             </div>
-                            <div style={{ padding: 10, background: "#F5F3FF", borderRadius: 6, fontSize: 12, color: "#5B21B6", borderLeft: "3px solid #7C3AED", lineHeight: 1.5 }}>
+                            <div style={{ padding: 10, background: "#2e1065", borderRadius: 6, fontSize: 12, color: "#a78bfa", borderLeft: "3px solid #7c3aed", lineHeight: 1.5 }}>
                               &quot;Have our D&amp;O insurance carriers flagged geopolitical supply chain as a coverage concern?&quot;
                             </div>
-                            <div style={{ padding: 10, background: "#F5F3FF", borderRadius: 6, fontSize: 12, color: "#5B21B6", borderLeft: "3px solid #7C3AED", lineHeight: 1.5 }}>
+                            <div style={{ padding: 10, background: "#2e1065", borderRadius: 6, fontSize: 12, color: "#a78bfa", borderLeft: "3px solid #7c3aed", lineHeight: 1.5 }}>
                               &quot;How does this disclosure language compare to what our outside counsel recommended?&quot;
                             </div>
                           </div>
+                        </div>
+
+                        {/* Reputational Implications — accordion */}
+                        <div style={{ marginBottom: 8 }}>
+                          <button
+                            onClick={() => setRepOpen(!repOpen)}
+                            style={{
+                              width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
+                              padding: "10px 12px", background: "#3b1219", borderRadius: repOpen ? "8px 8px 0 0" : 8,
+                              border: "1px solid #7f1d1d", cursor: "pointer", textAlign: "left"
+                            }}
+                          >
+                            <span style={{ fontSize: 11, fontWeight: 600, color: "#DC2626" }}>⚠ REPUTATIONAL IMPLICATIONS</span>
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: repOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}><polyline points="6 9 12 15 18 9" /></svg>
+                          </button>
+                          {repOpen && (
+                            <div style={{
+                              padding: 12, background: "#3b1219",
+                              borderRadius: "0 0 8px 8px", borderLeft: "1px solid #7f1d1d", borderRight: "1px solid #7f1d1d", borderBottom: "1px solid #7f1d1d"
+                            }}>
+                              <div style={{ display: "grid", gap: 10 }}>
+                                <div style={{ fontSize: 12, color: "#fca5a5", lineHeight: 1.6 }}>
+                                  <strong>Investor confidence risk:</strong> Failure to disclose known supply chain concentration may be viewed as a material omission. 3 shareholder advisory firms have flagged semiconductor risk disclosure as a 2026 proxy season focus area.
+                                </div>
+                                <div style={{ fontSize: 12, color: "#fca5a5", lineHeight: 1.6 }}>
+                                  <strong>Media exposure:</strong> 12 major news outlets have published Taiwan Strait supply chain articles in the last 30 days. Analysts are likely to ask about this on the next earnings call.
+                                </div>
+                                <div style={{ fontSize: 12, color: "#fca5a5", lineHeight: 1.6 }}>
+                                  <strong>Peer comparison gap:</strong> 4 of 6 comparable companies have already updated their risk factor language for Taiwan exposure. Delayed disclosure may signal governance weakness.
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Governance Implications — accordion */}
+                        <div style={{ marginBottom: 20 }}>
+                          <button
+                            onClick={() => setGovOpen(!govOpen)}
+                            style={{
+                              width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
+                              padding: "10px 12px", background: "#0c2d6b", borderRadius: govOpen ? "8px 8px 0 0" : 8,
+                              border: "1px solid #1e40af", cursor: "pointer", textAlign: "left"
+                            }}
+                          >
+                            <span style={{ fontSize: 11, fontWeight: 600, color: "#60a5fa" }}>GOVERNANCE IMPLICATIONS</span>
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1D4ED8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: govOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}><polyline points="6 9 12 15 18 9" /></svg>
+                          </button>
+                          {govOpen && (
+                            <div style={{
+                              padding: 12, background: "#0c2d6b",
+                              borderRadius: "0 0 8px 8px", borderLeft: "1px solid #1e40af", borderRight: "1px solid #1e40af", borderBottom: "1px solid #1e40af"
+                            }}>
+                              <div style={{ display: "grid", gap: 10 }}>
+                                <div style={{ fontSize: 12, color: "#93c5fd", lineHeight: 1.6 }}>
+                                  <strong>Board oversight obligation:</strong> The board has a fiduciary duty to ensure material risks are adequately disclosed. Taiwan Strait risk was discussed in Q3 board materials but not reflected in current SEC filings.
+                                </div>
+                                <div style={{ fontSize: 12, color: "#93c5fd", lineHeight: 1.6 }}>
+                                  <strong>Disclosure Committee process:</strong> This risk was identified by monitoring agents 18 days ago. Prompt escalation through the Disclosure Committee demonstrates sound governance practices.
+                                </div>
+                                <div style={{ fontSize: 12, color: "#93c5fd", lineHeight: 1.6 }}>
+                                  <strong>Regulatory alignment:</strong> SEC has increased scrutiny on geopolitical risk disclosures per recent Staff Legal Bulletins. Updated language aligns with current guidance.
+                                </div>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
                     )}
@@ -736,21 +748,21 @@ export default function BoardGovernancePage() {
                     {aiPanelMode === "meeting" && (
                       <div>
                         <div style={{ marginBottom: 20 }}>
-                          <div style={{ fontSize: 11, fontWeight: 600, color: "#6B7280", marginBottom: 8 }}>DISCLOSURE STATUS</div>
+                          <div style={{ fontSize: 11, fontWeight: 600, color: "#8b949e", marginBottom: 8 }}>DISCLOSURE STATUS</div>
                           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-                            <div style={{ padding: 12, background: "#ECFDF5", borderRadius: 8, border: "1px solid #A7F3D0" }}>
+                            <div style={{ padding: 12, background: "#052e16", borderRadius: 8, border: "1px solid #065f46" }}>
                               <div style={{ fontSize: 20, fontWeight: 800, color: "#059669" }}>3 / 3</div>
-                              <div style={{ fontSize: 11, color: "#047857" }}>Risks reviewed</div>
+                              <div style={{ fontSize: 11, color: "#34d399" }}>Risks reviewed</div>
                             </div>
-                            <div style={{ padding: 12, background: "#F9FAFB", borderRadius: 8, border: "1px solid #E5E7EB" }}>
-                              <div style={{ fontSize: 20, fontWeight: 800, color: "#111827" }}>13 days</div>
-                              <div style={{ fontSize: 11, color: "#6B7280" }}>Until 10-Q filing</div>
+                            <div style={{ padding: 12, background: "#1a1f2e", borderRadius: 8, border: "1px solid #30363d" }}>
+                              <div style={{ fontSize: 20, fontWeight: 800, color: "#f0f6fc" }}>13 days</div>
+                              <div style={{ fontSize: 11, color: "#8b949e" }}>Until 10-Q filing</div>
                             </div>
                           </div>
                         </div>
 
                         <div style={{ marginBottom: 20 }}>
-                          <div style={{ fontSize: 11, fontWeight: 600, color: "#6B7280", marginBottom: 8 }}>RISKS REQUIRING DISCLOSURE</div>
+                          <div style={{ fontSize: 11, fontWeight: 600, color: "#8b949e", marginBottom: 8 }}>RISKS REQUIRING DISCLOSURE</div>
                           <div style={{ display: "grid", gap: 6 }}>
                             {[
                               { risk: "Taiwan Strait Geopolitical Tensions", severity: "Critical", color: "#DC2626", bg: "#FEF2F2", border: "#FECACA" },
@@ -763,9 +775,9 @@ export default function BoardGovernancePage() {
                                 border: `1px solid ${r.border}`
                               }}>
                                 <div style={{ flex: 1 }}>
-                                  <div style={{ fontSize: 12, fontWeight: 600, color: "#111827" }}>{r.risk}</div>
+                                  <div style={{ fontSize: 12, fontWeight: 600, color: "#f0f6fc" }}>{r.risk}</div>
                                 </div>
-                                <span style={{ fontSize: 10, fontWeight: 600, color: r.color, background: "#fff", padding: "2px 6px", borderRadius: 4 }}>
+                                <span style={{ fontSize: 10, fontWeight: 600, color: r.color, background: "#161b22", padding: "2px 6px", borderRadius: 4 }}>
                                   {r.severity}
                                 </span>
                               </div>
@@ -774,13 +786,13 @@ export default function BoardGovernancePage() {
                         </div>
 
                         <div>
-                          <div style={{ fontSize: 11, fontWeight: 600, color: "#6B7280", marginBottom: 8 }}>COMMITTEE ROUTING</div>
+                          <div style={{ fontSize: 11, fontWeight: 600, color: "#8b949e", marginBottom: 8 }}>COMMITTEE ROUTING</div>
                           <div style={{
-                            padding: 12, background: "#EFF6FF", borderRadius: 8,
-                            border: "1px solid #BFDBFE"
+                            padding: 12, background: "#0c2d6b", borderRadius: 8,
+                            border: "1px solid #1e40af"
                           }}>
-                            <div style={{ fontSize: 12, fontWeight: 600, color: "#1E40AF", marginBottom: 6 }}>After this review:</div>
-                            <div style={{ display: "grid", gap: 4, fontSize: 12, color: "#1D4ED8" }}>
+                            <div style={{ fontSize: 12, fontWeight: 600, color: "#93c5fd", marginBottom: 6 }}>After this review:</div>
+                            <div style={{ display: "grid", gap: 4, fontSize: 12, color: "#60a5fa" }}>
                               <div>→ Audit Committee (risk disclosures, financial implications)</div>
                               <div>→ Risk Committee</div>
                               <div>→ Compliance / Regulatory Committee</div>
@@ -796,28 +808,28 @@ export default function BoardGovernancePage() {
                         {userRole === "board-member" && (
                           <>
                             <div style={{ marginBottom: 16 }}>
-                              <div style={{ fontSize: 13, fontWeight: 600, color: "#111827", marginBottom: 4 }}>
+                              <div style={{ fontSize: 13, fontWeight: 600, color: "#f0f6fc", marginBottom: 4 }}>
                                 What would you like to do?
                               </div>
-                              <div style={{ fontSize: 11, color: "#6B7280" }}>
+                              <div style={{ fontSize: 11, color: "#8b949e" }}>
                                 GovernAI can help you review these disclosures
                               </div>
                             </div>
 
                             <div style={{ display: "grid", gap: 10 }}>
                               <div style={{
-                                padding: 14, background: "#F9FAFB", borderRadius: 10,
-                                border: "1px solid #E5E7EB"
+                                padding: 14, background: "#1a1f2e", borderRadius: 10,
+                                border: "1px solid #30363d"
                               }}>
                                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
-                                  <div style={{ fontSize: 13, color: "#111827", fontWeight: 600 }}>
+                                  <div style={{ fontSize: 13, color: "#f0f6fc", fontWeight: 600 }}>
                                     Add questions to my meeting notes
                                   </div>
-                                  <span style={{ fontSize: 9, padding: "2px 6px", borderRadius: 4, background: "#ECFDF5", color: "#059669", fontWeight: 600 }}>
+                                  <span style={{ fontSize: 9, padding: "2px 6px", borderRadius: 4, background: "#052e16", color: "#059669", fontWeight: 600 }}>
                                     INSTANT
                                   </span>
                                 </div>
-                                <div style={{ fontSize: 11, color: "#6B7280", marginBottom: 12 }}>
+                                <div style={{ fontSize: 11, color: "#8b949e", marginBottom: 12 }}>
                                   Save suggested questions about the risk disclosure to your notes
                                 </div>
                                 <button style={{
@@ -830,22 +842,22 @@ export default function BoardGovernancePage() {
                               </div>
 
                               <div style={{
-                                padding: 14, background: "linear-gradient(135deg, #F5F3FF 0%, #EDE9FE 100%)",
-                                borderRadius: 10, border: "1px solid #DDD6FE"
+                                padding: 14, background: "linear-gradient(135deg, #2e1065 0%, #1e1b4b 100%)",
+                                borderRadius: 10, border: "1px solid #5b21b6"
                               }}>
                                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
-                                  <div style={{ fontSize: 13, color: "#5B21B6", fontWeight: 600 }}>
+                                  <div style={{ fontSize: 13, color: "#a78bfa", fontWeight: 600 }}>
                                     Compare with peer disclosures
                                   </div>
                                   <span style={{ fontSize: 9, padding: "2px 6px", borderRadius: 4, background: "#EDE9FE", color: "#7C3AED", fontWeight: 600 }}>
                                     AGENT DRAFT
                                   </span>
                                 </div>
-                                <div style={{ fontSize: 11, color: "#6B7280", marginBottom: 12 }}>
+                                <div style={{ fontSize: 11, color: "#8b949e", marginBottom: 12 }}>
                                   Agent creates a side-by-side comparison of your disclosure vs. peer filings. You review before sharing.
                                 </div>
                                 <button style={{
-                                  padding: "8px 14px", background: "#fff", color: "#7C3AED",
+                                  padding: "8px 14px", background: "#161b22", color: "#7C3AED",
                                   border: "1px solid #7C3AED", borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: "pointer",
                                   display: "flex", alignItems: "center", gap: 6
                                 }}>
@@ -854,20 +866,20 @@ export default function BoardGovernancePage() {
                               </div>
                             </div>
 
-                            <div style={{ margin: "20px 0", borderTop: "1px solid #E5E7EB" }} />
+                            <div style={{ margin: "20px 0", borderTop: "1px solid #30363d" }} />
 
-                            <div style={{ fontSize: 11, fontWeight: 600, color: "#6B7280", marginBottom: 8 }}>
+                            <div style={{ fontSize: 11, fontWeight: 600, color: "#8b949e", marginBottom: 8 }}>
                               ACTION ITEMS ({ACTIONS.length})
                             </div>
                             <div style={{ display: "grid", gap: 6 }}>
                               {ACTIONS.map(action => (
                                 <div key={action.id} style={{
-                                  padding: 10, background: "#fff", borderRadius: 8,
-                                  border: "1px solid #E5E7EB", fontSize: 12
+                                  padding: 10, background: "#161b22", borderRadius: 8,
+                                  border: "1px solid #30363d", fontSize: 12
                                 }}>
-                                  <div style={{ color: "#111827", marginBottom: 4 }}>{action.text}</div>
+                                  <div style={{ color: "#f0f6fc", marginBottom: 4 }}>{action.text}</div>
                                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                    <span style={{ fontSize: 10, color: "#6B7280" }}>{action.owner} · Due {action.dueDate}</span>
+                                    <span style={{ fontSize: 10, color: "#8b949e" }}>{action.owner} · Due {action.dueDate}</span>
                                     <StatusBadge status={action.status} />
                                   </div>
                                 </div>
@@ -879,32 +891,32 @@ export default function BoardGovernancePage() {
                         {userRole === "corp-sec" && (
                           <>
                             <div style={{
-                              padding: 12, background: "#ECFDF5", borderRadius: 10,
-                              border: "1px solid #A7F3D0", marginBottom: 16
+                              padding: 12, background: "#052e16", borderRadius: 10,
+                              border: "1px solid #065f46", marginBottom: 16
                             }}>
                               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                                 <span style={{ fontSize: 16 }}>✓</span>
                                 <div>
                                   <div style={{ fontSize: 13, fontWeight: 600, color: "#059669" }}>On track for filing</div>
-                                  <div style={{ fontSize: 11, color: "#047857" }}>CEO approved, AI verified, {allOpenActions.length} actions remaining</div>
+                                  <div style={{ fontSize: 11, color: "#34d399" }}>CEO approved, AI verified, {allOpenActions.length} actions remaining</div>
                                 </div>
                               </div>
                             </div>
 
                             <div style={{ display: "grid", gap: 10 }}>
                               <div style={{
-                                padding: 14, background: "linear-gradient(135deg, #FEF2F2 0%, #FEE2E2 100%)",
-                                borderRadius: 10, border: "1px solid #FECACA"
+                                padding: 14, background: "linear-gradient(135deg, #3b1219 0%, #450a0a 100%)",
+                                borderRadius: 10, border: "1px solid #7f1d1d"
                               }}>
                                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
-                                  <div style={{ fontSize: 13, color: "#991B1B", fontWeight: 600 }}>
+                                  <div style={{ fontSize: 13, color: "#fca5a5", fontWeight: 600 }}>
                                     Route to additional committees
                                   </div>
                                   <span style={{ fontSize: 9, padding: "2px 6px", borderRadius: 4, background: "#FEE2E2", color: "#DC2626", fontWeight: 600 }}>
                                     NEXT STEP
                                   </span>
                                 </div>
-                                <div style={{ fontSize: 11, color: "#7F1D1D", marginBottom: 12 }}>
+                                <div style={{ fontSize: 11, color: "#fca5a5", marginBottom: 12 }}>
                                   CEO requested forwarding to Risk, Compliance, and Cybersecurity committees.
                                 </div>
                                 <button style={{
@@ -917,18 +929,18 @@ export default function BoardGovernancePage() {
                               </div>
 
                               <div style={{
-                                padding: 14, background: "#F9FAFB",
-                                borderRadius: 10, border: "1px solid #E5E7EB"
+                                padding: 14, background: "#1a1f2e",
+                                borderRadius: 10, border: "1px solid #30363d"
                               }}>
                                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
-                                  <div style={{ fontSize: 13, color: "#111827", fontWeight: 600 }}>
+                                  <div style={{ fontSize: 13, color: "#f0f6fc", fontWeight: 600 }}>
                                     Generate EDGAR filing package
                                   </div>
-                                  <span style={{ fontSize: 9, padding: "2px 6px", borderRadius: 4, background: "#ECFDF5", color: "#059669", fontWeight: 600 }}>
+                                  <span style={{ fontSize: 9, padding: "2px 6px", borderRadius: 4, background: "#052e16", color: "#059669", fontWeight: 600 }}>
                                     INSTANT
                                   </span>
                                 </div>
-                                <div style={{ fontSize: 11, color: "#6B7280", marginBottom: 12 }}>
+                                <div style={{ fontSize: 11, color: "#8b949e", marginBottom: 12 }}>
                                   Prepare the EDGAR submission package with all approved disclosures.
                                 </div>
                                 <button style={{
@@ -941,20 +953,20 @@ export default function BoardGovernancePage() {
                               </div>
                             </div>
 
-                            <div style={{ margin: "20px 0", borderTop: "1px solid #E5E7EB" }} />
+                            <div style={{ margin: "20px 0", borderTop: "1px solid #30363d" }} />
 
-                            <div style={{ fontSize: 11, fontWeight: 600, color: "#6B7280", marginBottom: 8 }}>
+                            <div style={{ fontSize: 11, fontWeight: 600, color: "#8b949e", marginBottom: 8 }}>
                               ALL ACTIONS ({ACTIONS.length})
                             </div>
                             <div style={{ display: "grid", gap: 6 }}>
                               {ACTIONS.map(action => (
                                 <div key={action.id} style={{
-                                  padding: 10, background: "#fff", borderRadius: 8,
-                                  border: "1px solid #E5E7EB", fontSize: 12
+                                  padding: 10, background: "#161b22", borderRadius: 8,
+                                  border: "1px solid #30363d", fontSize: 12
                                 }}>
-                                  <div style={{ color: "#111827", marginBottom: 4 }}>{action.text}</div>
+                                  <div style={{ color: "#f0f6fc", marginBottom: 4 }}>{action.text}</div>
                                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                    <span style={{ fontSize: 10, color: "#6B7280" }}>{action.owner} · Due {action.dueDate}</span>
+                                    <span style={{ fontSize: 10, color: "#8b949e" }}>{action.owner} · Due {action.dueDate}</span>
                                     <StatusBadge status={action.status} />
                                   </div>
                                 </div>
@@ -966,10 +978,10 @@ export default function BoardGovernancePage() {
                     )}
                   </div>
 
-                  <div style={{ padding: 12, borderTop: "1px solid #E5E7EB" }}>
+                  <div style={{ padding: 12, borderTop: "1px solid #30363d" }}>
                     <div style={{
                       display: "flex", alignItems: "center", gap: 8, padding: "10px 12px",
-                      background: "#F5F3FF", borderRadius: 8, border: "1px solid #DDD6FE"
+                      background: "#2e1065", borderRadius: 8, border: "1px solid #5b21b6"
                     }}>
                       <span style={{ fontSize: 14 }}>✨</span>
                       <input
@@ -977,7 +989,7 @@ export default function BoardGovernancePage() {
                         placeholder="Ask about this disclosure..."
                         style={{
                           flex: 1, background: "none", border: "none", outline: "none",
-                          fontSize: 13, color: "#5B21B6"
+                          fontSize: 13, color: "#a78bfa"
                         }}
                       />
                       <button style={{
