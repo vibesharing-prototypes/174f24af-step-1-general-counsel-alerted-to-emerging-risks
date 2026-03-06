@@ -123,6 +123,12 @@ const sections = [
         description: "CEO reviews disclosures, approves, and suggests additional committee routing.",
         href: "/superhero/ceo-review",
       },
+      {
+        id: "13b",
+        title: "Approval Status",
+        description: "CEO disclosure approval page with pipeline status, documents, AI verification, and risk cards.",
+        href: "/superhero/approval-status",
+      },
     ],
   },
   {
