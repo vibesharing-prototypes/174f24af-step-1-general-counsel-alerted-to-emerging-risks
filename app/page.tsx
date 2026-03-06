@@ -14,6 +14,12 @@ const sections = [
         href: "/superhero/boards-home",
       },
       {
+        id: "A2",
+        title: "Boards Home — Dark (Near-Term Vision)",
+        description: "Dark-mode variant of the Boards system with GRC Command Center panel.",
+        href: "/superhero/boards-dark",
+      },
+      {
         id: "B",
         title: "GRC Command Center (Full Vision)",
         description: "GC opens the full GRC Command Center — agents have detected emerging risks.",
