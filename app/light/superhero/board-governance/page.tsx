@@ -299,24 +299,12 @@ export default function BoardGovernancePage() {
 
           {/* Main Slide Viewer */}
           <main style={{ flex: 1, display: "flex", flexDirection: "column", background: "#E8E8E8", padding: 16 }}>
-            {/* Action buttons + verification status above the slide */}
+            {/* Action buttons above the slide */}
             {!markedAsRead ? (
               <div style={{
-                display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8,
+                display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 8,
                 marginBottom: 10
               }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                  {["Consistency with financial reporting", "Alignment with MD&A commentary", "No conflicts with audited statements", "Peer language benchmarked"].map((check, i) => (
-                    <div key={i} style={{
-                      display: "flex", alignItems: "center", gap: 4, fontSize: 10, color: "#047857",
-                      background: "#ECFDF5", border: "1px solid #A7F3D0", borderRadius: 12, padding: "3px 8px"
-                    }}>
-                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                      {check}
-                    </div>
-                  ))}
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
                   <button style={{
                     padding: "7px 14px", borderRadius: 6, fontSize: 12, fontWeight: 500, cursor: "pointer",
                     background: "#fff", border: "1px solid #D1D5DB", color: "#374151",
@@ -344,7 +332,6 @@ export default function BoardGovernancePage() {
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                     Mark as Read / No Changes
                   </button>
-                </div>
               </div>
             ) : null}
 
