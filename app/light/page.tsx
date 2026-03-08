@@ -129,6 +129,12 @@ const sections = [
         description: "CEO disclosure approval page with pipeline status, documents, AI verification, and risk cards.",
         href: "/light/superhero/approval-status",
       },
+      {
+        id: "13c",
+        title: "Risk Impact Visualization",
+        description: "AI-detected Taiwan Strait risk — supply chain dependency map, control coverage, and disclosure readiness.",
+        href: "/light/superhero/risk-analysis",
+      },
     ],
   },
   {
