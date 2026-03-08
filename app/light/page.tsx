@@ -135,6 +135,12 @@ const sections = [
         description: "AI-detected Taiwan Strait risk — supply chain dependency map, control coverage, and disclosure readiness.",
         href: "/light/superhero/risk-analysis",
       },
+      {
+        id: "13d",
+        title: "Risk Gravity Map",
+        description: "Cinematic visualization of financial exposure pulled toward major enterprise risks with scenario simulation.",
+        href: "/superhero/risk-gravity",
+      },
     ],
   },
   {
