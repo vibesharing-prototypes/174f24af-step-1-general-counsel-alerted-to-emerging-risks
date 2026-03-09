@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useMoodysMode, MoodysToggleLight } from "../MoodysToggle";
 
 function cn(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
@@ -294,10 +295,13 @@ const BOOKS = [
 export default function BoardsHomePage() {
   const [booksTab, setBooksTab] = useState<"all" | "books" | "reports">("all");
   const [demoPanelOpen, setDemoPanelOpen] = useState(true);
+  const [withMoodys, toggleMoodys] = useMoodysMode();
   const router = useRouter();
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
+      {/* Moody's Toggle */}
+      <MoodysToggleLight withMoodys={withMoodys} onToggle={toggleMoodys} />
       {/* Demo controls — matching gc-commandcenter */}
       <div className="border-b-2 border-[#0ea5e9]/40 bg-[#e0f2fe] flex-shrink-0">
         <div className="border-b border-[#0ea5e9]/30 bg-[#bae6fd] px-4 py-2 flex items-center justify-between">
@@ -651,8 +655,10 @@ export default function BoardsHomePage() {
                   <div className="group relative inline-flex items-center gap-1.5 pl-1 cursor-help">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0 group-hover:stroke-[#93c5fd] transition-colors"><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></svg>
                     <p className="text-xs text-[#e2e8f0]/80 leading-relaxed">Taiwan Strait Geopolitical Tensions</p>
+                    {withMoodys && <span className="inline-flex items-center gap-0.5 rounded-full bg-[#002B5C] px-1.5 py-px text-[8px] font-bold text-white uppercase tracking-wider flex-shrink-0">M</span>}
                     <div className="absolute left-0 top-full mt-2 w-72 rounded-lg border border-[#334155] bg-[#1e293b] p-3 text-xs text-[#cbd5e1] leading-relaxed shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity z-20">
                       Escalating tensions in the Taiwan Strait may disrupt semiconductor supply chain. 47% of our chip suppliers have Taiwan-based operations. Prior board materials (Q3) referenced Vietnam as diversification target under evaluation.
+                      {withMoodys && <span className="block mt-2 text-[#93c5fd] border-t border-[#334155] pt-2">Moody&apos;s: TSMC credit outlook stable (A1), but sector-wide sovereign risk elevated. Supplier concentration score: 8.7/10 critical.</span>}
                     </div>
                   </div>
                 </div>
@@ -664,15 +670,19 @@ export default function BoardsHomePage() {
                     <div className="group relative inline-flex items-center gap-1.5 cursor-help">
                       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0 group-hover:stroke-[#93c5fd] transition-colors"><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></svg>
                       <p className="text-xs text-[#e2e8f0]/80 leading-relaxed">Critical Vendor Cybersecurity Breach</p>
+                      {withMoodys && <span className="inline-flex items-center gap-0.5 rounded-full bg-[#002B5C] px-1.5 py-px text-[8px] font-bold text-white uppercase tracking-wider flex-shrink-0">M</span>}
                       <div className="absolute left-0 top-full mt-2 w-72 rounded-lg border border-[#334155] bg-[#1e293b] p-3 text-xs text-[#cbd5e1] leading-relaxed shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity z-20">
                         CloudSecure Inc. (our primary data processing vendor) disclosed a ransomware incident. They process customer PII under 3 of our data processing agreements.
+                        {withMoodys && <span className="block mt-2 text-[#93c5fd] border-t border-[#334155] pt-2">Moody&apos;s: CloudSecure Inc. credit rating B2 (negative watch). Cyber-risk adjusted vendor score: 3.1/10.</span>}
                       </div>
                     </div>
                     <div className="group relative inline-flex items-center gap-1.5 cursor-help">
                       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0 group-hover:stroke-[#93c5fd] transition-colors"><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></svg>
                       <p className="text-xs text-[#e2e8f0]/80 leading-relaxed">EU Digital Markets Act Enforcement Pattern</p>
+                      {withMoodys && <span className="inline-flex items-center gap-0.5 rounded-full bg-[#002B5C] px-1.5 py-px text-[8px] font-bold text-white uppercase tracking-wider flex-shrink-0">M</span>}
                       <div className="absolute left-0 top-full mt-2 w-72 rounded-lg border border-[#334155] bg-[#1e293b] p-3 text-xs text-[#cbd5e1] leading-relaxed shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity z-20">
                         EC initiated enforcement actions against 3 companies in our sector for DMA non-compliance. Pattern analysis suggests our EU operations may face similar scrutiny.
+                        {withMoodys && <span className="block mt-2 text-[#93c5fd] border-t border-[#334155] pt-2">Moody&apos;s: EU regulatory compliance risk sector assessment: elevated. 3 peer companies downgraded on DMA exposure.</span>}
                       </div>
                     </div>
                   </div>

@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { StakeholderFooter, PrototypeControlLink } from "../StakeholderFooter";
+import { useMoodysMode, MoodysToggle, MoodysBadge } from "../MoodysToggle";
 
 /* ------------------------------------------------------------------ */
 /*  Shared Utilities & Components                                      */
@@ -51,11 +52,12 @@ const workflowStages: WorkflowStage[] = [
 
 type SourceScanned = {
   name: string;
-  type: "news" | "regulatory" | "vendor" | "internal" | "financial";
+  type: "news" | "regulatory" | "vendor" | "internal" | "financial" | "credit";
   itemsScanned: number;
   risksFound: number;
   lastScan: string;
   coverage: string;
+  moodysOnly?: boolean;
 };
 
 const SOURCES_SCANNED: SourceScanned[] = [
@@ -115,6 +117,15 @@ const SOURCES_SCANNED: SourceScanned[] = [
     lastScan: "8:47 AM",
     coverage: "Supplier contracts, concentration analysis, geographic exposure",
   },
+  {
+    name: "Moody's Credit & Industry Risk Intelligence",
+    type: "credit",
+    itemsScanned: 1247,
+    risksFound: 2,
+    lastScan: "8:30 AM",
+    coverage: "Credit ratings, industry risk scores, probability of default models, supplier creditworthiness",
+    moodysOnly: true,
+  },
 ];
 
 const sourceTypeIcons: Record<string, { icon: React.ReactNode; color: string }> = {
@@ -161,6 +172,15 @@ const sourceTypeIcons: Record<string, { icon: React.ReactNode; color: string }> 
       </svg>
     ),
     color: "text-[#d29922] bg-[#d29922]/10",
+  },
+  credit: {
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <rect x="2" y="5" width="20" height="14" rx="2" />
+        <path d="M2 10h20" />
+      </svg>
+    ),
+    color: "text-[#79c0ff] bg-[#002B5C]/30",
   },
 };
 
@@ -246,11 +266,17 @@ const ACTIVITY_LOG = [
 export default function ReviewerPage() {
   const [expandedRisk, setExpandedRisk] = useState<number | null>(null);
   const [expandedSource, setExpandedSource] = useState<number | null>(null);
+  const [withMoodys, toggleMoodys] = useMoodysMode();
 
-  const totalItemsScanned = SOURCES_SCANNED.reduce((sum, s) => sum + s.itemsScanned, 0);
+  const activeSources = withMoodys ? SOURCES_SCANNED : SOURCES_SCANNED.filter((s) => !s.moodysOnly);
+  const totalItemsScanned = activeSources.reduce((sum, s) => sum + s.itemsScanned, 0);
+  const CONFIDENCE_DROP = withMoodys ? 0 : 12;
 
   return (
     <div className="min-h-screen bg-[#0d1117] flex flex-col">
+      {/* Moody's Toggle */}
+      <MoodysToggle withMoodys={withMoodys} onToggle={toggleMoodys} />
+
       {/* Prototype Nav - matches main Command Center */}
       <div className="w-full border-b border-[#30363d] bg-[#161b22]">
         <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-3">
@@ -338,8 +364,8 @@ export default function ReviewerPage() {
             <div className="grid grid-cols-4 gap-4 mb-6">
               <div className="rounded-xl border border-[#30363d] bg-[#0d1117] p-4">
                 <div className="text-[10px] font-medium uppercase tracking-wider text-[#484f58]">Sources Scanned</div>
-                <div className="mt-1 text-2xl font-bold text-[#f0f6fc]">{SOURCES_SCANNED.length}</div>
-                <div className="mt-1 text-xs text-[#8b949e]">News, regulatory, vendor data</div>
+                <div className="mt-1 text-2xl font-bold text-[#f0f6fc]">{activeSources.length}</div>
+                <div className="mt-1 text-xs text-[#8b949e]">{withMoodys ? "News, regulatory, vendor, credit data" : "News, regulatory, vendor data"}</div>
               </div>
               <div className="rounded-xl border border-[#30363d] bg-[#0d1117] p-4">
                 <div className="text-[10px] font-medium uppercase tracking-wider text-[#484f58]">Items Analyzed</div>
@@ -365,12 +391,12 @@ export default function ReviewerPage() {
                 <div className="flex items-center justify-between mb-4">
                   <div>
                     <h2 className="text-lg font-semibold text-[#f0f6fc]">Sources Scanned</h2>
-                    <p className="text-xs text-[#8b949e] mt-0.5">{totalItemsScanned.toLocaleString()} items across {SOURCES_SCANNED.length} sources</p>
+                    <p className="text-xs text-[#8b949e] mt-0.5">{totalItemsScanned.toLocaleString()} items across {activeSources.length} sources</p>
                   </div>
                 </div>
 
                 <div className="space-y-3">
-                  {SOURCES_SCANNED.map((source, idx) => {
+                  {activeSources.map((source, idx) => {
                     const typeConfig = sourceTypeIcons[source.type];
                     const isExpanded = expandedSource === idx;
                     return (
@@ -390,7 +416,7 @@ export default function ReviewerPage() {
                               {typeConfig.icon}
                             </div>
                             <div>
-                              <div className="text-sm font-medium text-[#f0f6fc]">{source.name}</div>
+                              <div className="text-sm font-medium text-[#f0f6fc] flex items-center gap-2">{source.name}{source.moodysOnly && <MoodysBadge />}</div>
                               <div className="text-[10px] text-[#6e7681] mt-0.5">
                                 {source.itemsScanned.toLocaleString()} items · Last: {source.lastScan}
                               </div>
@@ -497,7 +523,7 @@ export default function ReviewerPage() {
                                 </span>
                               </div>
                               <div className="text-[10px] text-[#6e7681] mt-0.5">
-                                {risk.source} · {risk.confidence}% confidence
+                                {risk.source} · {risk.confidence - CONFIDENCE_DROP}% confidence{!withMoodys && <span className="text-[#f85149]"> (−{CONFIDENCE_DROP}%)</span>}
                               </div>
                             </div>
                           </div>

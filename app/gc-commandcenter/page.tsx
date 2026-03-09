@@ -3,6 +3,7 @@
 import React, { useState, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { useMoodysMode, MoodysToggle } from "../superhero/MoodysToggle";
 // Tambo not available in VibeSharing - running in demo mode
 import {
   CanvasType,
@@ -2869,6 +2870,7 @@ function PageContent({ hasTamboProvider = false }: { hasTamboProvider?: boolean 
   const ceoApproved = searchParams.get("ceo_approved") === "1";
   const [edgarApproved, setEdgarApproved] = React.useState(false);
   const [vision, setVision] = React.useState<Vision>("near-term");
+  const [withMoodys, toggleMoodys] = useMoodysMode();
   const [activityOpen, setActivityOpen] = React.useState(false);
   const [hoveredAgent, setHoveredAgent] = React.useState<AgentStatus | null>(null);
   const [popoverPos, setPopoverPos] = React.useState({ x: 0, y: 0 });
@@ -3043,6 +3045,9 @@ function PageContent({ hasTamboProvider = false }: { hasTamboProvider?: boolean 
 
   return (
     <div className={cn("min-h-screen bg-[#0d1117]", showChat ? "pb-6" : "pb-28")}>
+      {/* Moody's Toggle */}
+      <MoodysToggle withMoodys={withMoodys} onToggle={toggleMoodys} />
+
       {/* Canvas overlay */}
       {activeCanvas !== "none" && renderCanvas()}
       

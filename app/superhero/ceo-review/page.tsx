@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { StakeholderFooter, PrototypeControlLink } from "../StakeholderFooter";
+import { useMoodysMode, MoodysToggleLight } from "../MoodysToggle";
 
 function cn(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
@@ -39,9 +40,11 @@ export default function CeoApprovalPage() {
   const [approved, setApproved] = useState<boolean | null>(null);
   const [showRequestChanges, setShowRequestChanges] = useState(false);
   const [additionalNotified, setAdditionalNotified] = useState(false);
+  const [withMoodys, toggleMoodys] = useMoodysMode();
 
   return (
     <div className="min-h-screen bg-[#0d1117] flex flex-col">
+      <MoodysToggleLight withMoodys={withMoodys} onToggle={toggleMoodys} />
       <div className="border-b-2 border-[#0ea5e9]/40 bg-[#e0f2fe] flex-shrink-0">
         <div className="border-b border-[#0ea5e9]/30 bg-[#bae6fd] px-4 py-2">
           <p className="text-[10px] font-medium uppercase tracking-widest text-[#0369a1]">Demo controls — not part of prototype</p>
@@ -258,7 +261,13 @@ export default function CeoApprovalPage() {
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
                           <p className="text-sm font-semibold text-[#065f46]">Diligent AI Verification</p>
-                          <span className="rounded-full bg-[#d1fae5] px-2 py-0.5 text-[10px] font-medium text-[#059669]">Passed</span>
+                          <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${withMoodys ? "bg-[#d1fae5] text-[#059669]" : "bg-[#fef3c7] text-[#b45309]"}`}>{withMoodys ? "Passed" : "Partial"}</span>
+                          {withMoodys && (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-[#002B5C] px-2 py-0.5 text-[9px] font-bold text-white uppercase tracking-wider">
+                              <svg width="10" height="10" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect width="24" height="24" rx="4" fill="#002B5C" /><text x="12" y="16" textAnchor="middle" fill="white" fontSize="10" fontWeight="800" fontFamily="Arial, sans-serif">M</text></svg>
+                              Moody&apos;s Enhanced
+                            </span>
+                          )}
                         </div>
                         <p className="text-xs text-[#047857] mb-3">Automated review of the 10-K risk factor draft found:</p>
                         <ul className="space-y-1.5">
@@ -274,6 +283,17 @@ export default function CeoApprovalPage() {
                             <svg className="w-3.5 h-3.5 mt-0.5 text-[#10b981] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
                             No conflicts with audited financial statements
                           </li>
+                          {withMoodys ? (
+                            <li className="flex items-start gap-2 text-xs text-[#065f46]">
+                              <svg className="w-3.5 h-3.5 mt-0.5 text-[#10b981] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
+                              Moody&apos;s credit rating consistency confirmed (supplier & vendor exposure validated)
+                            </li>
+                          ) : (
+                            <li className="flex items-start gap-2 text-xs text-[#92400e]">
+                              <svg className="w-3.5 h-3.5 mt-0.5 text-[#f59e0b] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><path d="M12 8v4M12 16h.01" /></svg>
+                              Credit rating consistency — requires Moody&apos;s data
+                            </li>
+                          )}
                         </ul>
                       </div>
                     </div>

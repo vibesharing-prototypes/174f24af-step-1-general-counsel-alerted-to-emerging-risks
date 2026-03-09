@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { StakeholderFooter, PrototypeControlLink } from "../StakeholderFooter";
+import { useMoodysMode, MoodysToggle, MoodysBadge } from "../MoodysToggle";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -247,10 +248,12 @@ function RiskCardItem({ risk }: { risk: RiskCard }) {
 
 export default function RiskDiscoveryDarkPage() {
   const [filter, setFilter] = useState<"all" | "new">("all");
+  const [withMoodys, toggleMoodys] = useMoodysMode();
   const displayed = filter === "new" ? RISKS.filter((r) => r.isNew) : RISKS;
 
   return (
     <div className="min-h-screen bg-[#0d1117] flex flex-col">
+      <MoodysToggle withMoodys={withMoodys} onToggle={toggleMoodys} />
       <div className="flex flex-1 overflow-hidden">
         {/* Icon Sidebar */}
         <IconSidebar />
@@ -296,16 +299,18 @@ export default function RiskDiscoveryDarkPage() {
                 <h2 className="text-sm font-bold text-[#f0f6fc]">Risks identified</h2>
               </div>
               <p className="text-[12px] text-[#6e7681] mb-4">
-                Source information from Moody&apos;s, 10-K reports, regulatory filings, and real-time news intelligence
+                {withMoodys
+                  ? <>Source information from Moody&apos;s, 10-K reports, regulatory filings, and real-time news intelligence</>
+                  : "Source information from 10-K reports, regulatory filings, and real-time news intelligence"}
               </p>
               <div className="grid grid-cols-4 gap-6">
                 <div>
                   <div className="text-[11px] text-[#484f58] font-medium mb-0.5">Discovered risks</div>
-                  <div className="text-lg font-bold text-[#f0f6fc]">98,120 risks</div>
+                  <div className="text-lg font-bold text-[#f0f6fc]">{withMoodys ? "98,120" : "41,200"} risks</div>
                 </div>
                 <div>
                   <div className="text-[11px] text-[#484f58] font-medium mb-0.5">Companies</div>
-                  <div className="text-lg font-bold text-[#f0f6fc]">2,755 companies</div>
+                  <div className="text-lg font-bold text-[#f0f6fc]">{withMoodys ? "2,755" : "1,180"} companies</div>
                 </div>
                 <div>
                   <div className="text-[11px] text-[#484f58] font-medium mb-0.5">Industries</div>
