@@ -147,6 +147,12 @@ const sections = [
         description: "Animated propagation from geopolitical signal to disclosure — 37 minutes across 5 enterprise functions.",
         href: "/superhero/risk-shockwave",
       },
+      {
+        id: "13f",
+        title: "Risk-to-Disclosure Pipeline",
+        description: "7-stage pipeline from external signal to GC decision — traceability, evidence chain, and AI-drafted disclosure.",
+        href: "/superhero/risk-pipeline",
+      },
     ],
   },
   {
