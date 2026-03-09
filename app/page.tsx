@@ -141,6 +141,34 @@ const sections = [
         description: "CEO disclosure approval page with pipeline status, documents, AI verification, and risk cards.",
         href: "/superhero/approval-status",
       },
+    ],
+  },
+  {
+    heading: "Committee Review & Filing",
+    steps: [
+      {
+        id: 14,
+        title: "GC Mobile Notification — CEO Approved",
+        description: "GC notified that CEO approved and wants additional committees to review.",
+        href: "/superhero/gc-notification/ceo-approved",
+      },
+      {
+        id: 15,
+        title: "Board Director Reviews in Boards",
+        description: "Board Director reviews 10-K risk factor update in Boards with GovernAI.",
+        href: "/superhero/board-governance",
+      },
+      {
+        id: 16,
+        title: "GC — All Committee Members Reviewed",
+        description: "GC sees all committee members reviewed, EDGAR filing package is ready.",
+        href: "/superhero/gc-committee-complete",
+      },
+    ],
+  },
+  {
+    heading: "Standalone Visualizations",
+    steps: [
       {
         id: "13c",
         title: "Risk Impact Visualization",
@@ -164,29 +192,6 @@ const sections = [
         title: "Risk-to-Disclosure Pipeline",
         description: "7-stage pipeline from external signal to GC decision — traceability, evidence chain, and AI-drafted disclosure.",
         href: "/superhero/risk-pipeline",
-      },
-    ],
-  },
-  {
-    heading: "Committee Review & Filing",
-    steps: [
-      {
-        id: 14,
-        title: "GC Mobile Notification — CEO Approved",
-        description: "GC notified that CEO approved and wants additional committees to review.",
-        href: "/superhero/gc-notification/ceo-approved",
-      },
-      {
-        id: 15,
-        title: "Board Director Reviews in Boards",
-        description: "Board Director reviews 10-K risk factor update in Boards with GovernAI.",
-        href: "/superhero/board-governance",
-      },
-      {
-        id: 16,
-        title: "GC — All Committee Members Reviewed",
-        description: "GC sees all committee members reviewed, EDGAR filing package is ready.",
-        href: "/superhero/gc-committee-complete",
       },
     ],
   },
