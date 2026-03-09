@@ -141,6 +141,12 @@ const sections = [
         description: "Cinematic visualization of financial exposure pulled toward major enterprise risks with scenario simulation.",
         href: "/superhero/risk-gravity",
       },
+      {
+        id: "13e",
+        title: "Risk Shockwave",
+        description: "Animated propagation from geopolitical signal to disclosure — 37 minutes across 5 enterprise functions.",
+        href: "/superhero/risk-shockwave",
+      },
     ],
   },
   {
