@@ -1,9 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMoodysMode, MoodysToggleLight } from "../MoodysToggle";
 
 function cn(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
@@ -289,25 +288,209 @@ const BOOKS = [
 ];
 
 /* ------------------------------------------------------------------ */
+/*  Agent Scan Sequence                                                */
+/* ------------------------------------------------------------------ */
+
+const SCAN_AGENTS = [
+  { id: "risk", label: "Risk Intelligence", detail: "Scanning global news feeds and media sources...", icon: "radar" },
+  { id: "vendor", label: "Vendor Intelligence", detail: "Monitoring third-party risk networks...", icon: "shield" },
+  { id: "reg", label: "Regulatory Watch", detail: "Reviewing SEC filings, EU regulatory databases...", icon: "file" },
+  { id: "board", label: "Board Materials Agent", detail: "Comparing board decks against regulatory findings...", icon: "layers" },
+  { id: "supply", label: "Supply Chain Data", detail: "Analyzing supplier contracts and geographic exposure...", icon: "link" },
+];
+
+function AgentIcon({ icon, size = 14, color = "currentColor" }: { icon: string; size?: number; color?: string }) {
+  const p = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: color, strokeWidth: 2, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
+  switch (icon) {
+    case "radar": return <svg {...p}><circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="3" /><path d="M12 2a10 10 0 0 1 10 10" /></svg>;
+    case "shield": return <svg {...p}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>;
+    case "file": return <svg {...p}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>;
+    case "layers": return <svg {...p}><polygon points="12 2 2 7 12 12 22 7 12 2" /><polyline points="2 17 12 22 22 17" /><polyline points="2 12 12 17 22 12" /></svg>;
+    case "link": return <svg {...p}><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" /></svg>;
+    default: return <svg {...p}><circle cx="12" cy="12" r="10" /></svg>;
+  }
+}
+
+type ScanPhase = "init" | "scanning" | "analyzing" | "detected" | "ready";
+
+function ScanSequence({ onComplete }: { onComplete: () => void }) {
+  const [phase, setPhase] = useState<ScanPhase>("init");
+  const [visibleAgents, setVisibleAgents] = useState(0);
+  const [completedAgents, setCompletedAgents] = useState(0);
+  const [anomalyCount, setAnomalyCount] = useState(0);
+
+  useEffect(() => {
+    const t1 = setTimeout(() => setPhase("scanning"), 800);
+    return () => clearTimeout(t1);
+  }, []);
+
+  useEffect(() => {
+    if (phase !== "scanning") return;
+    if (visibleAgents < SCAN_AGENTS.length) {
+      const t = setTimeout(() => setVisibleAgents((v) => v + 1), 900);
+      return () => clearTimeout(t);
+    }
+  }, [phase, visibleAgents]);
+
+  useEffect(() => {
+    if (phase !== "scanning") return;
+    if (visibleAgents > 0 && completedAgents < visibleAgents) {
+      const t = setTimeout(() => setCompletedAgents((v) => v + 1), 1400);
+      return () => clearTimeout(t);
+    }
+    if (completedAgents === SCAN_AGENTS.length) {
+      const t = setTimeout(() => setPhase("analyzing"), 600);
+      return () => clearTimeout(t);
+    }
+  }, [phase, visibleAgents, completedAgents]);
+
+  useEffect(() => {
+    if (phase !== "analyzing") return;
+    const t = setTimeout(() => setPhase("detected"), 1200);
+    return () => clearTimeout(t);
+  }, [phase]);
+
+  useEffect(() => {
+    if (phase !== "detected") return;
+    const steps = [1, 2, 3];
+    const timers = steps.map((n, i) =>
+      setTimeout(() => setAnomalyCount(n), (i + 1) * 400)
+    );
+    const final = setTimeout(() => {
+      setPhase("ready");
+      onComplete();
+    }, steps.length * 400 + 800);
+    return () => { timers.forEach(clearTimeout); clearTimeout(final); };
+  }, [phase, onComplete]);
+
+  return (
+    <div className="flex-1 flex flex-col px-6 py-8">
+      <div className="flex-1 flex flex-col items-center justify-center">
+      {/* Initializing */}
+      {phase === "init" && (
+        <div className="flex flex-col items-center gap-3 animate-pulse">
+          <div className="h-10 w-10 rounded-xl bg-[#1e293b] border border-[#334155] flex items-center justify-center">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
+          </div>
+          <p className="text-xs font-medium text-[#94a3b8]">Initializing GRC agents...</p>
+        </div>
+      )}
+
+      {/* Scanning */}
+      {(phase === "scanning" || phase === "analyzing" || phase === "detected" || phase === "ready") && (
+        <div className="w-full space-y-2.5">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-[#64748b] mb-3">
+            {phase === "scanning" ? "Scanning enterprise sources..." : phase === "analyzing" ? "Cross-referencing findings..." : "Scan complete"}
+          </p>
+
+          {SCAN_AGENTS.slice(0, visibleAgents).map((agent, i) => {
+            const done = i < completedAgents;
+            return (
+              <div
+                key={agent.id}
+                className="flex items-center gap-3 rounded-lg border px-3 py-2.5 transition-all duration-500"
+                style={{
+                  borderColor: done ? "#1e3a5f" : "#334155",
+                  background: done ? "#0f172a" : "#1e293b",
+                  opacity: 1,
+                }}
+              >
+                <div className={cn(
+                  "flex h-7 w-7 items-center justify-center rounded-lg flex-shrink-0 transition-colors",
+                  done ? "bg-[#052e16] border border-[#065f46]" : "bg-[#1e293b] border border-[#475569]"
+                )}>
+                  {done ? (
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#34d399" strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12" /></svg>
+                  ) : (
+                    <AgentIcon icon={agent.icon} size={12} color="#60a5fa" />
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-[11px] font-semibold text-[#e2e8f0]">{agent.label}</div>
+                  <div className="text-[10px] text-[#64748b] truncate">{agent.detail}</div>
+                </div>
+                {!done && (
+                  <div className="w-3 h-3 border-2 border-[#60a5fa] border-t-transparent rounded-full animate-spin flex-shrink-0" />
+                )}
+              </div>
+            );
+          })}
+
+          {/* Analyzing bar */}
+          {phase === "analyzing" && (
+            <div className="mt-4 rounded-lg border border-[#334155] bg-[#1e293b] p-3 flex items-center gap-3">
+              <div className="w-4 h-4 border-2 border-[#a78bfa] border-t-transparent rounded-full animate-spin flex-shrink-0" />
+              <p className="text-xs text-[#c4b5fd] font-medium">Cross-referencing board materials with regulatory findings...</p>
+            </div>
+          )}
+
+          {/* Anomalies detected */}
+          {(phase === "detected" || phase === "ready") && anomalyCount > 0 && (
+            <div className="mt-4 rounded-lg border border-[#dc2626]/50 bg-[#450a0a]/60 p-4 transition-all duration-500">
+              <div className="flex items-center gap-2.5 mb-2">
+                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[#dc2626] flex-shrink-0">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="M12 2L1 21h22L12 2zm0 4l7.53 13H4.47L12 6z" /><rect x="11" y="10" width="2" height="4" fill="white" /><rect x="11" y="16" width="2" height="2" fill="white" /></svg>
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-[#fca5a5]">{anomalyCount} {anomalyCount === 1 ? "risk" : "risks"} detected</p>
+                  <p className="text-[10px] text-[#f87171]/70">Not captured in current filings or board materials</p>
+                </div>
+              </div>
+              {anomalyCount >= 3 && (
+                <p className="text-[11px] text-[#fca5a5]/60 leading-relaxed">
+                  Loading risk details and recommendations...
+                </p>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+      </div>
+      {/* Skip button */}
+      <button
+        onClick={onComplete}
+        className="self-center text-[10px] text-[#475569] hover:text-[#94a3b8] transition-colors mt-4 pb-1"
+      >
+        Skip
+      </button>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
 /*  Page Component                                                     */
 /* ------------------------------------------------------------------ */
 
 export default function BoardsHomePage() {
   const [booksTab, setBooksTab] = useState<"all" | "books" | "reports">("all");
-  const [demoPanelOpen, setDemoPanelOpen] = useState(true);
-  const [withMoodys, toggleMoodys] = useMoodysMode();
+  const [demoPanelOpen, setDemoPanelOpen] = useState(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("demo-panel-open");
+      return stored === null ? true : stored === "true";
+    }
+    return true;
+  });
+
+  React.useEffect(() => {
+    localStorage.setItem("demo-panel-open", String(demoPanelOpen));
+  }, [demoPanelOpen]);
+  const [scanComplete, setScanComplete] = useState(false);
+  const [contentVisible, setContentVisible] = useState(false);
   const router = useRouter();
+
+  const handleScanComplete = React.useCallback(() => {
+    setScanComplete(true);
+    setTimeout(() => setContentVisible(true), 300);
+  }, []);
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
-      {/* Moody's Toggle */}
-      <MoodysToggleLight withMoodys={withMoodys} onToggle={toggleMoodys} />
       {/* Demo controls — matching gc-commandcenter */}
       <div className="border-b-2 border-[#0ea5e9]/40 bg-[#e0f2fe] flex-shrink-0">
         <div className="border-b border-[#0ea5e9]/30 bg-[#bae6fd] px-4 py-2 flex items-center justify-between">
-          <p className="text-[10px] font-medium uppercase tracking-widest text-[#0369a1]">
-            Demo controls — not part of prototype
-          </p>
+          <Link href="/" className="text-[10px] font-medium uppercase tracking-widest text-[#0369a1] hover:text-[#075985] transition-colors">
+            Diligent Prototype — For illustrative and alignment purposes
+          </Link>
           <button
             onClick={() => setDemoPanelOpen(!demoPanelOpen)}
             className="flex items-center gap-1 rounded px-2 py-0.5 text-[10px] font-medium text-[#0369a1] hover:bg-[#7dd3fc]/30 transition-colors"
@@ -615,21 +798,26 @@ export default function BoardsHomePage() {
       {/*  GRC Command Center Column — full browser height                     */}
       {/* ------------------------------------------------------------------ */}
       <aside className="w-[340px] flex-shrink-0 border-l border-[#1e293b] bg-[#0f172a] flex flex-col overflow-y-auto">
-          <div className="flex-1 space-y-4">
-            {/* Header */}
-            <div className="flex items-center justify-between px-4 pt-4">
-              <div className="flex items-center gap-2.5">
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#1e293b] border border-[#334155] p-1">
-                  <DiligentLogo className="h-4 w-4" />
-                </div>
-                <h2 className="text-sm font-semibold text-white">GRC Command Center</h2>
+          {/* Header — always visible */}
+          <div className="flex items-center justify-between px-4 pt-4 pb-3 flex-shrink-0">
+            <div className="flex items-center gap-2.5">
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#1e293b] border border-[#334155] p-1">
+                <DiligentLogo className="h-4 w-4" />
               </div>
-              <Link href="/gc-commandcenter" className="flex h-7 w-7 items-center justify-center rounded-lg text-[#64748b] hover:text-[#e2e8f0] hover:bg-[#1e293b] transition-colors" title="Open full screen">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 3 21 3 21 9" /><polyline points="9 21 3 21 3 15" /><line x1="21" y1="3" x2="14" y2="10" /><line x1="3" y1="21" x2="10" y2="14" /></svg>
-              </Link>
+              <h2 className="text-sm font-semibold text-white">GRC Command Center</h2>
             </div>
-            <div className="border-t border-[#334155]/60" />
+            <Link href="/gc-commandcenter" className="flex h-7 w-7 items-center justify-center rounded-lg text-[#64748b] hover:text-[#e2e8f0] hover:bg-[#1e293b] transition-colors" title="Open full screen">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 3 21 3 21 9" /><polyline points="9 21 3 21 3 15" /><line x1="21" y1="3" x2="14" y2="10" /><line x1="3" y1="21" x2="10" y2="14" /></svg>
+            </Link>
+          </div>
+          <div className="border-t border-[#334155]/60 flex-shrink-0" />
 
+          {/* Scan sequence or loaded content */}
+          {!scanComplete ? (
+            <ScanSequence onComplete={handleScanComplete} />
+          ) : (
+          <div className={cn("flex-1 flex flex-col transition-opacity duration-700", contentVisible ? "opacity-100" : "opacity-0")}>
+          <div className="flex-1 space-y-4 pt-4">
             {/* Emerging risks alert */}
             <div className="rounded-xl border border-[#dc2626]/30 bg-[#1c1017] p-4 space-y-3 mx-4">
               <div className="flex items-start gap-2.5">
@@ -643,7 +831,8 @@ export default function BoardsHomePage() {
               </div>
 
               <p className="text-xs text-[#e2e8f0]/60 leading-relaxed">
-                Your monitoring agents detected emerging risks that may not be adequately disclosed in current SEC filings or Board meeting materials. Review recommended before the Feb 28 Board meeting.
+                Your monitoring agents detected emerging risks that may not be adequately disclosed in current SEC filings or Board meeting materials. Review recommended before the Feb 28 Board meeting.{" "}
+                <Link href="/superhero/reviewer" className="text-[#60a5fa] hover:text-[#93c5fd] underline underline-offset-2 transition-colors">Review sources</Link>.
               </p>
 
               {/* Risk severity list with tooltips */}
@@ -655,10 +844,8 @@ export default function BoardsHomePage() {
                   <div className="group relative inline-flex items-center gap-1.5 pl-1 cursor-help">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0 group-hover:stroke-[#93c5fd] transition-colors"><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></svg>
                     <p className="text-xs text-[#e2e8f0]/80 leading-relaxed">Taiwan Strait Geopolitical Tensions</p>
-                    {withMoodys && <span className="inline-flex items-center gap-0.5 rounded-full bg-[#002B5C] px-1.5 py-px text-[8px] font-bold text-white uppercase tracking-wider flex-shrink-0">M</span>}
                     <div className="absolute left-0 top-full mt-2 w-72 rounded-lg border border-[#334155] bg-[#1e293b] p-3 text-xs text-[#cbd5e1] leading-relaxed shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity z-20">
                       Escalating tensions in the Taiwan Strait may disrupt semiconductor supply chain. 47% of our chip suppliers have Taiwan-based operations. Prior board materials (Q3) referenced Vietnam as diversification target under evaluation.
-                      {withMoodys && <span className="block mt-2 text-[#93c5fd] border-t border-[#334155] pt-2">Moody&apos;s: TSMC credit outlook stable (A1), but sector-wide sovereign risk elevated. Supplier concentration score: 8.7/10 critical.</span>}
                     </div>
                   </div>
                 </div>
@@ -670,31 +857,25 @@ export default function BoardsHomePage() {
                     <div className="group relative inline-flex items-center gap-1.5 cursor-help">
                       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0 group-hover:stroke-[#93c5fd] transition-colors"><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></svg>
                       <p className="text-xs text-[#e2e8f0]/80 leading-relaxed">Critical Vendor Cybersecurity Breach</p>
-                      {withMoodys && <span className="inline-flex items-center gap-0.5 rounded-full bg-[#002B5C] px-1.5 py-px text-[8px] font-bold text-white uppercase tracking-wider flex-shrink-0">M</span>}
                       <div className="absolute left-0 top-full mt-2 w-72 rounded-lg border border-[#334155] bg-[#1e293b] p-3 text-xs text-[#cbd5e1] leading-relaxed shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity z-20">
                         CloudSecure Inc. (our primary data processing vendor) disclosed a ransomware incident. They process customer PII under 3 of our data processing agreements.
-                        {withMoodys && <span className="block mt-2 text-[#93c5fd] border-t border-[#334155] pt-2">Moody&apos;s: CloudSecure Inc. credit rating B2 (negative watch). Cyber-risk adjusted vendor score: 3.1/10.</span>}
                       </div>
                     </div>
                     <div className="group relative inline-flex items-center gap-1.5 cursor-help">
                       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0 group-hover:stroke-[#93c5fd] transition-colors"><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></svg>
                       <p className="text-xs text-[#e2e8f0]/80 leading-relaxed">EU Digital Markets Act Enforcement Pattern</p>
-                      {withMoodys && <span className="inline-flex items-center gap-0.5 rounded-full bg-[#002B5C] px-1.5 py-px text-[8px] font-bold text-white uppercase tracking-wider flex-shrink-0">M</span>}
                       <div className="absolute left-0 top-full mt-2 w-72 rounded-lg border border-[#334155] bg-[#1e293b] p-3 text-xs text-[#cbd5e1] leading-relaxed shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity z-20">
                         EC initiated enforcement actions against 3 companies in our sector for DMA non-compliance. Pattern analysis suggests our EU operations may face similar scrutiny.
-                        {withMoodys && <span className="block mt-2 text-[#93c5fd] border-t border-[#334155] pt-2">Moody&apos;s: EU regulatory compliance risk sector assessment: elevated. 3 peer companies downgraded on DMA exposure.</span>}
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Review Sources */}
-              <div className="pt-1">
-                <Link href="/superhero/reviewer" className="inline-flex items-center gap-1.5 rounded-lg border border-[#475569] bg-[#1e293b] px-3 py-1.5 text-xs font-medium text-[#60a5fa] hover:bg-[#334155] hover:border-[#60a5fa] transition-all">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
-                  Review Sources
-                </Link>
+              {/* Status note */}
+              <div className="flex items-center gap-2 pt-1 rounded-md bg-[#1e293b]/50 px-2.5 py-2 border border-[#334155]/50">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0"><polyline points="20 6 9 17 4 12" /></svg>
+                <p className="text-[11px] text-[#64748b] leading-snug">Risk Essentials AI has been updated and the risk team has been notified.</p>
               </div>
 
               {/* Recommendation */}
@@ -703,7 +884,7 @@ export default function BoardsHomePage() {
                 <div className="space-y-1.5 text-xs text-[#e2e8f0]/70 leading-relaxed">
                   <div className="flex gap-1.5">
                     <span className="flex-shrink-0">1.</span>
-                    <span>Assign Risk Owners to provide context and point of view</span>
+                    <span><Link href="/superhero/boards-assign" className="text-[#60a5fa] hover:text-[#93c5fd] underline underline-offset-2 transition-colors">Assign Risk Owners</Link> to provide context and point of view</span>
                   </div>
                   <div className="flex gap-1.5">
                     <span className="flex-shrink-0">2.</span>
@@ -743,7 +924,7 @@ export default function BoardsHomePage() {
           </div>
 
           {/* Prompt box pinned to bottom */}
-          <div className="border-t border-[#334155] bg-[#1e293b] p-4">
+          <div className="border-t border-[#334155] bg-[#1e293b] p-4 flex-shrink-0">
             <div className="relative">
               <input
                 type="text"
@@ -751,7 +932,7 @@ export default function BoardsHomePage() {
                 className="w-full rounded-full border border-[#475569] bg-[#0f172a] pl-4 pr-10 py-2.5 text-xs text-[#e2e8f0] placeholder-[#64748b] focus:border-[#3b82f6] focus:outline-none focus:ring-1 focus:ring-[#3b82f6]"
               />
               <button
-                onClick={() => router.push("/superhero/coordinator")}
+                onClick={() => router.push("/superhero/boards-assign")}
                 className="absolute right-1.5 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-full bg-[#3b82f6] text-white hover:bg-[#2563eb] transition-colors"
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" /></svg>
@@ -762,6 +943,8 @@ export default function BoardsHomePage() {
               <button className="font-medium underline hover:text-[#94a3b8]">Learn more</button>
             </p>
           </div>
+          </div>
+          )}
         </aside>
       </div>{/* end main layout row */}
     </div>
