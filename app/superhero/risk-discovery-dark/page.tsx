@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { StakeholderFooter, PrototypeControlLink } from "../StakeholderFooter";
-import { useMoodysMode, MoodysToggle, MoodysBadge } from "../MoodysToggle";
+import { useMoodysMode, MoodysToggle, MoodysBadge, MoodysSourceChip } from "../MoodysToggle";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -18,6 +18,7 @@ interface RiskCard {
   description: string;
   isNew: boolean;
   aiGenerated: boolean;
+  moodysSignals?: string[];
 }
 
 /* ------------------------------------------------------------------ */
@@ -35,6 +36,7 @@ const RISKS: RiskCard[] = [
       "Escalating military posturing in the Taiwan Strait creates material risk to semiconductor supply chains. Approximately 47% of critical chip suppliers operate in Taiwan. Disruption could impact $1.8B in annual product revenue across two major product lines.",
     isNew: true,
     aiGenerated: true,
+    moodysSignals: ["Moody\u2019s sector outlook", "Moody\u2019s credit signal", "Moody\u2019s issuer event"],
   },
   {
     id: "vendor",
@@ -46,6 +48,7 @@ const RISKS: RiskCard[] = [
       "CloudSecure Inc. (primary data processing vendor) disclosed a ransomware incident affecting customer data pipelines. They process customer PII under 3 of our data processing agreements. Elevated per CRO assessment; added to Top 5 risk register.",
     isNew: true,
     aiGenerated: true,
+    moodysSignals: ["Moody\u2019s credit signal", "Moody\u2019s vendor stress"],
   },
   {
     id: "eu-dma",
@@ -57,6 +60,7 @@ const RISKS: RiskCard[] = [
       "EC initiated enforcement actions against 3 companies in our sector for DMA non-compliance. Pattern analysis suggests our EU operations may face similar scrutiny. Potential fines up to 10% of global turnover.",
     isNew: true,
     aiGenerated: true,
+    moodysSignals: ["Moody\u2019s sector outlook", "Moody\u2019s issuer event"],
   },
   {
     id: "ai-reg",
@@ -166,7 +170,7 @@ function AISparkle({ size = 16, color = "#6e7681" }: { size?: number; color?: st
 /*  Risk Card Component (Dark)                                         */
 /* ------------------------------------------------------------------ */
 
-function RiskCardItem({ risk }: { risk: RiskCard }) {
+function RiskCardItem({ risk, withMoodys }: { risk: RiskCard; withMoodys: boolean }) {
   const sc = SEVERITY_COLORS[risk.severity];
   const [tooltipOpen, setTooltipOpen] = useState(false);
 
@@ -220,7 +224,15 @@ function RiskCardItem({ risk }: { risk: RiskCard }) {
       </h3>
 
       {/* Source */}
-      <p className="text-[11px] text-[#6e7681] mb-3">{risk.source}</p>
+      <p className="text-[11px] text-[#6e7681] mb-1">{risk.source}</p>
+      {withMoodys && risk.moodysSignals && risk.moodysSignals.length > 0 && (
+        <div className="flex flex-wrap gap-1 mb-3">
+          {risk.moodysSignals.map((sig) => (
+            <MoodysSourceChip key={sig} label={sig} />
+          ))}
+        </div>
+      )}
+      {(!withMoodys || !risk.moodysSignals || risk.moodysSignals.length === 0) && <div className="mb-2" />}
 
       {/* Description */}
       <p className="text-[12px] text-[#8b949e] leading-relaxed flex-1 mb-4">
@@ -369,7 +381,7 @@ export default function RiskDiscoveryDarkPage() {
             {/* Risk card grid */}
             <div className="grid grid-cols-3 gap-5 mb-8">
               {displayed.map((risk) => (
-                <RiskCardItem key={risk.id} risk={risk} />
+                <RiskCardItem key={risk.id} risk={risk} withMoodys={withMoodys} />
               ))}
             </div>
 

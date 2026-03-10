@@ -1,7 +1,18 @@
 "use client";
 
+/* ------------------------------------------------------------------ */
+/*  MOODY'S EVIDENCE: Gravity Map View                                 */
+/*  Detail panel: external risk indicators per risk cluster            */
+/*    - Taiwan: sector stress elevated, credit watch negative,         */
+/*      concentration risk high                                        */
+/*    - Energy: commodity price stress, hedging counterparty risk      */
+/*    - EU: regulatory enforcement trend, peer downgrade pattern       */
+/*  Header: Moody's intelligence source count stat chip                */
+/* ------------------------------------------------------------------ */
+
 import React, { useState } from "react";
 import { StakeholderFooter, PrototypeControlLink } from "../StakeholderFooter";
+import { useMoodysMode, MoodysToggle, MoodysConfidencePanel, MoodysSourceChip } from "../MoodysToggle";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -21,6 +32,11 @@ interface Control {
   active: boolean;
 }
 
+interface MoodysIndicator {
+  label: string;
+  status: "confirmed" | "elevated" | "warning";
+}
+
 interface Risk {
   id: RiskId;
   title: string;
@@ -33,6 +49,7 @@ interface Risk {
   nodes: BusinessNode[];
   controls: Control[];
   description: string;
+  moodysIndicators: MoodysIndicator[];
 }
 
 /* ------------------------------------------------------------------ */
@@ -60,6 +77,12 @@ const RISKS: Risk[] = [
       { label: "Geopolitical Monitoring", active: true },
       { label: "Secondary Supplier", active: false },
     ],
+    moodysIndicators: [
+      { label: "Semiconductor sector stress: Elevated (78/100)", status: "elevated" },
+      { label: "Supplier credit watch: Negative (3 of 5)", status: "warning" },
+      { label: "Concentration risk: High — single region", status: "warning" },
+      { label: "Sovereign risk assessment: Negative outlook", status: "elevated" },
+    ],
   },
   {
     id: "energy",
@@ -81,6 +104,10 @@ const RISKS: Risk[] = [
       { label: "Energy Diversification", active: true },
       { label: "Demand Response", active: false },
     ],
+    moodysIndicators: [
+      { label: "Commodity price stress: Moderate", status: "elevated" },
+      { label: "Hedging counterparty risk: Stable", status: "confirmed" },
+    ],
   },
   {
     id: "eu",
@@ -101,6 +128,11 @@ const RISKS: Risk[] = [
       { label: "Compliance Monitoring", active: true },
       { label: "DMA Gap Assessment", active: false },
       { label: "EU Legal Counsel", active: true },
+    ],
+    moodysIndicators: [
+      { label: "Regulatory enforcement trend: Increasing", status: "elevated" },
+      { label: "Peer downgrade pattern: 3 companies in sector", status: "warning" },
+      { label: "EU compliance cost outlook: Rising", status: "elevated" },
     ],
   },
 ];
@@ -360,9 +392,11 @@ function GravityMap({
 function DetailPanel({
   risk,
   simActive,
+  withMoodys,
 }: {
   risk: Risk;
   simActive: Set<string>;
+  withMoodys: boolean;
 }) {
   const sc = SEVERITY_COLORS[risk.severity];
 
@@ -448,6 +482,11 @@ function DetailPanel({
           ))}
         </div>
       </div>
+
+      {/* Moody's External Risk Indicators */}
+      {withMoodys && risk.moodysIndicators.length > 0 && (
+        <MoodysConfidencePanel items={risk.moodysIndicators} />
+      )}
     </div>
   );
 }
@@ -459,6 +498,7 @@ function DetailPanel({
 export default function RiskGravityPage() {
   const [selected, setSelected] = useState<RiskId>("taiwan");
   const [simActive, setSimActive] = useState<Set<string>>(new Set());
+  const [withMoodys, toggleMoodys] = useMoodysMode();
 
   const toggleSim = (id: string) => {
     setSimActive((prev) => {
@@ -485,6 +525,7 @@ export default function RiskGravityPage() {
 
   return (
     <div className="min-h-screen bg-[#0d1117] text-[#c9d1d9] flex flex-col">
+      <MoodysToggle withMoodys={withMoodys} onToggle={toggleMoodys} />
       <div className="flex-1">
         {/* ========================================================== */}
         {/*  HEADER                                                     */}
@@ -511,6 +552,11 @@ export default function RiskGravityPage() {
                 <span className="text-[10px] font-semibold text-[#6e7681] uppercase">Highest Concentration</span>
                 <span className="text-sm font-extrabold text-[#fbbf24]">Asia-Pacific</span>
               </div>
+              {withMoodys && (
+                <div className="flex items-center gap-2 rounded-lg border border-[#002B5C]/40 bg-[#002B5C]/10 px-3.5 py-2">
+                  <MoodysSourceChip label="External intelligence active" />
+                </div>
+              )}
             </div>
           </div>
         </header>
@@ -612,7 +658,7 @@ export default function RiskGravityPage() {
                 })}
               </div>
 
-              <DetailPanel risk={selectedRisk} simActive={simActive} />
+              <DetailPanel risk={selectedRisk} simActive={simActive} withMoodys={withMoodys} />
             </div>
           </div>
         </div>

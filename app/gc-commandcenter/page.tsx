@@ -3,7 +3,7 @@
 import React, { useState, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { useMoodysMode, MoodysToggle } from "../superhero/MoodysToggle";
+import { useMoodysMode, MoodysToggle, MoodysEvidenceCard } from "../superhero/MoodysToggle";
 // Tambo not available in VibeSharing - running in demo mode
 import {
   CanvasType,
@@ -1998,6 +1998,7 @@ function DashboardContent({
   onPromptSubmit,
   promptLoading = false,
   promptSuggestions = [],
+  withMoodys = true,
 }: {
   ceoApproved?: boolean;
   edgarApproved?: boolean;
@@ -2024,6 +2025,7 @@ function DashboardContent({
   onPromptSubmit?: (message: string) => void;
   promptLoading?: boolean;
   promptSuggestions?: string[];
+  withMoodys?: boolean;
 }) {
   const isIphone = device === "iphone";
   const isIpad = device === "ipad";
@@ -2485,6 +2487,33 @@ Regulatory and Compliance Risks — We are subject to evolving regulatory framew
                   </p>
                 </Card>
               ))}
+            </div>
+          </section>
+        )}
+
+        {/* External Risk Evidence — Moody's intelligence module */}
+        {withMoodys && !ceoApproved && !isIphone && (
+          <section className="mt-6">
+            <div className="flex items-center gap-2 mb-3">
+              <svg width="14" height="14" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect width="24" height="24" rx="4" fill="#002B5C" /><text x="12" y="16" textAnchor="middle" fill="white" fontSize="10" fontWeight="800" fontFamily="Arial, sans-serif">M</text></svg>
+              <h2 className="text-xs font-bold text-[#79c0ff] uppercase tracking-wider">External Risk Evidence — Moody&apos;s</h2>
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+              <MoodysEvidenceCard
+                title="Semiconductor Sector Risk: Increasing"
+                detail="Geopolitical instability driving sector stress index to 78/100. Elevated probability of supply disruption across Taiwan-dependent manufacturers."
+                type="Moody's Industry Outlook"
+              />
+              <MoodysEvidenceCard
+                title="Critical Supplier: Negative Watch"
+                detail="3 of 5 key semiconductor suppliers placed on negative credit watch. TSMC sovereign risk assessment shifted from stable to negative."
+                type="Moody's Credit Signal"
+              />
+              <MoodysEvidenceCard
+                title="Concentration Risk: High"
+                detail="47% single-region dependency exceeds Moody's concentration threshold. Peer companies with similar exposure have begun diversification disclosures."
+                type="Moody's Concentration Insight"
+              />
             </div>
           </section>
         )}
@@ -3021,6 +3050,7 @@ function PageContent({ hasTamboProvider = false }: { hasTamboProvider?: boolean 
     onPromptSubmit: handlePromptSubmit,
     promptLoading,
     promptSuggestions,
+    withMoodys,
   };
 
   // Render active canvas

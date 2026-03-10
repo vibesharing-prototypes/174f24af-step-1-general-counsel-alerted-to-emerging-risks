@@ -1,7 +1,16 @@
 "use client";
 
+/* ------------------------------------------------------------------ */
+/*  MOODY'S EVIDENCE: Shockwave View                                   */
+/*  Waves 1–2: Moody's supplier credit quality + sector stress         */
+/*  Wave 3: Moody's confirms elevated default likelihood               */
+/*  Wave 4–5: Moody's context accelerates governance escalation        */
+/*  Detail panel: Moody's evidence card when wave ≥ 2                  */
+/* ------------------------------------------------------------------ */
+
 import React, { useState, useEffect, useCallback } from "react";
 import { StakeholderFooter, PrototypeControlLink } from "../StakeholderFooter";
+import { useMoodysMode, MoodysToggle, MoodysEvidenceCard, MoodysSourceChip } from "../MoodysToggle";
 
 /* ------------------------------------------------------------------ */
 /*  Types & Data                                                       */
@@ -23,6 +32,7 @@ interface Wave {
   timestamp: string;
   elapsed: string;
   outputs: WaveOutput[];
+  moodysInsight?: { title: string; detail: string; type: string };
 }
 
 const WAVES: Wave[] = [
@@ -39,6 +49,11 @@ const WAVES: Wave[] = [
       { label: "Taiwan semiconductor suppliers flagged", value: "47% concentration", status: "complete" },
       { label: "Production dependency detected", value: "$1.8B exposed", status: "complete" },
     ],
+    moodysInsight: {
+      title: "Supplier Credit Quality: Deteriorating",
+      detail: "Moody\u2019s rates 3 of 5 key Taiwan suppliers on negative credit watch. Sector sovereign risk assessment elevated from stable to negative.",
+      type: "Moody\u2019s Credit Signal",
+    },
   },
   {
     id: 2,
@@ -54,6 +69,11 @@ const WAVES: Wave[] = [
       { label: "Product Y manufacturing risk", value: "$850M", status: "complete" },
       { label: "Inventory coverage remaining", value: "63 days", status: "active" },
     ],
+    moodysInsight: {
+      title: "Industry Concentration: Critical",
+      detail: "Moody\u2019s semiconductor sector stress index at 78/100 (elevated). Single-region dependency exceeds Moody\u2019s concentration threshold for material risk classification.",
+      type: "Moody\u2019s Sector Outlook",
+    },
   },
   {
     id: 3,
@@ -69,6 +89,11 @@ const WAVES: Wave[] = [
       { label: "Geopolitical monitoring", value: "Active", status: "active" },
       { label: "Secondary supplier control", value: "Missing", status: "missing" },
     ],
+    moodysInsight: {
+      title: "Default Likelihood: Increased",
+      detail: "Moody\u2019s probability of default model shows 2.3x increase for suppliers with >60% Taiwan production exposure. Existing controls insufficient without secondary supplier qualification.",
+      type: "Moody\u2019s Risk Assessment",
+    },
   },
   {
     id: 4,
@@ -99,6 +124,11 @@ const WAVES: Wave[] = [
       { label: "AI drafted disclosure language", value: "Generated", status: "complete" },
       { label: "GC review initiated", value: "Pending", status: "pending" },
     ],
+    moodysInsight: {
+      title: "Peer Disclosure Context",
+      detail: "Moody\u2019s issuer intelligence: 2 of 3 peer companies (Apple, Nvidia) have disclosed Taiwan supply chain exposure in recent filings. Delayed disclosure may weaken defensibility.",
+      type: "Moody\u2019s Issuer Event",
+    },
   },
 ];
 
@@ -309,7 +339,7 @@ function ShockwaveRings({
 /*  Detail Panel                                                       */
 /* ------------------------------------------------------------------ */
 
-function WaveDetailPanel({ wave }: { wave: Wave }) {
+function WaveDetailPanel({ wave, withMoodys }: { wave: Wave; withMoodys: boolean }) {
   return (
     <div
       className="rounded-xl border p-5 transition-all duration-300"
@@ -347,6 +377,17 @@ function WaveDetailPanel({ wave }: { wave: Wave }) {
           </div>
         ))}
       </div>
+
+      {/* Moody's evidence — shows when toggle is on and wave has insight */}
+      {withMoodys && wave.moodysInsight && (
+        <div className="mt-3">
+          <MoodysEvidenceCard
+            title={wave.moodysInsight.title}
+            detail={wave.moodysInsight.detail}
+            type={wave.moodysInsight.type}
+          />
+        </div>
+      )}
     </div>
   );
 }
@@ -429,6 +470,7 @@ function PlaybackControls({
 export default function RiskShockwavePage() {
   const [activeWave, setActiveWave] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [withMoodys, toggleMoodys] = useMoodysMode();
 
   const step = useCallback(
     (dir: number) => {
@@ -456,6 +498,7 @@ export default function RiskShockwavePage() {
 
   return (
     <div className="min-h-screen bg-[#0d1117] text-[#c9d1d9] flex flex-col">
+      <MoodysToggle withMoodys={withMoodys} onToggle={toggleMoodys} />
       <div className="flex-1">
         {/* ========================================================== */}
         {/*  HEADER                                                     */}
@@ -596,7 +639,7 @@ export default function RiskShockwavePage() {
               </div>
 
               {/* Active Wave Detail */}
-              {currentWave && <WaveDetailPanel wave={currentWave} />}
+              {currentWave && <WaveDetailPanel wave={currentWave} withMoodys={withMoodys} />}
 
               {/* Timeline progress */}
               {activeWave === 0 && (

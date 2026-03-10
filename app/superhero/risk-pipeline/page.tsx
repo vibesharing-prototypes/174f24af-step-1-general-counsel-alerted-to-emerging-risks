@@ -1,7 +1,18 @@
 "use client";
 
+/* ------------------------------------------------------------------ */
+/*  MOODY'S EVIDENCE: Pipeline View                                    */
+/*  Stage 1 (Signal Detection): Moody's credit signal + sector outlook */
+/*    as additional inputs and output                                   */
+/*  Stage 2 (Exposure Mapping): Moody's concentration data as input    */
+/*  Stage 6 (Disclosure Assessment): Moody's peer/industry context     */
+/*    strengthens materiality rationale                                 */
+/*  Evidence drawer: Moody's artifacts at stages 1, 2, 6              */
+/* ------------------------------------------------------------------ */
+
 import React, { useState } from "react";
 import { StakeholderFooter, PrototypeControlLink } from "../StakeholderFooter";
+import { useMoodysMode, MoodysToggle, MoodysEvidenceCard, MoodysSourceChip } from "../MoodysToggle";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -26,6 +37,8 @@ interface Stage {
   outputs: StageItem[];
   status: "complete" | "active" | "pending";
   aiAssisted: boolean;
+  moodysInputs?: string[];
+  moodysOutput?: StageItem;
 }
 
 interface Evidence {
@@ -34,6 +47,7 @@ interface Evidence {
   type: string;
   stage: number;
   summary: string;
+  isMoodys?: boolean;
 }
 
 /* ------------------------------------------------------------------ */
@@ -58,6 +72,8 @@ const STAGES: Stage[] = [
     ],
     status: "complete",
     aiAssisted: true,
+    moodysInputs: ["Moody\u2019s sector outlook", "Moody\u2019s credit signal"],
+    moodysOutput: { label: "Moody\u2019s: Semiconductor sector stress elevated", value: "78/100", status: "complete" },
   },
   {
     id: 2,
@@ -77,6 +93,8 @@ const STAGES: Stage[] = [
     ],
     status: "complete",
     aiAssisted: true,
+    moodysInputs: ["Moody\u2019s concentration data", "Moody\u2019s issuer intelligence"],
+    moodysOutput: { label: "Moody\u2019s: Supplier credit watch — 3 of 5 negative", value: "High", status: "complete" },
   },
   {
     id: 3,
@@ -149,6 +167,8 @@ const STAGES: Stage[] = [
     ],
     status: "complete",
     aiAssisted: true,
+    moodysInputs: ["Moody\u2019s sector commentary", "Moody\u2019s peer exposure data"],
+    moodysOutput: { label: "Moody\u2019s: Sector risk warrants disclosure per industry pattern", value: "Confirmed", status: "complete" },
   },
   {
     id: 7,
@@ -205,6 +225,30 @@ const EVIDENCE: Evidence[] = [
     type: "Competitive Intelligence",
     stage: 6,
     summary: "Apple and Nvidia have disclosed Taiwan Strait supply chain exposure in recent 10-K filings. AMD disclosure is pending. Delayed disclosure may signal governance weakness.",
+  },
+  {
+    id: "ev-m1",
+    title: "Moody\u2019s Semiconductor Sector Outlook",
+    type: "Moody\u2019s Sector Outlook",
+    stage: 1,
+    summary: "Sector stress index at 78/100 (elevated). Geopolitical instability driving increased default probability for Taiwan-dependent manufacturers. Sovereign risk assessment shifted to negative.",
+    isMoodys: true,
+  },
+  {
+    id: "ev-m2",
+    title: "Moody\u2019s Supplier Credit Watch Report",
+    type: "Moody\u2019s Credit Signal",
+    stage: 2,
+    summary: "3 of 5 key semiconductor suppliers placed on negative credit watch. TSMC (A1) remains stable but sector-wide sovereign risk elevated. Concentration score: 8.7/10 critical.",
+    isMoodys: true,
+  },
+  {
+    id: "ev-m3",
+    title: "Moody\u2019s Peer Disclosure Analysis",
+    type: "Moody\u2019s Issuer Event",
+    stage: 6,
+    summary: "Moody\u2019s issuer intelligence confirms 2 of 3 peer companies disclosed similar Taiwan supply chain exposure in recent filings. Industry pattern supports material risk classification.",
+    isMoodys: true,
   },
 ];
 
@@ -268,11 +312,13 @@ function StageCard({
   isSelected,
   onSelect,
   isLast,
+  withMoodys,
 }: {
   stage: Stage;
   isSelected: boolean;
   onSelect: () => void;
   isLast: boolean;
+  withMoodys: boolean;
 }) {
   return (
     <div className="flex">
@@ -352,6 +398,11 @@ function StageCard({
                   <span className="text-[11px] text-[#6e7681]">{inp}</span>
                 </div>
               ))}
+              {withMoodys && stage.moodysInputs && stage.moodysInputs.map((mi, i) => (
+                <div key={`m-${i}`} className="mt-0.5">
+                  <MoodysSourceChip label={mi} />
+                </div>
+              ))}
             </div>
           </div>
           {/* Outputs */}
@@ -365,6 +416,13 @@ function StageCard({
                   {out.value && <span className="text-[11px] font-bold text-[#f0f6fc] flex-shrink-0">{out.value}</span>}
                 </div>
               ))}
+              {withMoodys && stage.moodysOutput && (
+                <div className="flex items-center gap-1.5 rounded-md border border-[#002B5C]/30 bg-[#002B5C]/10 px-1.5 py-1">
+                  <StatusLabel status={stage.moodysOutput.status} />
+                  <span className="text-[11px] text-[#79c0ff] flex-1 min-w-0 truncate">{stage.moodysOutput.label}</span>
+                  {stage.moodysOutput.value && <span className="text-[11px] font-bold text-[#79c0ff] flex-shrink-0">{stage.moodysOutput.value}</span>}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -463,10 +521,11 @@ function DecisionPanel({ decision, setDecision }: { decision: string | null; set
 /*  Evidence Drawer                                                    */
 /* ------------------------------------------------------------------ */
 
-function EvidenceDrawer({ evidence, selectedStage }: { evidence: Evidence[]; selectedStage: number }) {
+function EvidenceDrawer({ evidence, selectedStage, withMoodys }: { evidence: Evidence[]; selectedStage: number; withMoodys: boolean }) {
   const [open, setOpen] = useState(false);
-  const filtered = evidence.filter((e) => e.stage === selectedStage);
-  const shown = open ? evidence : filtered;
+  const visibleEvidence = withMoodys ? evidence : evidence.filter((e) => !e.isMoodys);
+  const filtered = visibleEvidence.filter((e) => e.stage === selectedStage);
+  const shown = open ? visibleEvidence : filtered;
 
   return (
     <div className="rounded-xl border border-[#30363d] bg-[#161b22] p-5">
@@ -476,7 +535,7 @@ function EvidenceDrawer({ evidence, selectedStage }: { evidence: Evidence[]; sel
             <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
           </svg>
           <h3 className="text-xs font-bold text-[#f0f6fc]">Evidence Chain</h3>
-          <span className="text-[10px] text-[#6e7681]">{evidence.length} artifacts</span>
+          <span className="text-[10px] text-[#6e7681]">{visibleEvidence.length} artifacts</span>
         </div>
         <button
           onClick={() => setOpen(!open)}
@@ -508,7 +567,11 @@ function EvidenceDrawer({ evidence, selectedStage }: { evidence: Evidence[]; sel
                   <span className="text-[10px] font-bold text-[#f0f6fc]">{ev.title}</span>
                 </div>
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="text-[9px] font-semibold text-[#484f58] uppercase">{ev.type}</span>
+                  {ev.isMoodys ? (
+                    <MoodysSourceChip label={ev.type} />
+                  ) : (
+                    <span className="text-[9px] font-semibold text-[#484f58] uppercase">{ev.type}</span>
+                  )}
                 </div>
                 <p className="text-[11px] text-[#8b949e] leading-relaxed">{ev.summary}</p>
               </div>
@@ -527,9 +590,11 @@ function EvidenceDrawer({ evidence, selectedStage }: { evidence: Evidence[]; sel
 export default function RiskPipelinePage() {
   const [selectedStage, setSelectedStage] = useState(7);
   const [decision, setDecision] = useState<string | null>("disclose");
+  const [withMoodys, toggleMoodys] = useMoodysMode();
 
   return (
     <div className="min-h-screen bg-[#0d1117] text-[#c9d1d9] flex flex-col">
+      <MoodysToggle withMoodys={withMoodys} onToggle={toggleMoodys} />
       <div className="flex-1">
         {/* ========================================================== */}
         {/*  HEADER                                                     */}
@@ -579,6 +644,7 @@ export default function RiskPipelinePage() {
                   isSelected={selectedStage === stage.id}
                   onSelect={() => setSelectedStage(stage.id)}
                   isLast={i === STAGES.length - 1}
+                  withMoodys={withMoodys}
                 />
               ))}
             </div>
@@ -586,7 +652,7 @@ export default function RiskPipelinePage() {
             {/* Right: Decision + Evidence */}
             <div className="w-[380px] flex-shrink-0 space-y-5">
               <DecisionPanel decision={decision} setDecision={setDecision} />
-              <EvidenceDrawer evidence={EVIDENCE} selectedStage={selectedStage} />
+              <EvidenceDrawer evidence={EVIDENCE} selectedStage={selectedStage} withMoodys={withMoodys} />
             </div>
           </div>
         </div>
