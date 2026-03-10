@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { StakeholderFooter, PrototypeControlLink } from "../StakeholderFooter";
 
 /* ------------------------------------------------------------------ */
@@ -132,39 +133,110 @@ function TimelineIcon({ icon, color }: { icon: string; color: string }) {
 }
 
 /* ------------------------------------------------------------------ */
+/*  Icon Sidebar (matches Risk Essentials)                             */
+/* ------------------------------------------------------------------ */
+
+function IconSidebar() {
+  const icons = [
+    { id: "home", active: false, el: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg> },
+    { id: "grc", active: true, el: <span className="text-[11px] font-extrabold">G</span> },
+    { id: "chart", active: false, el: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M18 20V10" /><path d="M12 20V4" /><path d="M6 20v-6" /></svg> },
+    { id: "board", active: false, el: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="2" /><line x1="3" y1="9" x2="21" y2="9" /><line x1="9" y1="21" x2="9" y2="9" /></svg> },
+    { id: "chat", active: false, el: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg> },
+    { id: "help", active: false, el: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg> },
+  ];
+
+  return (
+    <div className="w-12 bg-[#0d0d1a] flex flex-col items-center py-3 gap-1 flex-shrink-0 border-r border-[#21262d]">
+      <button className="h-9 w-9 flex items-center justify-center text-[#6e7681] hover:text-[#c9d1d9] rounded-lg hover:bg-white/5">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
+      </button>
+      <div className="h-9 w-9 flex items-center justify-center my-1">
+        <DiligentLogo size={20} />
+      </div>
+      <div className="w-6 h-px bg-white/10 my-1" />
+      {icons.map((ic) => (
+        <button
+          key={ic.id}
+          className={`h-9 w-9 flex items-center justify-center rounded-lg transition-colors ${
+            ic.active ? "bg-[#ef4444] text-white" : "text-[#6e7681] hover:text-[#c9d1d9] hover:bg-white/5"
+          }`}
+        >
+          {ic.el}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
 /*  Page                                                               */
 /* ------------------------------------------------------------------ */
 
 export default function RiskAnalysisPage() {
   return (
     <div className="min-h-screen bg-[#0d1117] text-[#c9d1d9] flex flex-col">
-      <div className="flex-1">
+      <div className="flex flex-1 overflow-hidden">
+        <IconSidebar />
 
-        {/* ============================================================ */}
-        {/*  HEADER                                                       */}
-        {/* ============================================================ */}
-        <header className="border-b border-[#21262d] bg-[#161b22]">
-          <div className="max-w-[1280px] mx-auto px-6 py-5">
-            <div className="flex items-center gap-3 mb-3">
-              <DiligentLogo size={28} />
-              <h1 className="text-lg font-bold text-[#f0f6fc] tracking-tight">Enterprise Risk Governance Command Center</h1>
+        <div className="flex-1 flex flex-col overflow-y-auto">
+          {/* Top nav bar */}
+          <div className="h-12 bg-[#161b22] border-b border-[#21262d] flex items-center justify-between px-4 flex-shrink-0">
+            <div className="flex items-center gap-2">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8b949e" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="2" /><line x1="3" y1="9" x2="21" y2="9" /><line x1="9" y1="21" x2="9" y2="9" /></svg>
+              <span className="text-sm font-medium text-[#c9d1d9]">Acme Co.</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6e7681" strokeWidth="2"><polyline points="6 9 12 15 18 9" /></svg>
+            </div>
+            <button className="h-8 w-8 rounded-full bg-[#21262d] flex items-center justify-center">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8b949e" strokeWidth="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+            </button>
+          </div>
+
+          {/* Content */}
+          <div className="flex-1 px-8 py-6 overflow-y-auto">
+            <div className="max-w-[1280px] mx-auto">
+            {/* Breadcrumb */}
+            <div className="flex items-center gap-2 text-[12px] text-[#6e7681] mb-4">
+              <Link href="/superhero/risk-discovery" className="hover:text-[#58a6ff] cursor-pointer">AI Risk Essentials</Link>
+              <span>›</span>
+              <span className="text-[#c9d1d9]">AI Risk Impact Simulator</span>
+            </div>
+
+            {/* Simulator nav */}
+            <div className="flex items-center gap-1 mb-6 border-b border-[#21262d] pb-3">
+              <Link href="/superhero/risk-discovery" className="rounded-lg px-3 py-1.5 text-[11px] font-medium text-[#6e7681] hover:text-[#c9d1d9] hover:bg-white/5 transition-colors">
+                ← Risk Essentials
+              </Link>
+              <div className="w-px h-4 bg-[#21262d] mx-1" />
+              <span className="rounded-lg px-3 py-1.5 text-[11px] font-medium bg-white/10 text-[#f0f6fc] border border-white/10">
+                Simulator Home
+              </span>
+              <Link href="/superhero/risk-gravity" className="rounded-lg px-3 py-1.5 text-[11px] font-medium text-[#6e7681] hover:text-[#c9d1d9] hover:bg-white/5 transition-colors">
+                Gravity Map
+              </Link>
+              <Link href="/superhero/risk-shockwave" className="rounded-lg px-3 py-1.5 text-[11px] font-medium text-[#6e7681] hover:text-[#c9d1d9] hover:bg-white/5 transition-colors">
+                Risk Shockwave
+              </Link>
+              <Link href="/superhero/risk-pipeline" className="rounded-lg px-3 py-1.5 text-[11px] font-medium text-[#6e7681] hover:text-[#c9d1d9] hover:bg-white/5 transition-colors">
+                Risk Pipeline
+              </Link>
+            </div>
+
+            {/* Title + badges */}
+            <div className="flex items-center gap-3 mb-2">
+              <h1 className="text-xl font-bold text-[#f0f6fc]">AI Risk Impact Simulator</h1>
             </div>
             <p className="text-sm text-[#8b949e] mb-3">
-              AI-detected geopolitical escalation affecting semiconductor supply chains
+              Model how Taiwan Strait geopolitical tensions cascade across the enterprise — from supply chain to disclosure
             </p>
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3 mb-8">
               <Badge color="#8b949e" bg="#21262d" border="#30363d">Last updated: Feb 18, 2026</Badge>
               <Badge color="#a78bfa" bg="#2e1065" border="#5b21b6">AI Confidence: 92%</Badge>
               <Badge color="#60a5fa" bg="#1e3a5f" border="#1e40af">Owner: Chief Supply Chain Officer</Badge>
               <Badge color="#fbbf24" bg="#422006" border="#92400e">Disclosure: Pending</Badge>
             </div>
-          </div>
-        </header>
 
-        {/* ============================================================ */}
-        {/*  CONTENT GRID                                                 */}
-        {/* ============================================================ */}
-        <div className="max-w-[1280px] mx-auto px-6 py-8">
+            <div>
           <div className="grid grid-cols-2 gap-6">
 
             {/* -------------------------------------------------------- */}
@@ -444,12 +516,143 @@ export default function RiskAnalysisPage() {
             </Card>
 
           </div>
+
+          {/* -------------------------------------------------------- */}
+          {/*  BOTTOM LINE                                              */}
+          {/* -------------------------------------------------------- */}
+          <div className="mt-8 rounded-xl border-2 border-[#7c3aed] bg-[#161b22] p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#7c3aed]/20">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+                </svg>
+              </div>
+              <h2 className="text-lg font-bold text-[#f0f6fc]">Bottom Line — What This Means for Acme</h2>
+            </div>
+            <p className="text-sm text-[#c9d1d9] leading-relaxed">
+              A geopolitical signal has been traced to <span className="font-bold text-[#f0f6fc]">$1.8B in revenue exposure</span>.
+              A critical control gap — <span className="font-bold text-[#f87171]">no secondary semiconductor supplier</span> — leaves the company
+              unable to absorb a disruption. Two of three peers have already disclosed similar exposure.
+              The question isn&apos;t whether to act, but <span className="font-bold text-[#a78bfa]">how fast</span>.
+            </p>
+          </div>
+
+          {/* -------------------------------------------------------- */}
+          {/*  WHAT YOU SHOULD DO                                       */}
+          {/* -------------------------------------------------------- */}
+          <div className="mt-8">
+            <h3 className="text-[10px] font-bold uppercase tracking-widest text-[#6e7681] mb-4">What You Should Do</h3>
+            <div className="space-y-4">
+              {/* Action 1 — Urgent */}
+              <div className="rounded-xl border border-[#7f1d1d] bg-[#161b22] p-5 flex items-start gap-4">
+                <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#450a0a] border border-[#7f1d1d]">
+                  <span className="text-sm font-extrabold text-[#f87171]">1</span>
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <span className="text-sm font-bold text-[#f0f6fc]">Close the supplier gap</span>
+                    <Badge color="#f87171" bg="#450a0a" border="#7f1d1d">Urgent</Badge>
+                  </div>
+                  <p className="text-sm text-[#8b949e] leading-relaxed">
+                    Begin secondary supplier qualification immediately (60–90 day timeline)
+                  </p>
+                </div>
+              </div>
+
+              {/* Action 2 — High */}
+              <div className="rounded-xl border border-[#92400e] bg-[#161b22] p-5 flex items-start gap-4">
+                <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#422006] border border-[#92400e]">
+                  <span className="text-sm font-extrabold text-[#fbbf24]">2</span>
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <span className="text-sm font-bold text-[#f0f6fc]">Prepare the board</span>
+                    <Badge color="#fbbf24" bg="#422006" border="#92400e">High</Badge>
+                  </div>
+                  <p className="text-sm text-[#8b949e] leading-relaxed">
+                    Schedule risk committee review within 24 hours with full simulation results
+                  </p>
+                </div>
+              </div>
+
+              {/* Action 3 — Required */}
+              <div className="rounded-xl border border-[#1e40af] bg-[#161b22] p-5 flex items-start gap-4">
+                <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#1e3a5f] border border-[#1e40af]">
+                  <span className="text-sm font-extrabold text-[#60a5fa]">3</span>
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <span className="text-sm font-bold text-[#f0f6fc]">Start disclosure review</span>
+                    <Badge color="#60a5fa" bg="#1e3a5f" border="#1e40af">Required</Badge>
+                  </div>
+                  <p className="text-sm text-[#8b949e] leading-relaxed">
+                    Send AI-drafted 10-Q language to General Counsel for review within 48 hours
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* -------------------------------------------------------- */}
+          {/*  WHO NEEDS TO KNOW                                        */}
+          {/* -------------------------------------------------------- */}
+          <div className="mt-8">
+            <h3 className="text-[10px] font-bold uppercase tracking-widest text-[#6e7681] mb-4">Who Needs to Know</h3>
+            <div className="grid grid-cols-4 gap-4">
+              {[
+                { initials: "DC", name: "David Chen", role: "VP Supply Chain", task: "Own supplier diversification", color: "#f87171", bg: "#450a0a", border: "#7f1d1d" },
+                { initials: "SL", name: "Sarah Lin", role: "Head of Operations", task: "Contingency production planning", color: "#fbbf24", bg: "#422006", border: "#92400e" },
+                { initials: "MW", name: "Marcus Webb", role: "Risk Committee Chair", task: "Emergency committee session", color: "#a78bfa", bg: "#2e1065", border: "#5b21b6" },
+                { initials: "DR", name: "Diana Reyes", role: "General Counsel", task: "Disclosure review", color: "#60a5fa", bg: "#1e3a5f", border: "#1e40af" },
+              ].map((person) => (
+                <div key={person.initials} className="rounded-xl border border-[#30363d] bg-[#161b22] p-4 flex flex-col items-center text-center">
+                  <div
+                    className="h-11 w-11 rounded-full flex items-center justify-center text-sm font-bold mb-3 border"
+                    style={{ color: person.color, background: person.bg, borderColor: person.border }}
+                  >
+                    {person.initials}
+                  </div>
+                  <div className="text-sm font-semibold text-[#f0f6fc] mb-0.5">{person.name}</div>
+                  <div className="text-[11px] text-[#6e7681] mb-2">{person.role}</div>
+                  <div className="text-[11px] font-medium leading-snug" style={{ color: person.color }}>{person.task}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* -------------------------------------------------------- */}
+          {/*  ACTION BUTTONS                                           */}
+          {/* -------------------------------------------------------- */}
+          <div className="mt-8 flex items-center gap-4">
+            <button className="rounded-lg bg-gradient-to-r from-[#2563eb] to-[#3b82f6] px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-500/20 hover:shadow-blue-500/30 transition-all">
+              Share Full Simulation
+            </button>
+            <button className="rounded-lg border border-[#30363d] bg-[#161b22] px-5 py-2.5 text-sm font-semibold text-[#c9d1d9] hover:border-[#6e7681] transition-colors">
+              Schedule Committee Review
+            </button>
+            <button className="rounded-lg border border-[#5b21b6] bg-[#161b22] px-5 py-2.5 text-sm font-semibold text-[#a78bfa] hover:bg-[#2e1065]/30 transition-colors">
+              Begin Disclosure Process
+            </button>
+          </div>
+
+            </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <StakeholderFooter label="Prototype navigation — Risk Impact Visualization">
-        <PrototypeControlLink href="/superhero/approval-status">
-          View Approval Status →
+      <StakeholderFooter label="Prototype navigation — AI Risk Impact Simulator">
+        <PrototypeControlLink href="/superhero/risk-discovery">
+          ← Back to Risk Essentials
+        </PrototypeControlLink>
+        <PrototypeControlLink href="/superhero/risk-gravity">
+          Gravity Map →
+        </PrototypeControlLink>
+        <PrototypeControlLink href="/superhero/risk-shockwave">
+          Risk Shockwave →
+        </PrototypeControlLink>
+        <PrototypeControlLink href="/superhero/risk-pipeline">
+          Risk Pipeline →
         </PrototypeControlLink>
       </StakeholderFooter>
     </div>

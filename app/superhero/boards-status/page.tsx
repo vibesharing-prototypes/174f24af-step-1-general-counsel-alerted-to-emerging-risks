@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { StakeholderFooter, PrototypeControlLink } from "../StakeholderFooter";
 
 function cn(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
@@ -124,17 +125,18 @@ const ASSIGNED_RISKS = [
 
 export default function BoardsStatusPage() {
   const [booksTab, setBooksTab] = useState<"all" | "books" | "reports">("all");
-  const [demoPanelOpen, setDemoPanelOpen] = useState(() => {
-    if (typeof window !== "undefined") {
-      const stored = localStorage.getItem("demo-panel-open");
-      return stored === null ? true : stored === "true";
-    }
-    return true;
-  });
+  const [demoPanelOpen, setDemoPanelOpen] = useState(true);
+  const [demoPanelHydrated, setDemoPanelHydrated] = useState(false);
 
   React.useEffect(() => {
-    localStorage.setItem("demo-panel-open", String(demoPanelOpen));
-  }, [demoPanelOpen]);
+    const stored = localStorage.getItem("demo-panel-open");
+    if (stored !== null) setDemoPanelOpen(stored === "true");
+    setDemoPanelHydrated(true);
+  }, []);
+
+  React.useEffect(() => {
+    if (demoPanelHydrated) localStorage.setItem("demo-panel-open", String(demoPanelOpen));
+  }, [demoPanelOpen, demoPanelHydrated]);
   const router = useRouter();
 
   return (
@@ -416,6 +418,12 @@ export default function BoardsStatusPage() {
         </div>
       </aside>
       </div>
+
+      <StakeholderFooter label="Next in the prototype: Diana Reyes receives her risk owner notification">
+        <PrototypeControlLink href="/superhero/owner-investigation/notification?risk=risk-taiwan&owner=diana-reyes">
+          View Diana Reyes&apos; notification →
+        </PrototypeControlLink>
+      </StakeholderFooter>
     </div>
   );
 }

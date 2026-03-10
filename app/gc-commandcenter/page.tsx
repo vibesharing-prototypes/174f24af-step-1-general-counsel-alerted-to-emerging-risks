@@ -435,6 +435,44 @@ function InlineAssignmentCard({
 }
 
 /* ------------------------------------------------------------------ */
+/*  Assigned Owners Confirmation (post-action state)                   */
+/* ------------------------------------------------------------------ */
+
+function AssignedOwnersConfirmation({ suggestions }: { suggestions: AssignmentSuggestion[] }) {
+  return (
+    <div className="rounded-xl border border-[#3fb950]/30 bg-[#3fb950]/5 overflow-hidden">
+      <div className="px-4 py-3 border-b border-[#3fb950]/20 flex items-center gap-2">
+        <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-[#3fb950]/20">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3fb950" strokeWidth="2">
+            <path d="M20 6L9 17l-5-5" />
+          </svg>
+        </div>
+        <span className="text-sm font-semibold text-[#3fb950]">Owners Assigned &amp; Notified</span>
+      </div>
+      <div className="p-3 space-y-2">
+        {suggestions.map((s) => (
+          <div key={s.riskId} className="flex items-center justify-between rounded-lg border border-[#30363d] bg-[#0d1117]/50 px-3 py-2">
+            <div className="flex items-center gap-2">
+              <div className={cn(
+                "h-2 w-2 rounded-full",
+                s.severity === "critical" ? "bg-[#da3633]" : "bg-[#d29922]"
+              )} />
+              <span className="text-xs font-medium text-[#f0f6fc]">{s.riskName}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] text-[#3fb950]">{s.primarySuggestion.name}</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#3fb950" strokeWidth="2">
+                <path d="M20 6L9 17l-5-5" />
+              </svg>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
 /*  Chat Message Bubble                                                */
 /* ------------------------------------------------------------------ */
 
@@ -447,9 +485,12 @@ function ChatMessageBubble({ message }: { message: ChatMessage }) {
       <div className={cn(
         "h-7 w-7 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden",
         message.role === "user" 
-          ? "bg-gradient-to-br from-[#58a6ff] to-[#a371f7]"
+          ? ""
           : "bg-white p-1"
       )}>
+        {message.role === "user" ? (
+          <img src="https://randomuser.me/api/portraits/med/women/65.jpg" alt="Sarah Mitchell" className="h-7 w-7 rounded-full object-cover" />
+        ) : null}
         {message.role === "assistant" ? (
           <svg width="22" height="20" viewBox="0 0 22 20" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-full w-auto">
             <path d="M20.1006 15.6877C20.0186 15.8056 19.9338 15.9211 19.8467 16.0364C19.5697 16.4006 19.2675 16.7474 18.9443 17.0706C17.5077 18.5072 15.6393 19.5107 13.5459 19.8596L6.03223 12.345L8.3877 9.98755H8.38965L8.39258 9.98462L20.1006 15.6877Z" fill="#D3222A"/>
@@ -572,7 +613,7 @@ function PinnedPromptBox({
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-              placeholder="Show me suggested risk owners"
+              placeholder="Assign recommended risk owners"
               className="flex-1 bg-transparent text-sm text-[#f0f6fc] placeholder-[#484f58] focus:outline-none"
               disabled={isLoading}
             />
@@ -1155,13 +1196,24 @@ function PrototypeNav({
   onVisionChange: (v: Vision) => void;
 }) {
   const [open, setOpen] = React.useState(true);
+  const [hydrated, setHydrated] = React.useState(false);
+
+  React.useEffect(() => {
+    const stored = localStorage.getItem("demo-panel-open");
+    if (stored !== null) setOpen(stored === "true");
+    setHydrated(true);
+  }, []);
+
+  React.useEffect(() => {
+    if (hydrated) localStorage.setItem("demo-panel-open", String(open));
+  }, [open, hydrated]);
+
   return (
     <div className="border-b-2 border-[#0ea5e9]/40 bg-[#e0f2fe]">
-      {/* Explicit label: these controls are NOT part of the prototype */}
       <div className="border-b border-[#0ea5e9]/30 bg-[#bae6fd] px-4 py-2 flex items-center justify-between">
-        <p className="text-[10px] font-medium uppercase tracking-widest text-[#0369a1]">
-          Demo controls — not part of prototype
-        </p>
+        <Link href="/" className="text-[10px] font-medium uppercase tracking-widest text-[#0369a1] hover:text-[#075985] transition-colors">
+          Diligent Prototype — For illustrative and alignment purposes
+        </Link>
         <button
           onClick={() => setOpen(!open)}
           className="flex items-center gap-1 rounded px-2 py-0.5 text-[10px] font-medium text-[#0369a1] hover:bg-[#7dd3fc]/30 transition-colors"
@@ -1634,7 +1686,7 @@ function TamboPromptBoxWithHooks({ vision, onOpenCanvas, onFocusChange }: { visi
             onBlur={() => setIsFocused(false)}
             disabled={isLoading}
             className="flex-1 bg-transparent px-2 py-2 text-base text-[#f0f6fc] placeholder:text-[#6e7681] focus:outline-none"
-            placeholder="Show me suggested risk owners"
+            placeholder="Assign recommended risk owners"
           />
           {messages.length > 0 && (
             <button
@@ -1813,7 +1865,7 @@ function TamboPromptBoxDemoOnly({ vision, onOpenCanvas, onFocusChange }: { visio
             onBlur={() => setIsFocused(false)}
             disabled={isLoading}
             className="flex-1 bg-transparent px-2 py-2 text-base text-[#f0f6fc] placeholder:text-[#6e7681] focus:outline-none"
-            placeholder="Show me suggested risk owners"
+            placeholder="Assign recommended risk owners"
           />
           {messages.length > 0 && (
             <button
@@ -2392,128 +2444,119 @@ Regulatory and Compliance Risks — We are subject to evolving regulatory framew
           </div>
         )}
 
-        {/* Detected Risks Requiring Review — first-page focus: assign owners (hidden when ceoApproved) */}
+        {/* Detected Risks — two-column: risk detail left, recommended owner right */}
         {!ceoApproved && !isIphone && (
           <section className="mt-8">
-            <div className="flex items-center justify-between gap-4 mb-4">
-              <div className="flex items-center gap-3">
-                <h2 className="text-lg font-semibold text-[#f0f6fc]">Detected Risks Requiring Review</h2>
-                <span className="rounded-full border border-[#da3633]/50 bg-[#da3633]/20 px-2.5 py-0.5 text-xs font-medium text-[#ff7b72]">
-                  {detectedRisks.length} risks
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Link
-                  href="/superhero/reviewer"
-                  className="inline-flex items-center rounded-lg border border-[#58a6ff]/50 bg-[#58a6ff]/10 px-3 py-2 text-xs font-medium text-[#58a6ff] hover:bg-[#58a6ff]/20 transition-colors"
-                >
-                  Review detection sources
-                </Link>
-                <Link
-                  href="/superhero/coordinator"
-                  className="inline-flex items-center gap-2 rounded-lg bg-[#58a6ff] px-4 py-2.5 text-sm font-medium text-white hover:bg-[#79b8ff] transition-colors"
-                >
-                  Assign Owners
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
-                </Link>
-              </div>
+            <div className="flex items-center gap-3 mb-4">
+              <h2 className="text-lg font-semibold text-[#f0f6fc]">Detected Risks</h2>
+              <span className="rounded-full border border-[#da3633]/50 bg-[#da3633]/20 px-2.5 py-0.5 text-xs font-medium text-[#ff7b72]">
+                {detectedRisks.length} risks
+              </span>
             </div>
             <div className="space-y-4">
-              {detectedRisks.map((risk) => (
-                <Card key={risk.id} className="p-5">
-                  <div className="flex items-start justify-between gap-4 mb-4">
-                    <div className="flex items-start gap-3">
-                      <div className={cn(
-                        "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-xs font-bold",
-                        risk.severity === "critical" && "bg-[#da3633]/20 text-[#ff7b72]",
-                        risk.severity === "high" && "bg-[#d29922]/20 text-[#d29922]",
-                        risk.severity === "medium" && "bg-[#58a6ff]/20 text-[#58a6ff]"
-                      )}>
-                        !
-                      </div>
+              {/* Taiwan Strait */}
+              <Card className="p-5">
+                <div className="flex gap-5">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start gap-3 mb-3">
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#da3633]/20 text-xs font-bold text-[#ff7b72]">!</div>
                       <div>
                         <div className="flex items-center gap-2 mb-1">
-                          <h3 className="text-sm font-semibold text-[#f0f6fc]">{risk.title}</h3>
-                          <span className={cn(
-                            "rounded-full px-2 py-0.5 text-[10px] font-medium uppercase",
-                            risk.severity === "critical" && "bg-[#da3633]/20 text-[#ff7b72]",
-                            risk.severity === "high" && "bg-[#d29922]/20 text-[#d29922]",
-                            risk.severity === "medium" && "bg-[#58a6ff]/20 text-[#58a6ff]"
-                          )}>
-                            {risk.severity}
-                          </span>
+                          <h3 className="text-sm font-semibold text-[#f0f6fc]">Taiwan Strait Geopolitical Tensions</h3>
+                          <span className="rounded-full px-2 py-0.5 text-[10px] font-medium uppercase bg-[#da3633]/20 text-[#ff7b72]">Critical</span>
                         </div>
-                        <p className="text-xs text-[#8b949e]">{risk.source} · {risk.detectedAt}</p>
-                        <p className="mt-2 text-sm text-[#c9d1d9]">{risk.summary}</p>
+                        <p className="text-xs text-[#8b949e]">Risk Intelligence + News Monitoring · Today, 8:47 AM</p>
+                        <p className="mt-2 text-sm text-[#c9d1d9]">47% of chip suppliers have Taiwan-based operations. Escalating tensions may disrupt semiconductor supply chain.</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                      <Link
-                        href="/superhero/coordinator"
-                        className="inline-flex items-center rounded-lg border border-[#58a6ff]/50 bg-transparent px-3 py-1.5 text-xs font-medium text-[#58a6ff] hover:bg-[#58a6ff]/10 transition-colors"
-                      >
-                        View Details
-                      </Link>
-                      <Link
-                        href="/superhero/coordinator"
-                        className="inline-flex items-center rounded-lg bg-[#58a6ff] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#79b8ff] transition-colors"
-                      >
-                        Draft Update
-                      </Link>
+                    <div className="rounded-lg border border-[#1f6feb]/20 bg-[#1f6feb]/5 px-3 py-2.5">
+                      <p className="text-[10px] font-medium uppercase tracking-wider text-[#58a6ff]/70 mb-1">Moody&apos;s Intelligence</p>
+                      <p className="text-xs text-[#8b949e]">Sector stress index 78/100. 3 of 5 key suppliers on negative credit watch. TSMC sovereign risk shifted to negative.</p>
                     </div>
                   </div>
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    {risk.currentDisclosure && (
-                      <div className="rounded-lg border border-[#30363d] bg-[#161b22] p-3">
-                        <p className="text-[10px] font-medium uppercase tracking-wider text-[#6e7681] mb-1">Current disclosure</p>
-                        <p className="text-xs text-[#8b949e]">{risk.currentDisclosure}</p>
-                      </div>
-                    )}
-                    <div className="rounded-lg border border-[#da3633]/30 bg-[#da3633]/5 p-3">
-                      <p className="text-[10px] font-medium uppercase tracking-wider text-[#ff7b72] mb-1">Disclosure gap</p>
-                      <p className="text-xs text-[#c9d1d9]">{risk.disclosureGap}</p>
-                    </div>
+                  <div className="w-[160px] flex-shrink-0 flex flex-col items-center justify-center rounded-lg border border-[#30363d] bg-[#0d1117] p-4 text-center">
+                    <p className="text-[9px] font-medium uppercase tracking-wider text-[#58a6ff]/60 mb-2">AI-Suggested Owner</p>
+                    <img src="https://randomuser.me/api/portraits/med/women/44.jpg" alt="Diana Reyes" className="h-10 w-10 rounded-full object-cover mb-2" />
+                    <p className="text-xs font-medium text-[#e6edf3]">Diana Reyes</p>
+                    <p className="text-[10px] text-[#484f58] mb-2">VP, Supply Chain</p>
+                    <button className="text-[10px] text-[#484f58] hover:text-[#8b949e] transition-colors">Edit</button>
                   </div>
-                  <div className="mt-3 flex flex-wrap items-center gap-2">
-                    {risk.affectedFilings.map((f) => (
-                      <span key={f} className="rounded-full border border-[#30363d] bg-[#21262d] px-2.5 py-0.5 text-[10px] text-[#8b949e]">
-                        {f}
-                      </span>
-                    ))}
-                  </div>
-                  <p className="mt-3 flex items-start gap-2 text-xs text-[#3fb950]">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0 mt-0.5"><path d="M9 12l2 2 4-4" /></svg>
-                    <span>{risk.recommendedAction}</span>
-                  </p>
-                </Card>
-              ))}
-            </div>
-          </section>
-        )}
+                </div>
+              </Card>
 
-        {/* External Risk Evidence — Moody's intelligence module */}
-        {withMoodys && !ceoApproved && !isIphone && (
-          <section className="mt-6">
-            <div className="flex items-center gap-2 mb-3">
-              <svg width="14" height="14" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect width="24" height="24" rx="4" fill="#002B5C" /><text x="12" y="16" textAnchor="middle" fill="white" fontSize="10" fontWeight="800" fontFamily="Arial, sans-serif">M</text></svg>
-              <h2 className="text-xs font-bold text-[#79c0ff] uppercase tracking-wider">External Risk Evidence — Moody&apos;s</h2>
+              {/* Critical Vendor Breach */}
+              <Card className="p-5">
+                <div className="flex gap-5">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start gap-3 mb-3">
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#d29922]/20 text-xs font-bold text-[#d29922]">!</div>
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="text-sm font-semibold text-[#f0f6fc]">Critical Vendor Cybersecurity Breach</h3>
+                          <span className="rounded-full px-2 py-0.5 text-[10px] font-medium uppercase bg-[#d29922]/20 text-[#d29922]">High</span>
+                        </div>
+                        <p className="text-xs text-[#8b949e]">Vendor Intelligence · Today, 9:12 AM</p>
+                        <p className="mt-2 text-sm text-[#c9d1d9]">CloudSecure Inc. disclosed a ransomware incident. They process customer PII under 3 data processing agreements.</p>
+                      </div>
+                    </div>
+                    <div className="rounded-lg border border-[#1f6feb]/20 bg-[#1f6feb]/5 px-3 py-2.5">
+                      <p className="text-[10px] font-medium uppercase tracking-wider text-[#58a6ff]/70 mb-1">Moody&apos;s Intelligence</p>
+                      <p className="text-xs text-[#8b949e]">CloudSecure credit rating B2, negative watch. Cyber-risk adjusted vendor score: 3.1/10. Sector breach frequency up 34% YoY.</p>
+                    </div>
+                  </div>
+                  <div className="w-[160px] flex-shrink-0 flex flex-col items-center justify-center rounded-lg border border-[#30363d] bg-[#0d1117] p-4 text-center">
+                    <p className="text-[9px] font-medium uppercase tracking-wider text-[#58a6ff]/60 mb-2">AI-Suggested Owner</p>
+                    <img src="https://i.pravatar.cc/150?u=marcus-webb" alt="Marcus Webb" className="h-10 w-10 rounded-full object-cover mb-2" />
+                    <p className="text-xs font-medium text-[#e6edf3]">Marcus Webb</p>
+                    <p className="text-[10px] text-[#484f58] mb-2">CISO</p>
+                    <button className="text-[10px] text-[#484f58] hover:text-[#8b949e] transition-colors">Edit</button>
+                  </div>
+                </div>
+              </Card>
+
+              {/* EU DMA */}
+              <Card className="p-5">
+                <div className="flex gap-5">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start gap-3 mb-3">
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#d29922]/20 text-xs font-bold text-[#d29922]">!</div>
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="text-sm font-semibold text-[#f0f6fc]">EU Digital Markets Act Enforcement Pattern</h3>
+                          <span className="rounded-full px-2 py-0.5 text-[10px] font-medium uppercase bg-[#d29922]/20 text-[#d29922]">High</span>
+                        </div>
+                        <p className="text-xs text-[#8b949e]">Regulatory Watch · Today, 7:23 AM</p>
+                        <p className="mt-2 text-sm text-[#c9d1d9]">EC initiated enforcement actions against 3 companies in our sector. Pattern analysis suggests our EU operations may face similar scrutiny.</p>
+                      </div>
+                    </div>
+                    <div className="rounded-lg border border-[#1f6feb]/20 bg-[#1f6feb]/5 px-3 py-2.5">
+                      <p className="text-[10px] font-medium uppercase tracking-wider text-[#58a6ff]/70 mb-1">Moody&apos;s Intelligence</p>
+                      <p className="text-xs text-[#8b949e]">EU regulatory compliance risk: elevated. 3 peer companies downgraded on DMA exposure. Enforcement accelerating — 12 actions in 6 months vs. 4 prior year.</p>
+                    </div>
+                  </div>
+                  <div className="w-[160px] flex-shrink-0 flex flex-col items-center justify-center rounded-lg border border-[#30363d] bg-[#0d1117] p-4 text-center">
+                    <p className="text-[9px] font-medium uppercase tracking-wider text-[#58a6ff]/60 mb-2">AI-Suggested Owner</p>
+                    <img src="https://i.pravatar.cc/150?u=james-park" alt="James Park" className="h-10 w-10 rounded-full object-cover mb-2" />
+                    <p className="text-xs font-medium text-[#e6edf3]">James Park</p>
+                    <p className="text-[10px] text-[#484f58] mb-2">Chief Compliance Officer</p>
+                    <button className="text-[10px] text-[#484f58] hover:text-[#8b949e] transition-colors">Edit</button>
+                  </div>
+                </div>
+              </Card>
             </div>
-            <div className="grid grid-cols-3 gap-3">
-              <MoodysEvidenceCard
-                title="Semiconductor Sector Risk: Increasing"
-                detail="Geopolitical instability driving sector stress index to 78/100. Elevated probability of supply disruption across Taiwan-dependent manufacturers."
-                type="Moody's Industry Outlook"
-              />
-              <MoodysEvidenceCard
-                title="Critical Supplier: Negative Watch"
-                detail="3 of 5 key semiconductor suppliers placed on negative credit watch. TSMC sovereign risk assessment shifted from stable to negative."
-                type="Moody's Credit Signal"
-              />
-              <MoodysEvidenceCard
-                title="Concentration Risk: High"
-                detail="47% single-region dependency exceeds Moody's concentration threshold. Peer companies with similar exposure have begun diversification disclosures."
-                type="Moody's Concentration Insight"
-              />
+
+            {/* Primary CTA */}
+            <div className="mt-5 flex flex-col gap-3">
+              <div className="flex justify-end">
+                <button
+                  onClick={() => onPromptSubmit?.("Assign recommended risk owners")}
+                  className="inline-flex items-center gap-2 rounded-lg bg-[#3fb950] px-5 py-2.5 text-sm font-medium text-[#0d1117] hover:bg-[#56d364] transition-colors"
+                >
+                  Assign recommended owners
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+                </button>
+              </div>
+              <p className="text-xs text-[#8b949e]">Risk owners will be interviewed by the Diligent AI Risk Manager to assess severity, likelihood, and existing controls. <Link href="/superhero/reviewer" className="text-[#58a6ff] hover:underline">Review detection sources</Link></p>
             </div>
           </section>
         )}
@@ -2849,42 +2892,6 @@ Regulatory and Compliance Risks — We are subject to evolving regulatory framew
           </section>
         )}
 
-        {/* Footer - System log (hidden when chat is active) */}
-        {!showChat && (
-          <footer className={cn(
-            "mt-14 border-t border-[#30363d] bg-[#0d1117] px-5 py-5",
-            isIphone && "mt-8 px-4 py-4"
-          )}>
-            <div className="flex items-center justify-between gap-6">
-              <div>
-                <p className="text-xs uppercase tracking-[0.2em] text-[#6e7681]">System log</p>
-                {!isIphone && (
-                  <p className="mt-1 text-sm text-[#8b949e]">
-                    {vision === "future" 
-                      ? "AI agent activity (last 24 hours)"
-                      : "Recent system activity (last 24 hours)"
-                    }
-                  </p>
-                )}
-              </div>
-            </div>
-            <div className="mt-4 grid gap-2">
-              {/* Show only 3 entries on iPhone */}
-              {(isIphone ? currentActivityLog.slice(0, 3) : currentActivityLog).map((entry) => (
-                <div key={entry} className={cn(
-                  "flex items-start gap-3 text-sm text-[#8b949e]",
-                  isIphone && "text-xs"
-                )}>
-                  <span className={cn(
-                    "mt-2 h-1.5 w-1.5 shrink-0 rounded-full",
-                    vision === "future" ? "bg-[#a371f7]" : "bg-[#3fb950]"
-                  )} />
-                  <span>{entry}</span>
-                </div>
-              ))}
-            </div>
-          </footer>
-        )}
       </div>
     </div>
   );
@@ -2893,6 +2900,152 @@ Regulatory and Compliance Risks — We are subject to evolving regulatory framew
 const GC_NAME = "Sarah Mitchell";
 const GC_AVATAR_URL = "https://randomuser.me/api/portraits/med/women/65.jpg";
 
+/* ------------------------------------------------------------------ */
+/*  Agent Scan Sequence (full-page version)                            */
+/* ------------------------------------------------------------------ */
+
+const SCAN_AGENTS_CC = [
+  { id: "risk", label: "Risk Intelligence", detail: "Scanning global news feeds and media sources...", icon: "radar" },
+  { id: "vendor", label: "Vendor Intelligence", detail: "Monitoring third-party risk networks...", icon: "shield" },
+  { id: "reg", label: "Regulatory Watch", detail: "Reviewing SEC filings, EU regulatory databases...", icon: "file" },
+  { id: "board", label: "Board Materials Agent", detail: "Comparing board decks against regulatory findings...", icon: "layers" },
+  { id: "supply", label: "Supply Chain Data", detail: "Analyzing supplier contracts and geographic exposure...", icon: "link" },
+];
+
+function ScanAgentIcon({ icon, size = 14, color = "currentColor" }: { icon: string; size?: number; color?: string }) {
+  const p = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: color, strokeWidth: 2, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
+  switch (icon) {
+    case "radar": return <svg {...p}><circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="3" /><path d="M12 2a10 10 0 0 1 10 10" /></svg>;
+    case "shield": return <svg {...p}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>;
+    case "file": return <svg {...p}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>;
+    case "layers": return <svg {...p}><polygon points="12 2 2 7 12 12 22 7 12 2" /><polyline points="2 17 12 22 22 17" /><polyline points="2 12 12 17 22 12" /></svg>;
+    case "link": return <svg {...p}><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" /></svg>;
+    default: return <svg {...p}><circle cx="12" cy="12" r="10" /></svg>;
+  }
+}
+
+type ScanPhaseCC = "init" | "scanning" | "analyzing" | "detected" | "ready";
+
+function CommandCenterScan({ onComplete }: { onComplete: () => void }) {
+  const [phase, setPhase] = React.useState<ScanPhaseCC>("init");
+  const [visibleAgents, setVisibleAgents] = React.useState(0);
+  const [completedAgents, setCompletedAgents] = React.useState(0);
+  const [anomalyCount, setAnomalyCount] = React.useState(0);
+
+  React.useEffect(() => {
+    const t = setTimeout(() => setPhase("scanning"), 800);
+    return () => clearTimeout(t);
+  }, []);
+
+  React.useEffect(() => {
+    if (phase !== "scanning") return;
+    if (visibleAgents < SCAN_AGENTS_CC.length) {
+      const t = setTimeout(() => setVisibleAgents((v) => v + 1), 900);
+      return () => clearTimeout(t);
+    }
+  }, [phase, visibleAgents]);
+
+  React.useEffect(() => {
+    if (phase !== "scanning") return;
+    if (visibleAgents > 0 && completedAgents < visibleAgents) {
+      const t = setTimeout(() => setCompletedAgents((v) => v + 1), 1400);
+      return () => clearTimeout(t);
+    }
+    if (completedAgents === SCAN_AGENTS_CC.length) {
+      const t = setTimeout(() => setPhase("analyzing"), 600);
+      return () => clearTimeout(t);
+    }
+  }, [phase, visibleAgents, completedAgents]);
+
+  React.useEffect(() => {
+    if (phase !== "analyzing") return;
+    const t = setTimeout(() => setPhase("detected"), 1200);
+    return () => clearTimeout(t);
+  }, [phase]);
+
+  React.useEffect(() => {
+    if (phase !== "detected") return;
+    const steps = [1, 2, 3];
+    const timers = steps.map((n, i) => setTimeout(() => setAnomalyCount(n), (i + 1) * 400));
+    const final = setTimeout(() => { setPhase("ready"); onComplete(); }, steps.length * 400 + 800);
+    return () => { timers.forEach(clearTimeout); clearTimeout(final); };
+  }, [phase, onComplete]);
+
+  return (
+    <div className="flex flex-col items-center justify-center py-24 px-6">
+      <div className="w-full max-w-md">
+        {/* Initializing */}
+        {phase === "init" && (
+          <div className="flex flex-col items-center gap-3 animate-pulse">
+            <div className="h-12 w-12 rounded-xl bg-[#21262d] border border-[#30363d] flex items-center justify-center">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#58a6ff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
+            </div>
+            <p className="text-sm font-medium text-[#8b949e]">Initializing GRC agents...</p>
+          </div>
+        )}
+
+        {/* Scanning + later phases */}
+        {phase !== "init" && (
+          <div className="space-y-3">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-[#484f58] mb-4">
+              {phase === "scanning" ? "Scanning enterprise sources..." : phase === "analyzing" ? "Cross-referencing findings..." : "Scan complete"}
+            </p>
+
+            {SCAN_AGENTS_CC.slice(0, visibleAgents).map((agent, i) => {
+              const done = i < completedAgents;
+              return (
+                <div key={agent.id} className="flex items-center gap-3 rounded-lg border px-4 py-3 transition-all duration-500" style={{ borderColor: done ? "#1f6feb33" : "#30363d", background: done ? "#0d1117" : "#161b22" }}>
+                  <div className={cn("flex h-8 w-8 items-center justify-center rounded-lg flex-shrink-0 transition-colors", done ? "bg-[#0d4429] border border-[#238636]" : "bg-[#21262d] border border-[#484f58]")}>
+                    {done ? (
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3fb950" strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12" /></svg>
+                    ) : (
+                      <ScanAgentIcon icon={agent.icon} size={14} color="#58a6ff" />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs font-semibold text-[#e6edf3]">{agent.label}</div>
+                    <div className="text-[11px] text-[#484f58]">{agent.detail}</div>
+                  </div>
+                  {!done && <div className="w-4 h-4 border-2 border-[#58a6ff] border-t-transparent rounded-full animate-spin flex-shrink-0" />}
+                </div>
+              );
+            })}
+
+            {phase === "analyzing" && (
+              <div className="mt-5 rounded-lg border border-[#30363d] bg-[#161b22] p-4 flex items-center gap-3">
+                <div className="w-4 h-4 border-2 border-[#a371f7] border-t-transparent rounded-full animate-spin flex-shrink-0" />
+                <p className="text-xs text-[#bc8cff] font-medium">Cross-referencing board materials with regulatory findings...</p>
+              </div>
+            )}
+
+            {(phase === "detected" || phase === "ready") && anomalyCount > 0 && (
+              <div className="mt-5 rounded-lg border border-[#da3633]/50 bg-[#300a0a]/60 p-5 transition-all duration-500">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#da3633] flex-shrink-0">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M12 2L1 21h22L12 2zm0 4l7.53 13H4.47L12 6z" /><rect x="11" y="10" width="2" height="4" fill="white" /><rect x="11" y="16" width="2" height="2" fill="white" /></svg>
+                  </div>
+                  <div>
+                    <p className="text-base font-bold text-[#f85149]">{anomalyCount} {anomalyCount === 1 ? "risk" : "risks"} detected</p>
+                    <p className="text-[11px] text-[#f85149]/60">Not captured in current filings or board materials</p>
+                  </div>
+                </div>
+                {anomalyCount >= 3 && (
+                  <p className="text-xs text-[#f85149]/40 mt-1">Loading command center...</p>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Skip */}
+        <button onClick={onComplete} className="block mx-auto text-[10px] text-[#30363d] hover:text-[#8b949e] transition-colors mt-8">
+          Skip
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // Main page content component
 function PageContent({ hasTamboProvider = false }: { hasTamboProvider?: boolean }) {
   const searchParams = useSearchParams();
@@ -2900,6 +3053,13 @@ function PageContent({ hasTamboProvider = false }: { hasTamboProvider?: boolean 
   const [edgarApproved, setEdgarApproved] = React.useState(false);
   const [vision, setVision] = React.useState<Vision>("near-term");
   const [withMoodys, toggleMoodys] = useMoodysMode();
+  const [scanComplete, setScanComplete] = React.useState(false);
+  const [contentVisible, setContentVisible] = React.useState(false);
+
+  const handleScanComplete = React.useCallback(() => {
+    setScanComplete(true);
+    setTimeout(() => setContentVisible(true), 300);
+  }, []);
   const [activityOpen, setActivityOpen] = React.useState(false);
   const [hoveredAgent, setHoveredAgent] = React.useState<AgentStatus | null>(null);
   const [popoverPos, setPopoverPos] = React.useState({ x: 0, y: 0 });
@@ -2916,7 +3076,7 @@ function PageContent({ hasTamboProvider = false }: { hasTamboProvider?: boolean 
   const [showChat, setShowChat] = React.useState(false);
   const chatEndRef = React.useRef<HTMLDivElement>(null);
 
-  const promptSuggestions: string[] = [];
+  const promptSuggestions: string[] = ["Assign recommended risk owners"];
 
   // Generate assignment suggestions
   const generateAssignmentSuggestions = (): AssignmentSuggestion[] => [
@@ -2963,10 +3123,8 @@ function PageContent({ hasTamboProvider = false }: { hasTamboProvider?: boolean 
   };
 
   const handlePromptSubmit = (message: string) => {
-    // Show chat area
     setShowChat(true);
     
-    // Add user message
     const userMessage: ChatMessage = {
       id: `msg-${Date.now()}`,
       role: "user",
@@ -2976,30 +3134,24 @@ function PageContent({ hasTamboProvider = false }: { hasTamboProvider?: boolean 
     setChatMessages(prev => [...prev, userMessage]);
     setPromptLoading(true);
 
-    // Simulate AI response
     setTimeout(() => {
-      const suggestions = generateAssignmentSuggestions();
-      
       const assistantMessage: ChatMessage = {
         id: `msg-${Date.now() + 1}`,
         role: "assistant",
-        content: "I've matched the 3 detected risks with owners based on expertise and recent activity. Click any risk to see alternatives:",
+        content: "Done — notifying Diana Reyes, Marcus Webb, and James Park now. They'll each complete an AI-guided interview to assess severity, likelihood, and existing controls.",
         timestamp: new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }),
-        component: (
-          <InlineAssignmentCard 
-            suggestions={suggestions} 
-            onConfirm={handleConfirmAssignments}
-          />
-        ),
       };
       
       setChatMessages(prev => [...prev, assistantMessage]);
       setPromptLoading(false);
       
-      // Scroll to bottom
       setTimeout(() => {
         chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
       }, 100);
+
+      setTimeout(() => {
+        router.push("/gc-commandcenter/status");
+      }, 2000);
     }, 1200);
   };
 
@@ -3075,9 +3227,6 @@ function PageContent({ hasTamboProvider = false }: { hasTamboProvider?: boolean 
 
   return (
     <div className={cn("min-h-screen bg-[#0d1117]", showChat ? "pb-6" : "pb-28")}>
-      {/* Moody's Toggle */}
-      <MoodysToggle withMoodys={withMoodys} onToggle={toggleMoodys} />
-
       {/* Canvas overlay */}
       {activeCanvas !== "none" && renderCanvas()}
       
@@ -3088,18 +3237,38 @@ function PageContent({ hasTamboProvider = false }: { hasTamboProvider?: boolean 
             vision={vision} 
             onVisionChange={setVision} 
           />
-          
-          <div className="mx-auto w-full max-w-6xl px-6 py-6">
-            <DashboardContent {...dashboardProps} device="desktop" />
-          </div>
-          
-          {/* Pinned Prompt Box - fixed at bottom when no chat; inline when chat active */}
-          {!showChat && (
-            <PinnedPromptBox 
-              onSubmit={handlePromptSubmit}
-              isLoading={promptLoading}
-              suggestions={promptSuggestions}
-            />
+
+          {!scanComplete ? (
+            <>
+              {/* Show the TopNav frame with scan inside */}
+              <div className="mx-auto w-full max-w-6xl px-6 py-6">
+                <div className="overflow-hidden rounded-3xl border border-[#30363d] bg-[#161b22]">
+                  <div className="px-6">
+                    <TopNav
+                      activityOpen={false}
+                      onToggleActivity={() => {}}
+                      activityCount={5}
+                      vision={vision}
+                    />
+                  </div>
+                  <CommandCenterScan onComplete={handleScanComplete} />
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className={cn("transition-opacity duration-700", contentVisible ? "opacity-100" : "opacity-0")}>
+              <div className="mx-auto w-full max-w-6xl px-6 py-6">
+                <DashboardContent {...dashboardProps} device="desktop" />
+              </div>
+              
+              {!showChat && (
+                <PinnedPromptBox 
+                  onSubmit={handlePromptSubmit}
+                  isLoading={promptLoading}
+                  suggestions={promptSuggestions}
+                />
+              )}
+            </div>
           )}
         </>
       )}

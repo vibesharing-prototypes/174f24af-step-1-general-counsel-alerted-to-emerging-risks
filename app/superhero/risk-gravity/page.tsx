@@ -1,18 +1,8 @@
 "use client";
 
-/* ------------------------------------------------------------------ */
-/*  MOODY'S EVIDENCE: Gravity Map View                                 */
-/*  Detail panel: external risk indicators per risk cluster            */
-/*    - Taiwan: sector stress elevated, credit watch negative,         */
-/*      concentration risk high                                        */
-/*    - Energy: commodity price stress, hedging counterparty risk      */
-/*    - EU: regulatory enforcement trend, peer downgrade pattern       */
-/*  Header: Moody's intelligence source count stat chip                */
-/* ------------------------------------------------------------------ */
-
 import React, { useState } from "react";
+import Link from "next/link";
 import { StakeholderFooter, PrototypeControlLink } from "../StakeholderFooter";
-import { useMoodysMode, MoodysToggle, MoodysConfidencePanel, MoodysSourceChip } from "../MoodysToggle";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -32,11 +22,6 @@ interface Control {
   active: boolean;
 }
 
-interface MoodysIndicator {
-  label: string;
-  status: "confirmed" | "elevated" | "warning";
-}
-
 interface Risk {
   id: RiskId;
   title: string;
@@ -49,7 +34,6 @@ interface Risk {
   nodes: BusinessNode[];
   controls: Control[];
   description: string;
-  moodysIndicators: MoodysIndicator[];
 }
 
 /* ------------------------------------------------------------------ */
@@ -77,12 +61,6 @@ const RISKS: Risk[] = [
       { label: "Geopolitical Monitoring", active: true },
       { label: "Secondary Supplier", active: false },
     ],
-    moodysIndicators: [
-      { label: "Semiconductor sector stress: Elevated (78/100)", status: "elevated" },
-      { label: "Supplier credit watch: Negative (3 of 5)", status: "warning" },
-      { label: "Concentration risk: High — single region", status: "warning" },
-      { label: "Sovereign risk assessment: Negative outlook", status: "elevated" },
-    ],
   },
   {
     id: "energy",
@@ -104,10 +82,6 @@ const RISKS: Risk[] = [
       { label: "Energy Diversification", active: true },
       { label: "Demand Response", active: false },
     ],
-    moodysIndicators: [
-      { label: "Commodity price stress: Moderate", status: "elevated" },
-      { label: "Hedging counterparty risk: Stable", status: "confirmed" },
-    ],
   },
   {
     id: "eu",
@@ -128,11 +102,6 @@ const RISKS: Risk[] = [
       { label: "Compliance Monitoring", active: true },
       { label: "DMA Gap Assessment", active: false },
       { label: "EU Legal Counsel", active: true },
-    ],
-    moodysIndicators: [
-      { label: "Regulatory enforcement trend: Increasing", status: "elevated" },
-      { label: "Peer downgrade pattern: 3 companies in sector", status: "warning" },
-      { label: "EU compliance cost outlook: Rising", status: "elevated" },
     ],
   },
 ];
@@ -392,11 +361,9 @@ function GravityMap({
 function DetailPanel({
   risk,
   simActive,
-  withMoodys,
 }: {
   risk: Risk;
   simActive: Set<string>;
-  withMoodys: boolean;
 }) {
   const sc = SEVERITY_COLORS[risk.severity];
 
@@ -483,10 +450,47 @@ function DetailPanel({
         </div>
       </div>
 
-      {/* Moody's External Risk Indicators */}
-      {withMoodys && risk.moodysIndicators.length > 0 && (
-        <MoodysConfidencePanel items={risk.moodysIndicators} />
-      )}
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Page                                                               */
+/* ------------------------------------------------------------------ */
+
+/* ------------------------------------------------------------------ */
+/*  Icon Sidebar (matches Risk Essentials)                             */
+/* ------------------------------------------------------------------ */
+
+function IconSidebar() {
+  const icons = [
+    { id: "home", active: false, el: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg> },
+    { id: "grc", active: true, el: <span className="text-[11px] font-extrabold">G</span> },
+    { id: "chart", active: false, el: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M18 20V10" /><path d="M12 20V4" /><path d="M6 20v-6" /></svg> },
+    { id: "board", active: false, el: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="2" /><line x1="3" y1="9" x2="21" y2="9" /><line x1="9" y1="21" x2="9" y2="9" /></svg> },
+    { id: "chat", active: false, el: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg> },
+    { id: "help", active: false, el: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg> },
+  ];
+
+  return (
+    <div className="w-12 bg-[#0d0d1a] flex flex-col items-center py-3 gap-1 flex-shrink-0 border-r border-[#21262d]">
+      <button className="h-9 w-9 flex items-center justify-center text-[#6e7681] hover:text-[#c9d1d9] rounded-lg hover:bg-white/5">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
+      </button>
+      <div className="h-9 w-9 flex items-center justify-center my-1">
+        <DiligentLogo size={20} />
+      </div>
+      <div className="w-6 h-px bg-white/10 my-1" />
+      {icons.map((ic) => (
+        <button
+          key={ic.id}
+          className={`h-9 w-9 flex items-center justify-center rounded-lg transition-colors ${
+            ic.active ? "bg-[#ef4444] text-white" : "text-[#6e7681] hover:text-[#c9d1d9] hover:bg-white/5"
+          }`}
+        >
+          {ic.el}
+        </button>
+      ))}
     </div>
   );
 }
@@ -498,7 +502,6 @@ function DetailPanel({
 export default function RiskGravityPage() {
   const [selected, setSelected] = useState<RiskId>("taiwan");
   const [simActive, setSimActive] = useState<Set<string>>(new Set());
-  const [withMoodys, toggleMoodys] = useMoodysMode();
 
   const toggleSim = (id: string) => {
     setSimActive((prev) => {
@@ -525,21 +528,62 @@ export default function RiskGravityPage() {
 
   return (
     <div className="min-h-screen bg-[#0d1117] text-[#c9d1d9] flex flex-col">
-      <MoodysToggle withMoodys={withMoodys} onToggle={toggleMoodys} />
-      <div className="flex-1">
-        {/* ========================================================== */}
-        {/*  HEADER                                                     */}
-        {/* ========================================================== */}
-        <header className="border-b border-[#21262d] bg-[#161b22]">
-          <div className="max-w-[1400px] mx-auto px-6 py-5">
-            <div className="flex items-center gap-3 mb-3">
-              <DiligentLogo size={28} />
-              <h1 className="text-lg font-bold text-[#f0f6fc] tracking-tight">Enterprise Risk Gravity Map</h1>
+      <div className="flex flex-1 overflow-hidden">
+        <IconSidebar />
+
+        <div className="flex-1 flex flex-col overflow-y-auto">
+          {/* Top nav bar */}
+          <div className="h-12 bg-[#161b22] border-b border-[#21262d] flex items-center justify-between px-4 flex-shrink-0">
+            <div className="flex items-center gap-2">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8b949e" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="2" /><line x1="3" y1="9" x2="21" y2="9" /><line x1="9" y1="21" x2="9" y2="9" /></svg>
+              <span className="text-sm font-medium text-[#c9d1d9]">Acme Co.</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6e7681" strokeWidth="2"><polyline points="6 9 12 15 18 9" /></svg>
+            </div>
+            <button className="h-8 w-8 rounded-full bg-[#21262d] flex items-center justify-center">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8b949e" strokeWidth="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+            </button>
+          </div>
+
+          {/* Content */}
+          <div className="flex-1 px-6 py-6 overflow-y-auto">
+            <div className="max-w-[1400px] mx-auto">
+            {/* Breadcrumb */}
+            <div className="flex items-center gap-2 text-[12px] text-[#6e7681] mb-4">
+              <Link href="/superhero/risk-discovery" className="hover:text-[#58a6ff] cursor-pointer">AI Risk Essentials</Link>
+              <span>›</span>
+              <Link href="/superhero/risk-analysis" className="hover:text-[#58a6ff] cursor-pointer">AI Risk Impact Simulator</Link>
+              <span>›</span>
+              <span className="text-[#c9d1d9]">Gravity Map</span>
+            </div>
+
+            {/* Simulator nav */}
+            <div className="flex items-center gap-1 mb-6 border-b border-[#21262d] pb-3">
+              <Link href="/superhero/risk-discovery" className="rounded-lg px-3 py-1.5 text-[11px] font-medium text-[#6e7681] hover:text-[#c9d1d9] hover:bg-white/5 transition-colors">
+                ← Risk Essentials
+              </Link>
+              <div className="w-px h-4 bg-[#21262d] mx-1" />
+              <Link href="/superhero/risk-analysis" className="rounded-lg px-3 py-1.5 text-[11px] font-medium text-[#6e7681] hover:text-[#c9d1d9] hover:bg-white/5 transition-colors">
+                Simulator Home
+              </Link>
+              <span className="rounded-lg px-3 py-1.5 text-[11px] font-medium bg-[#f87171]/10 text-[#f87171] border border-[#f87171]/20">
+                Gravity Map
+              </span>
+              <Link href="/superhero/risk-shockwave" className="rounded-lg px-3 py-1.5 text-[11px] font-medium text-[#6e7681] hover:text-[#c9d1d9] hover:bg-white/5 transition-colors">
+                Risk Shockwave
+              </Link>
+              <Link href="/superhero/risk-pipeline" className="rounded-lg px-3 py-1.5 text-[11px] font-medium text-[#6e7681] hover:text-[#c9d1d9] hover:bg-white/5 transition-colors">
+                Risk Pipeline
+              </Link>
+            </div>
+
+            {/* Title */}
+            <div className="flex items-center gap-3 mb-2">
+              <h1 className="text-xl font-bold text-[#f0f6fc]">Gravity Map</h1>
             </div>
             <p className="text-sm text-[#8b949e] mb-4">
-              Financial exposure drawn toward major enterprise risks — stronger risk gravity pulls more business value into the danger zone
+              Visualize how major enterprise risks pull financial exposure into their orbit — stronger gravity means higher impact
             </p>
-            <div className="flex flex-wrap items-center gap-4">
+            <div className="flex flex-wrap items-center gap-4 mb-6">
               <div className="flex items-center gap-2 rounded-lg border border-[#21262d] bg-[#0d1117] px-3.5 py-2">
                 <span className="text-[10px] font-semibold text-[#6e7681] uppercase">Total Exposure</span>
                 <span className="text-sm font-extrabold text-[#f0f6fc]">{fmt(totalExposure)}</span>
@@ -552,121 +596,207 @@ export default function RiskGravityPage() {
                 <span className="text-[10px] font-semibold text-[#6e7681] uppercase">Highest Concentration</span>
                 <span className="text-sm font-extrabold text-[#fbbf24]">Asia-Pacific</span>
               </div>
-              {withMoodys && (
-                <div className="flex items-center gap-2 rounded-lg border border-[#002B5C]/40 bg-[#002B5C]/10 px-3.5 py-2">
-                  <MoodysSourceChip label="External intelligence active" />
-                </div>
-              )}
             </div>
-          </div>
-        </header>
 
-        {/* ========================================================== */}
-        {/*  MAIN CONTENT                                               */}
-        {/* ========================================================== */}
-        <div className="max-w-[1400px] mx-auto px-6 py-6">
-          <div className="flex gap-6">
-            {/* Left: Gravity Map */}
-            <div className="flex-1 min-w-0">
-              {/* Map */}
-              <div className="rounded-xl border border-[#30363d] bg-[#0d1117] p-4 mb-5">
-                <GravityMap risks={modifiedRisks} selected={selected} onSelect={setSelected} />
+            {/* Main content */}
+            <div className="flex gap-6">
+              {/* Left: Gravity Map */}
+              <div className="flex-1 min-w-0">
+                <div className="rounded-xl border border-[#30363d] bg-[#0d1117] p-4 mb-5">
+                  <GravityMap risks={modifiedRisks} selected={selected} onSelect={setSelected} />
+                </div>
+
+                <div className="rounded-xl border border-[#30363d] bg-[#161b22] p-5">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="h-7 w-7 rounded-lg bg-[#2e1065] border border-[#5b21b6] flex items-center justify-center">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M12 20V10" /><path d="M18 20V4" /><path d="M6 20v-4" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-bold text-[#f0f6fc]">Scenario Simulation</h3>
+                      <p className="text-[11px] text-[#6e7681]">Toggle scenarios to see how exposure and controls shift</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-3">
+                    {SIMULATIONS.map((sim) => {
+                      const active = simActive.has(sim.id);
+                      return (
+                        <button
+                          key={sim.id}
+                          onClick={() => toggleSim(sim.id)}
+                          className="rounded-lg border p-3 text-left transition-all"
+                          style={{
+                            borderColor: active ? "#7c3aed" : "#30363d",
+                            background: active ? "#2e106540" : "#0d1117",
+                          }}
+                        >
+                          <div className="flex items-center gap-2 mb-1.5">
+                            <div
+                              className="w-3.5 h-3.5 rounded border flex items-center justify-center flex-shrink-0"
+                              style={{
+                                borderColor: active ? "#a78bfa" : "#484f58",
+                                background: active ? "#7c3aed" : "transparent",
+                              }}
+                            >
+                              {active && (
+                                <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
+                                  <polyline points="20 6 9 17 4 12" />
+                                </svg>
+                              )}
+                            </div>
+                            <span className="text-xs font-medium" style={{ color: active ? "#c4b5fd" : "#8b949e" }}>
+                              {sim.label}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2 pl-5">
+                            <span className="text-[10px]" style={{ color: sim.exposureDelta > 0 ? "#f87171" : "#34d399" }}>
+                              {sim.exposureDelta > 0 ? "+" : ""}{fmt(Math.abs(sim.exposureDelta))} exposure
+                            </span>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Action buttons */}
+                <div className="flex items-center gap-3 mt-4">
+                  <button className="flex-1 rounded-lg bg-gradient-to-r from-[#2563eb] to-[#3b82f6] px-4 py-2.5 text-xs font-bold text-white hover:from-[#1d4ed8] hover:to-[#2563eb] transition-all shadow-lg shadow-blue-500/20">
+                    Share Gravity Analysis
+                  </button>
+                  <button className="flex-1 rounded-lg border border-[#30363d] bg-[#161b22] px-4 py-2.5 text-xs font-bold text-[#c9d1d9] hover:border-[#484f58] hover:bg-[#1c2128] transition-all">
+                    Export to Committee Deck
+                  </button>
+                </div>
               </div>
 
-              {/* Simulation Controls */}
-              <div className="rounded-xl border border-[#30363d] bg-[#161b22] p-5">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="h-7 w-7 rounded-lg bg-[#2e1065] border border-[#5b21b6] flex items-center justify-center">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M12 20V10" /><path d="M18 20V4" /><path d="M6 20v-4" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-bold text-[#f0f6fc]">Scenario Simulation</h3>
-                    <p className="text-[11px] text-[#6e7681]">Toggle scenarios to see how exposure and controls shift</p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-3 gap-3">
-                  {SIMULATIONS.map((sim) => {
-                    const active = simActive.has(sim.id);
+              {/* Right: Detail Panel */}
+              <div className="w-[340px] flex-shrink-0">
+                <div className="flex gap-2 mb-4">
+                  {RISKS.map((r) => {
+                    const sc = SEVERITY_COLORS[r.severity];
+                    const isSel = r.id === selected;
                     return (
                       <button
-                        key={sim.id}
-                        onClick={() => toggleSim(sim.id)}
-                        className="rounded-lg border p-3 text-left transition-all"
+                        key={r.id}
+                        onClick={() => setSelected(r.id)}
+                        className="flex-1 rounded-lg border px-2 py-2 text-center transition-all"
                         style={{
-                          borderColor: active ? "#7c3aed" : "#30363d",
-                          background: active ? "#2e106540" : "#0d1117",
+                          borderColor: isSel ? sc.glow : "#30363d",
+                          background: isSel ? sc.bg : "#161b22",
                         }}
                       >
-                        <div className="flex items-center gap-2 mb-1.5">
-                          <div
-                            className="w-3.5 h-3.5 rounded border flex items-center justify-center flex-shrink-0"
-                            style={{
-                              borderColor: active ? "#a78bfa" : "#484f58",
-                              background: active ? "#7c3aed" : "transparent",
-                            }}
-                          >
-                            {active && (
-                              <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
-                                <polyline points="20 6 9 17 4 12" />
-                              </svg>
-                            )}
-                          </div>
-                          <span className="text-xs font-medium" style={{ color: active ? "#c4b5fd" : "#8b949e" }}>
-                            {sim.label}
-                          </span>
+                        <div className="text-[10px] font-bold" style={{ color: isSel ? sc.text : "#6e7681" }}>
+                          {r.shortTitle}
                         </div>
-                        <div className="flex items-center gap-2 pl-5">
-                          <span className="text-[10px]" style={{ color: sim.exposureDelta > 0 ? "#f87171" : "#34d399" }}>
-                            {sim.exposureDelta > 0 ? "+" : ""}{fmt(Math.abs(sim.exposureDelta))} exposure
-                          </span>
+                        <div className="text-xs font-extrabold mt-0.5" style={{ color: isSel ? "#f0f6fc" : "#8b949e" }}>
+                          {fmt(r.exposure)}
                         </div>
                       </button>
                     );
                   })}
                 </div>
+
+                <DetailPanel risk={selectedRisk} simActive={simActive} />
+
+                {/* What This Tells You */}
+                <div className="rounded-xl border border-[#30363d] bg-[#161b22] p-5 mt-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="h-6 w-6 rounded-lg bg-[#0c2d6b] border border-[#1e40af] flex items-center justify-center">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="12" y1="16" x2="12" y2="12" />
+                        <line x1="12" y1="8" x2="12.01" y2="8" />
+                      </svg>
+                    </div>
+                    <h4 className="text-xs font-bold text-[#f0f6fc] uppercase tracking-wider">What This Tells You</h4>
+                  </div>
+                  <p className="text-xs text-[#8b949e] leading-relaxed">
+                    Taiwan Strait pulls the most financial weight — $1.8B in exposure with the weakest control coverage (45%). Energy and EU compliance risks compound the picture, but Taiwan is where the gap between exposure and protection is widest.
+                  </p>
+                </div>
+
+                {/* Recommended Actions */}
+                <div className="rounded-xl border border-[#30363d] bg-[#161b22] p-5 mt-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="h-6 w-6 rounded-lg bg-[#14532d] border border-[#166534] flex items-center justify-center">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#4ade80" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="9 11 12 14 22 4" />
+                        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+                      </svg>
+                    </div>
+                    <h4 className="text-xs font-bold text-[#f0f6fc] uppercase tracking-wider">Recommended Actions</h4>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-start gap-3 rounded-lg border border-[#21262d] bg-[#0d1117] px-3 py-2.5">
+                      <span className="mt-0.5 inline-flex items-center rounded-full px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider bg-[#450a0a] text-[#f87171] border border-[#7f1d1d] flex-shrink-0">
+                        Urgent
+                      </span>
+                      <span className="text-xs text-[#c9d1d9] leading-relaxed">Close the secondary supplier gap</span>
+                    </div>
+                    <div className="flex items-start gap-3 rounded-lg border border-[#21262d] bg-[#0d1117] px-3 py-2.5">
+                      <span className="mt-0.5 inline-flex items-center rounded-full px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider bg-[#422006] text-[#fbbf24] border border-[#92400e] flex-shrink-0">
+                        High
+                      </span>
+                      <span className="text-xs text-[#c9d1d9] leading-relaxed">Run the 90-day export halt scenario to quantify worst case</span>
+                    </div>
+                    <div className="flex items-start gap-3 rounded-lg border border-[#21262d] bg-[#0d1117] px-3 py-2.5">
+                      <span className="mt-0.5 inline-flex items-center rounded-full px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider bg-[#1e3a5f] text-[#60a5fa] border border-[#1e40af] flex-shrink-0">
+                        Recommended
+                      </span>
+                      <span className="text-xs text-[#c9d1d9] leading-relaxed">Share gravity analysis with risk committee</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Involve */}
+                <div className="rounded-xl border border-[#30363d] bg-[#161b22] p-5 mt-4">
+                  <div className="text-[10px] font-bold uppercase tracking-widest text-[#6e7681] mb-3">Involve</div>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-3 rounded-lg border border-[#21262d] bg-[#0d1117] px-3 py-2.5">
+                      <div className="h-7 w-7 rounded-full bg-[#1e3a5f] border border-[#1e40af] flex items-center justify-center flex-shrink-0">
+                        <span className="text-[10px] font-bold text-[#60a5fa]">DC</span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-xs font-semibold text-[#c9d1d9]">David Chen</div>
+                        <div className="text-[10px] text-[#6e7681]">VP Supply Chain</div>
+                      </div>
+                      <button className="rounded-md border border-[#30363d] bg-[#21262d] px-2.5 py-1 text-[10px] font-semibold text-[#8b949e] hover:text-[#c9d1d9] hover:border-[#484f58] transition-colors">
+                        Notify
+                      </button>
+                    </div>
+                    <div className="flex items-center gap-3 rounded-lg border border-[#21262d] bg-[#0d1117] px-3 py-2.5">
+                      <div className="h-7 w-7 rounded-full bg-[#2e1065] border border-[#5b21b6] flex items-center justify-center flex-shrink-0">
+                        <span className="text-[10px] font-bold text-[#a78bfa]">MW</span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-xs font-semibold text-[#c9d1d9]">Marcus Webb</div>
+                        <div className="text-[10px] text-[#6e7681]">Risk Committee Chair</div>
+                      </div>
+                      <button className="rounded-md border border-[#30363d] bg-[#21262d] px-2.5 py-1 text-[10px] font-semibold text-[#8b949e] hover:text-[#c9d1d9] hover:border-[#484f58] transition-colors">
+                        Notify
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
-
-            {/* Right: Detail Panel */}
-            <div className="w-[340px] flex-shrink-0">
-              {/* Risk selector pills */}
-              <div className="flex gap-2 mb-4">
-                {RISKS.map((r) => {
-                  const sc = SEVERITY_COLORS[r.severity];
-                  const isSel = r.id === selected;
-                  return (
-                    <button
-                      key={r.id}
-                      onClick={() => setSelected(r.id)}
-                      className="flex-1 rounded-lg border px-2 py-2 text-center transition-all"
-                      style={{
-                        borderColor: isSel ? sc.glow : "#30363d",
-                        background: isSel ? sc.bg : "#161b22",
-                      }}
-                    >
-                      <div className="text-[10px] font-bold" style={{ color: isSel ? sc.text : "#6e7681" }}>
-                        {r.shortTitle}
-                      </div>
-                      <div className="text-xs font-extrabold mt-0.5" style={{ color: isSel ? "#f0f6fc" : "#8b949e" }}>
-                        {fmt(r.exposure)}
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-
-              <DetailPanel risk={selectedRisk} simActive={simActive} withMoodys={withMoodys} />
             </div>
           </div>
         </div>
       </div>
 
-      <StakeholderFooter label="Prototype navigation — Enterprise Risk Gravity Map">
+      <StakeholderFooter label="Prototype navigation — AI Risk Impact Simulator">
         <PrototypeControlLink href="/superhero/risk-analysis">
-          View Risk Impact Analysis →
+          ← Back to Simulator Home
+        </PrototypeControlLink>
+        <PrototypeControlLink href="/superhero/risk-shockwave">
+          Risk Shockwave →
+        </PrototypeControlLink>
+        <PrototypeControlLink href="/superhero/risk-pipeline">
+          Risk Pipeline →
         </PrototypeControlLink>
       </StakeholderFooter>
     </div>

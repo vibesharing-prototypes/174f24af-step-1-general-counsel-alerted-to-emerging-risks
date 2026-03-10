@@ -524,8 +524,17 @@ function OwnerInvestigationContent() {
       </div>
 
       {/* Stakeholder footer — outside the UI, at bottom of page */}
-      {step === "complete" && (
-        <StakeholderFooter label="Switch to Chief Risk Officer to advance the workflow">
+      <StakeholderFooter label={step === "complete" ? "Switch to Chief Risk Officer to advance the workflow" : "Prototype navigation"}>
+        {step !== "complete" && (
+          <PrototypeControlButton
+            onClick={() => {
+              router.push("/superhero/risk-discovery");
+            }}
+          >
+            Skip to Risk Essentials (CRO view) →
+          </PrototypeControlButton>
+        )}
+        {step === "complete" && (
           <PrototypeControlButton
             onClick={() => {
               if (typeof window !== "undefined") {
@@ -544,8 +553,8 @@ function OwnerInvestigationContent() {
           >
             Continue to Chief Risk Officer view →
           </PrototypeControlButton>
-        </StakeholderFooter>
-      )}
+        )}
+      </StakeholderFooter>
     </div>
   );
 }

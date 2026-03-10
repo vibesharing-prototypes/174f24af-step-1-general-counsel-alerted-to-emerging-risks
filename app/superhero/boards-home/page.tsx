@@ -463,17 +463,18 @@ function ScanSequence({ onComplete }: { onComplete: () => void }) {
 
 export default function BoardsHomePage() {
   const [booksTab, setBooksTab] = useState<"all" | "books" | "reports">("all");
-  const [demoPanelOpen, setDemoPanelOpen] = useState(() => {
-    if (typeof window !== "undefined") {
-      const stored = localStorage.getItem("demo-panel-open");
-      return stored === null ? true : stored === "true";
-    }
-    return true;
-  });
+  const [demoPanelOpen, setDemoPanelOpen] = useState(true);
+  const [demoPanelHydrated, setDemoPanelHydrated] = useState(false);
 
   React.useEffect(() => {
-    localStorage.setItem("demo-panel-open", String(demoPanelOpen));
-  }, [demoPanelOpen]);
+    const stored = localStorage.getItem("demo-panel-open");
+    if (stored !== null) setDemoPanelOpen(stored === "true");
+    setDemoPanelHydrated(true);
+  }, []);
+
+  React.useEffect(() => {
+    if (demoPanelHydrated) localStorage.setItem("demo-panel-open", String(demoPanelOpen));
+  }, [demoPanelOpen, demoPanelHydrated]);
   const [scanComplete, setScanComplete] = useState(false);
   const [contentVisible, setContentVisible] = useState(false);
   const router = useRouter();

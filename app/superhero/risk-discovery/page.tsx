@@ -2,8 +2,8 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { StakeholderFooter, PrototypeControlLink } from "../StakeholderFooter";
-import { useMoodysMode, MoodysToggleLight, MoodysBadge, MoodysSourceChipLight } from "../MoodysToggle";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -18,7 +18,6 @@ interface RiskCard {
   description: string;
   isNew: boolean;
   aiGenerated: boolean;
-  moodysSignals?: string[];
 }
 
 /* ------------------------------------------------------------------ */
@@ -36,7 +35,6 @@ const RISKS: RiskCard[] = [
       "Escalating military posturing in the Taiwan Strait creates material risk to semiconductor supply chains. Approximately 47% of critical chip suppliers operate in Taiwan. Disruption could impact $1.8B in annual product revenue across two major product lines.",
     isNew: true,
     aiGenerated: true,
-    moodysSignals: ["Moody\u2019s sector outlook", "Moody\u2019s credit signal", "Moody\u2019s issuer event"],
   },
   {
     id: "vendor",
@@ -48,7 +46,6 @@ const RISKS: RiskCard[] = [
       "CloudSecure Inc. (primary data processing vendor) disclosed a ransomware incident affecting customer data pipelines. They process customer PII under 3 of our data processing agreements. Elevated per CRO assessment; added to Top 5 risk register.",
     isNew: true,
     aiGenerated: true,
-    moodysSignals: ["Moody\u2019s credit signal", "Moody\u2019s vendor stress"],
   },
   {
     id: "eu-dma",
@@ -60,7 +57,6 @@ const RISKS: RiskCard[] = [
       "EC initiated enforcement actions against 3 companies in our sector for DMA non-compliance. Pattern analysis suggests our EU operations may face similar scrutiny. Potential fines up to 10% of global turnover.",
     isNew: true,
     aiGenerated: true,
-    moodysSignals: ["Moody\u2019s sector outlook", "Moody\u2019s issuer event"],
   },
   {
     id: "ai-reg",
@@ -98,9 +94,9 @@ const RISKS: RiskCard[] = [
 ];
 
 const SEVERITY_COLORS: Record<string, { text: string; bg: string; border: string }> = {
-  Critical: { text: "#dc2626", bg: "#fef2f2", border: "#fecaca" },
-  High: { text: "#d97706", bg: "#fffbeb", border: "#fde68a" },
-  Medium: { text: "#2563eb", bg: "#eff6ff", border: "#bfdbfe" },
+  Critical: { text: "#f87171", bg: "#450a0a", border: "#7f1d1d" },
+  High: { text: "#fbbf24", bg: "#422006", border: "#92400e" },
+  Medium: { text: "#60a5fa", bg: "#1e3a5f", border: "#1e40af" },
 };
 
 /* ------------------------------------------------------------------ */
@@ -118,7 +114,7 @@ function DiligentLogo({ size = 24 }: { size?: number }) {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Left Icon Sidebar (dark, narrow — matches Diligent product)        */
+/*  Left Icon Sidebar                                                  */
 /* ------------------------------------------------------------------ */
 
 function IconSidebar() {
@@ -132,25 +128,19 @@ function IconSidebar() {
   ];
 
   return (
-    <div className="w-12 bg-[#1a1a2e] flex flex-col items-center py-3 gap-1 flex-shrink-0">
-      {/* Hamburger */}
-      <button className="h-9 w-9 flex items-center justify-center text-[#9ca3af] hover:text-white rounded-lg hover:bg-white/10">
+    <div className="w-12 bg-[#0d0d1a] flex flex-col items-center py-3 gap-1 flex-shrink-0 border-r border-[#21262d]">
+      <button className="h-9 w-9 flex items-center justify-center text-[#6e7681] hover:text-[#c9d1d9] rounded-lg hover:bg-white/5">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
       </button>
-      {/* Diligent mark */}
       <div className="h-9 w-9 flex items-center justify-center my-1">
         <DiligentLogo size={20} />
       </div>
-      {/* Separator */}
       <div className="w-6 h-px bg-white/10 my-1" />
-      {/* Nav icons */}
       {icons.map((ic) => (
         <button
           key={ic.id}
           className={`h-9 w-9 flex items-center justify-center rounded-lg transition-colors ${
-            ic.active
-              ? "bg-[#ef4444] text-white"
-              : "text-[#9ca3af] hover:text-white hover:bg-white/10"
+            ic.active ? "bg-[#ef4444] text-white" : "text-[#6e7681] hover:text-[#c9d1d9] hover:bg-white/5"
           }`}
         >
           {ic.el}
@@ -164,7 +154,7 @@ function IconSidebar() {
 /*  AI Sparkle Icon                                                    */
 /* ------------------------------------------------------------------ */
 
-function AISparkle({ size = 16, color = "#6b7280" }: { size?: number; color?: string }) {
+function AISparkle({ size = 16, color = "#6e7681" }: { size?: number; color?: string }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill={color} xmlns="http://www.w3.org/2000/svg">
       <path d="M12 2L13.09 8.26L18 6L14.74 10.91L21 12L14.74 13.09L18 18L13.09 15.74L12 22L10.91 15.74L6 18L9.26 13.09L3 12L9.26 10.91L6 6L10.91 8.26L12 2Z" />
@@ -173,16 +163,15 @@ function AISparkle({ size = 16, color = "#6b7280" }: { size?: number; color?: st
 }
 
 /* ------------------------------------------------------------------ */
-/*  Risk Card Component                                                */
+/*  Risk Card Component (Dark)                                         */
 /* ------------------------------------------------------------------ */
 
-function RiskCardItem({ risk, withMoodys }: { risk: RiskCard; withMoodys: boolean }) {
+function RiskCardItem({ risk }: { risk: RiskCard }) {
   const sc = SEVERITY_COLORS[risk.severity];
   const [tooltipOpen, setTooltipOpen] = useState(false);
 
   return (
-    <div className="bg-white border border-[#e5e7eb] rounded-xl p-5 flex flex-col hover:shadow-md transition-shadow relative">
-      {/* Top row: AI sparkle + category badge */}
+    <div className="bg-[#161b22] border border-[#30363d] rounded-xl p-5 flex flex-col hover:border-[#484f58] transition-colors relative">
       <div className="flex items-center justify-between mb-3">
         <div className="relative">
           {risk.aiGenerated && (
@@ -191,13 +180,13 @@ function RiskCardItem({ risk, withMoodys }: { risk: RiskCard; withMoodys: boolea
               onMouseLeave={() => setTooltipOpen(false)}
               className="flex items-center justify-center"
             >
-              <AISparkle size={18} color="#9ca3af" />
+              <AISparkle size={18} color="#6e7681" />
             </button>
           )}
           {tooltipOpen && (
-            <div className="absolute left-0 bottom-full mb-2 z-10 w-48 rounded-lg bg-[#1f2937] text-white text-[11px] px-3 py-2 shadow-lg">
+            <div className="absolute left-0 bottom-full mb-2 z-10 w-48 rounded-lg bg-[#30363d] text-[#c9d1d9] text-[11px] px-3 py-2 shadow-lg border border-[#484f58]">
               This result was created with the help of AI.
-              <div className="absolute left-4 top-full w-2 h-2 bg-[#1f2937] transform rotate-45 -translate-y-1" />
+              <div className="absolute left-4 top-full w-2 h-2 bg-[#30363d] transform rotate-45 -translate-y-1" />
             </div>
           )}
         </div>
@@ -209,7 +198,6 @@ function RiskCardItem({ risk, withMoodys }: { risk: RiskCard; withMoodys: boolea
         </span>
       </div>
 
-      {/* New badge */}
       {risk.isNew && (
         <div className="flex items-center gap-2 mb-2">
           <span className="inline-flex rounded-full bg-[#ef4444] text-white px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider">
@@ -224,34 +212,22 @@ function RiskCardItem({ risk, withMoodys }: { risk: RiskCard; withMoodys: boolea
         </div>
       )}
 
-      {/* Title */}
-      <h3 className="text-sm font-semibold text-[#2563eb] leading-snug mb-1 hover:underline cursor-pointer">
+      <h3 className="text-sm font-semibold text-[#58a6ff] leading-snug mb-1 hover:underline cursor-pointer">
         {risk.title}
       </h3>
 
-      {/* Source */}
-      <p className="text-[11px] text-[#6b7280] mb-1">{risk.source}</p>
-      {withMoodys && risk.moodysSignals && risk.moodysSignals.length > 0 && (
-        <div className="flex flex-wrap gap-1 mb-3">
-          {risk.moodysSignals.map((sig) => (
-            <MoodysSourceChipLight key={sig} label={sig} />
-          ))}
-        </div>
-      )}
-      {(!withMoodys || !risk.moodysSignals || risk.moodysSignals.length === 0) && <div className="mb-2" />}
+      <p className="text-[11px] text-[#6e7681] mb-2">{risk.source}</p>
 
-      {/* Description */}
-      <p className="text-[12px] text-[#4b5563] leading-relaxed flex-1 mb-4">
+      <p className="text-[12px] text-[#8b949e] leading-relaxed flex-1 mb-4">
         {risk.description.length > 220 ? risk.description.slice(0, 220) + "..." : risk.description}
       </p>
 
-      {/* Actions */}
-      <div className="flex items-center gap-3 pt-3 border-t border-[#f3f4f6]">
-        <button className="flex items-center gap-1.5 text-[12px] text-[#374151] font-medium hover:text-[#111827] transition-colors">
+      <div className="flex items-center gap-3 pt-3 border-t border-[#21262d]">
+        <button className="flex items-center gap-1.5 text-[12px] text-[#c9d1d9] font-medium hover:text-[#f0f6fc] transition-colors">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
           Edit details
         </button>
-        <button className="flex items-center gap-1.5 text-[12px] text-[#374151] font-medium hover:text-[#111827] transition-colors">
+        <button className="flex items-center gap-1.5 text-[12px] text-[#c9d1d9] font-medium hover:text-[#f0f6fc] transition-colors">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
           Quick add
         </button>
@@ -266,110 +242,159 @@ function RiskCardItem({ risk, withMoodys }: { risk: RiskCard; withMoodys: boolea
 
 export default function RiskDiscoveryPage() {
   const [filter, setFilter] = useState<"all" | "new">("all");
-  const [withMoodys, toggleMoodys] = useMoodysMode();
+  const [toasterVisible, setToasterVisible] = useState(true);
+  const router = useRouter();
   const displayed = filter === "new" ? RISKS.filter((r) => r.isNew) : RISKS;
 
   return (
-    <div className="min-h-screen bg-[#f9fafb] flex flex-col">
-      <MoodysToggleLight withMoodys={withMoodys} onToggle={toggleMoodys} />
+    <div className="min-h-screen bg-[#0d1117] flex flex-col relative">
+      {/* Toaster notification */}
+      {toasterVisible && (
+        <div className="fixed top-4 right-4 z-50 animate-slide-in-right">
+          <div
+            role="button"
+            tabIndex={0}
+            onClick={() => router.push("/superhero/cro-review?risk=risk-taiwan&owner=diana-reyes")}
+            onKeyDown={(e) => { if (e.key === "Enter") router.push("/superhero/cro-review?risk=risk-taiwan&owner=diana-reyes"); }}
+            className="flex items-start gap-3 w-[380px] rounded-xl border border-[#30363d] bg-[#161b22] px-4 py-3.5 shadow-lg hover:shadow-xl hover:border-[#58a6ff]/40 transition-all text-left group cursor-pointer"
+          >
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#3fb950]/10 flex-shrink-0 mt-0.5">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3fb950" strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12" /></svg>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-[#f0f6fc] mb-0.5 group-hover:text-[#58a6ff] transition-colors">Interview submitted</p>
+              <p className="text-xs text-[#8b949e] leading-relaxed">Diana Reyes has completed her risk owner interview regarding <span className="font-medium text-[#c9d1d9]">Taiwan Strait Geopolitical Tensions</span>. Ready for intake processing.</p>
+            </div>
+            <button
+              onClick={(e) => { e.stopPropagation(); setToasterVisible(false); }}
+              className="text-[#484f58] hover:text-[#8b949e] flex-shrink-0 mt-0.5"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-1 overflow-hidden">
-        {/* Icon Sidebar */}
         <IconSidebar />
 
-        {/* Main content area */}
         <div className="flex-1 flex flex-col overflow-y-auto">
           {/* Top nav bar */}
-          <div className="h-12 bg-white border-b border-[#e5e7eb] flex items-center justify-between px-4 flex-shrink-0">
+          <div className="h-12 bg-[#161b22] border-b border-[#21262d] flex items-center justify-between px-4 flex-shrink-0">
             <div className="flex items-center gap-2">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#374151" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="2" /><line x1="3" y1="9" x2="21" y2="9" /><line x1="9" y1="21" x2="9" y2="9" /></svg>
-              <span className="text-sm font-medium text-[#111827]">Label</span>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2"><polyline points="6 9 12 15 18 9" /></svg>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8b949e" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="2" /><line x1="3" y1="9" x2="21" y2="9" /><line x1="9" y1="21" x2="9" y2="9" /></svg>
+              <span className="text-sm font-medium text-[#c9d1d9]">Acme Co.</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6e7681" strokeWidth="2"><polyline points="6 9 12 15 18 9" /></svg>
             </div>
-            <button className="h-8 w-8 rounded-full bg-[#f3f4f6] flex items-center justify-center">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+            <button className="h-8 w-8 rounded-full bg-[#21262d] flex items-center justify-center">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8b949e" strokeWidth="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
             </button>
           </div>
 
           {/* Content */}
-          <div className="flex-1 px-8 py-6">
-            {/* Breadcrumb */}
-            <div className="flex items-center gap-2 text-[12px] text-[#6b7280] mb-4">
-              <span className="hover:text-[#2563eb] cursor-pointer">AI Risk Essentials</span>
+          <div className="flex-1 px-8 py-6 overflow-y-auto">
+            <div className="max-w-[1280px] mx-auto">
+            <div className="flex items-center gap-2 text-[12px] text-[#6e7681] mb-4">
+              <span className="text-[#c9d1d9]">AI Risk Essentials</span>
               <span>›</span>
-              <span className="hover:text-[#2563eb] cursor-pointer">Risk Identification</span>
-              <span>›</span>
+              <span>Risk Identification</span>
             </div>
 
-            {/* Title */}
-            <div className="flex items-center gap-3 mb-2">
-              <Link href="/superhero/boards-home" className="text-[#374151] hover:text-[#111827]">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6" /></svg>
+            {/* Page nav */}
+            <div className="flex items-center gap-1 mb-6 border-b border-[#21262d] pb-3">
+              <span className="rounded-lg px-3 py-1.5 text-[11px] font-medium bg-white/10 text-[#f0f6fc] border border-white/10">
+                Risk Essentials
+              </span>
+              <div className="w-px h-4 bg-[#21262d] mx-1" />
+              <Link href="/superhero/risk-analysis" className="rounded-lg px-3 py-1.5 text-[11px] font-medium text-[#6e7681] hover:text-[#c9d1d9] hover:bg-white/5 transition-colors flex items-center gap-1.5">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" /></svg>
+                AI Risk Simulator
               </Link>
-              <h1 className="text-xl font-bold text-[#111827]">AI risk discovery</h1>
             </div>
-            <p className="text-sm text-[#6b7280] mb-6 ml-8">
+
+            <div className="flex items-center gap-3 mb-2">
+              <h1 className="text-xl font-bold text-[#f0f6fc]">AI risk discovery</h1>
+            </div>
+            <p className="text-sm text-[#8b949e] mb-6">
               Risks identified from company filings, news, and regulatory sources that may require disclosure review.
             </p>
 
             {/* Stats banner */}
-            <div className="bg-white border border-[#e5e7eb] rounded-xl p-5 mb-8">
+            <div className="bg-[#161b22] border border-[#30363d] rounded-xl p-5 mb-8">
               <div className="flex items-center gap-2 mb-1">
-                <h2 className="text-sm font-bold text-[#111827]">Risks identified</h2>
+                <h2 className="text-sm font-bold text-[#f0f6fc]">Risks identified</h2>
               </div>
-              <p className="text-[12px] text-[#6b7280] mb-4">
-                {withMoodys
-                  ? <>Source information from Moody&apos;s, 10-K reports, regulatory filings, and real-time news intelligence</>
-                  : "Source information from 10-K reports, regulatory filings, and real-time news intelligence"}
+              <p className="text-[12px] text-[#6e7681] mb-4">
+                Source information from 10-K reports, regulatory filings, and real-time news intelligence
               </p>
               <div className="grid grid-cols-4 gap-6">
                 <div>
-                  <div className="text-[11px] text-[#9ca3af] font-medium mb-0.5">Discovered risks</div>
-                  <div className="text-lg font-bold text-[#111827]">{withMoodys ? "98,120" : "41,200"} risks</div>
+                  <div className="text-[11px] text-[#484f58] font-medium mb-0.5">Discovered risks</div>
+                  <div className="text-lg font-bold text-[#f0f6fc]">41,200 risks</div>
                 </div>
                 <div>
-                  <div className="text-[11px] text-[#9ca3af] font-medium mb-0.5">Companies</div>
-                  <div className="text-lg font-bold text-[#111827]">{withMoodys ? "2,755" : "1,180"} companies</div>
+                  <div className="text-[11px] text-[#484f58] font-medium mb-0.5">Companies</div>
+                  <div className="text-lg font-bold text-[#f0f6fc]">1,180 companies</div>
                 </div>
                 <div>
-                  <div className="text-[11px] text-[#9ca3af] font-medium mb-0.5">Industries</div>
-                  <div className="text-lg font-bold text-[#111827]">64</div>
+                  <div className="text-[11px] text-[#484f58] font-medium mb-0.5">Industries</div>
+                  <div className="text-lg font-bold text-[#f0f6fc]">64</div>
                 </div>
                 <div>
-                  <div className="text-[11px] text-[#9ca3af] font-medium mb-0.5">Data last updated</div>
-                  <div className="text-lg font-bold text-[#111827]">18 Feb 2026</div>
+                  <div className="text-[11px] text-[#484f58] font-medium mb-0.5">Data last updated</div>
+                  <div className="text-lg font-bold text-[#f0f6fc]">18 Feb 2026</div>
                 </div>
               </div>
             </div>
 
+            {/* AI Risk Impact Simulator promo banner */}
+            <div className="rounded-lg border border-[#1f6feb]/20 bg-gradient-to-r from-[#1f6feb]/5 via-[#161b22] to-[#a371f7]/5 px-4 py-3 mb-6 flex items-center gap-3">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#1f6feb] to-[#a371f7] flex-shrink-0">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" /></svg>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[12px] text-[#c9d1d9]">
+                  <span className="font-semibold text-[#f0f6fc]">Try the AI Risk Impact Simulator</span>
+                  <span className="mx-1.5 text-[#30363d]">·</span>
+                  Evaluate how Taiwan Strait risk cascades across your enterprise with one complimentary simulation. See gravity maps, shockwave propagation, and full pipeline traceability.
+                </p>
+              </div>
+              <Link
+                href="/superhero/risk-analysis"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-[#1f6feb] to-[#a371f7] px-3.5 py-1.5 text-[11px] font-semibold text-white hover:opacity-90 transition-opacity flex-shrink-0 whitespace-nowrap"
+              >
+                Launch Simulator
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+              </Link>
+            </div>
+
             {/* Risk suggestions header */}
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-base font-bold text-[#111827]">
-                Risk suggestions <span className="text-[#6b7280] font-normal">({displayed.length})</span>
+              <h2 className="text-base font-bold text-[#f0f6fc]">
+                Risk suggestions <span className="text-[#6e7681] font-normal">({displayed.length})</span>
               </h2>
               <div className="flex items-center gap-3">
-                {/* Search bar */}
                 <div className="relative">
-                  <svg className="absolute left-3 top-1/2 -translate-y-1/2" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
+                  <svg className="absolute left-3 top-1/2 -translate-y-1/2" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#484f58" strokeWidth="2"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
                   <input
                     type="text"
                     placeholder="Search risks..."
-                    className="h-9 w-56 rounded-lg border border-[#d1d5db] bg-white pl-9 pr-3 text-sm text-[#374151] placeholder:text-[#9ca3af] focus:outline-none focus:ring-2 focus:ring-[#2563eb]/20 focus:border-[#2563eb]"
+                    className="h-9 w-56 rounded-lg border border-[#30363d] bg-[#0d1117] pl-9 pr-3 text-sm text-[#c9d1d9] placeholder:text-[#484f58] focus:outline-none focus:ring-2 focus:ring-[#58a6ff]/20 focus:border-[#58a6ff]"
                   />
                 </div>
-                {/* Filter buttons */}
-                <div className="flex items-center rounded-lg border border-[#d1d5db] overflow-hidden">
+                <div className="flex items-center rounded-lg border border-[#30363d] overflow-hidden">
                   <button
                     onClick={() => setFilter("all")}
                     className={`h-9 px-3 text-[12px] font-medium transition-colors ${
-                      filter === "all" ? "bg-[#111827] text-white" : "bg-white text-[#374151] hover:bg-[#f3f4f6]"
+                      filter === "all" ? "bg-[#f0f6fc] text-[#0d1117]" : "bg-[#161b22] text-[#c9d1d9] hover:bg-[#21262d]"
                     }`}
                   >
                     All
                   </button>
                   <button
                     onClick={() => setFilter("new")}
-                    className={`h-9 px-3 text-[12px] font-medium transition-colors border-l border-[#d1d5db] ${
-                      filter === "new" ? "bg-[#111827] text-white" : "bg-white text-[#374151] hover:bg-[#f3f4f6]"
+                    className={`h-9 px-3 text-[12px] font-medium transition-colors border-l border-[#30363d] ${
+                      filter === "new" ? "bg-[#f0f6fc] text-[#0d1117]" : "bg-[#161b22] text-[#c9d1d9] hover:bg-[#21262d]"
                     }`}
                   >
                     New
@@ -378,11 +403,10 @@ export default function RiskDiscoveryPage() {
                     </span>
                   </button>
                 </div>
-                {/* Filter chip */}
-                <button className="flex items-center gap-1.5 h-9 rounded-lg border border-[#d1d5db] bg-white px-3 text-[12px] font-medium text-[#374151] hover:bg-[#f3f4f6]">
+                <button className="flex items-center gap-1.5 h-9 rounded-lg border border-[#30363d] bg-[#161b22] px-3 text-[12px] font-medium text-[#c9d1d9] hover:bg-[#21262d]">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" /></svg>
                   Filter
-                  <span className="inline-flex items-center justify-center rounded-full bg-[#e5e7eb] text-[#374151] text-[9px] font-bold h-4 w-4">3</span>
+                  <span className="inline-flex items-center justify-center rounded-full bg-[#30363d] text-[#c9d1d9] text-[9px] font-bold h-4 w-4">3</span>
                 </button>
               </div>
             </div>
@@ -390,34 +414,35 @@ export default function RiskDiscoveryPage() {
             {/* Risk card grid */}
             <div className="grid grid-cols-3 gap-5 mb-8">
               {displayed.map((risk) => (
-                <RiskCardItem key={risk.id} risk={risk} withMoodys={withMoodys} />
+                <RiskCardItem key={risk.id} risk={risk} />
               ))}
             </div>
 
             {/* Pagination */}
-            <div className="flex items-center justify-between text-[12px] text-[#6b7280] pb-6">
+            <div className="flex items-center justify-between text-[12px] text-[#6e7681] pb-6">
               <span>1–{displayed.length} of {displayed.length}</span>
               <div className="flex items-center gap-1">
-                <button className="h-8 w-8 rounded-lg border border-[#d1d5db] bg-white flex items-center justify-center text-[#9ca3af]" disabled>
+                <button className="h-8 w-8 rounded-lg border border-[#30363d] bg-[#161b22] flex items-center justify-center text-[#484f58]" disabled>
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6" /></svg>
                 </button>
-                <button className="h-8 w-8 rounded-lg bg-[#111827] text-white flex items-center justify-center text-[12px] font-bold">1</button>
-                <button className="h-8 w-8 rounded-lg border border-[#d1d5db] bg-white flex items-center justify-center text-[#374151] hover:bg-[#f3f4f6] text-[12px]">2</button>
-                <button className="h-8 w-8 rounded-lg border border-[#d1d5db] bg-white flex items-center justify-center text-[#374151] hover:bg-[#f3f4f6] text-[12px]">3</button>
-                <span className="px-1">…</span>
-                <button className="h-8 w-8 rounded-lg border border-[#d1d5db] bg-white flex items-center justify-center text-[#374151] hover:bg-[#f3f4f6] text-[12px]">23</button>
-                <button className="h-8 w-8 rounded-lg border border-[#d1d5db] bg-white flex items-center justify-center text-[#374151] hover:bg-[#f3f4f6]">
+                <button className="h-8 w-8 rounded-lg bg-[#f0f6fc] text-[#0d1117] flex items-center justify-center text-[12px] font-bold">1</button>
+                <button className="h-8 w-8 rounded-lg border border-[#30363d] bg-[#161b22] flex items-center justify-center text-[#c9d1d9] hover:bg-[#21262d] text-[12px]">2</button>
+                <button className="h-8 w-8 rounded-lg border border-[#30363d] bg-[#161b22] flex items-center justify-center text-[#c9d1d9] hover:bg-[#21262d] text-[12px]">3</button>
+                <span className="px-1 text-[#484f58]">…</span>
+                <button className="h-8 w-8 rounded-lg border border-[#30363d] bg-[#161b22] flex items-center justify-center text-[#c9d1d9] hover:bg-[#21262d] text-[12px]">23</button>
+                <button className="h-8 w-8 rounded-lg border border-[#30363d] bg-[#161b22] flex items-center justify-center text-[#c9d1d9] hover:bg-[#21262d]">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 18 15 12 9 6" /></svg>
                 </button>
               </div>
+            </div>
             </div>
           </div>
         </div>
       </div>
 
-      <StakeholderFooter label="Prototype navigation — AI Risk Discovery (Diligent product view)">
+      <StakeholderFooter label="Prototype navigation — AI Risk Discovery">
         <PrototypeControlLink href="/superhero/risk-discovery-dark">
-          View in Dark Mode →
+          View in Light Mode →
         </PrototypeControlLink>
         <PrototypeControlLink href="/superhero/reviewer">
           Continue to Review Sources →

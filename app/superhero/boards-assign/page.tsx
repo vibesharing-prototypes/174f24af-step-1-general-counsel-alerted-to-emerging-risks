@@ -129,17 +129,18 @@ type AssignPhase = "ready" | "notifying" | "done";
 
 export default function BoardsAssignPage() {
   const [booksTab, setBooksTab] = useState<"all" | "books" | "reports">("all");
-  const [demoPanelOpen, setDemoPanelOpen] = useState(() => {
-    if (typeof window !== "undefined") {
-      const stored = localStorage.getItem("demo-panel-open");
-      return stored === null ? true : stored === "true";
-    }
-    return true;
-  });
+  const [demoPanelOpen, setDemoPanelOpen] = useState(true);
+  const [demoPanelHydrated, setDemoPanelHydrated] = useState(false);
 
   React.useEffect(() => {
-    localStorage.setItem("demo-panel-open", String(demoPanelOpen));
-  }, [demoPanelOpen]);
+    const stored = localStorage.getItem("demo-panel-open");
+    if (stored !== null) setDemoPanelOpen(stored === "true");
+    setDemoPanelHydrated(true);
+  }, []);
+
+  React.useEffect(() => {
+    if (demoPanelHydrated) localStorage.setItem("demo-panel-open", String(demoPanelOpen));
+  }, [demoPanelOpen, demoPanelHydrated]);
   const [editing, setEditing] = useState<string | null>(null);
   const [phase, setPhase] = useState<AssignPhase>("ready");
   const router = useRouter();

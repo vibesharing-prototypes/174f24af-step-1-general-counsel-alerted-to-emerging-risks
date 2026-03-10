@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { StakeholderFooter, PrototypeControlLink } from "../StakeholderFooter";
-import { useMoodysMode, MoodysToggle, MoodysBadge, MoodysSourceChip } from "../MoodysToggle";
+import { useRouter } from "next/navigation";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -18,7 +18,6 @@ interface RiskCard {
   description: string;
   isNew: boolean;
   aiGenerated: boolean;
-  moodysSignals?: string[];
 }
 
 /* ------------------------------------------------------------------ */
@@ -36,7 +35,6 @@ const RISKS: RiskCard[] = [
       "Escalating military posturing in the Taiwan Strait creates material risk to semiconductor supply chains. Approximately 47% of critical chip suppliers operate in Taiwan. Disruption could impact $1.8B in annual product revenue across two major product lines.",
     isNew: true,
     aiGenerated: true,
-    moodysSignals: ["Moody\u2019s sector outlook", "Moody\u2019s credit signal", "Moody\u2019s issuer event"],
   },
   {
     id: "vendor",
@@ -48,7 +46,6 @@ const RISKS: RiskCard[] = [
       "CloudSecure Inc. (primary data processing vendor) disclosed a ransomware incident affecting customer data pipelines. They process customer PII under 3 of our data processing agreements. Elevated per CRO assessment; added to Top 5 risk register.",
     isNew: true,
     aiGenerated: true,
-    moodysSignals: ["Moody\u2019s credit signal", "Moody\u2019s vendor stress"],
   },
   {
     id: "eu-dma",
@@ -60,7 +57,6 @@ const RISKS: RiskCard[] = [
       "EC initiated enforcement actions against 3 companies in our sector for DMA non-compliance. Pattern analysis suggests our EU operations may face similar scrutiny. Potential fines up to 10% of global turnover.",
     isNew: true,
     aiGenerated: true,
-    moodysSignals: ["Moody\u2019s sector outlook", "Moody\u2019s issuer event"],
   },
   {
     id: "ai-reg",
@@ -170,7 +166,7 @@ function AISparkle({ size = 16, color = "#6e7681" }: { size?: number; color?: st
 /*  Risk Card Component (Dark)                                         */
 /* ------------------------------------------------------------------ */
 
-function RiskCardItem({ risk, withMoodys }: { risk: RiskCard; withMoodys: boolean }) {
+function RiskCardItem({ risk }: { risk: RiskCard }) {
   const sc = SEVERITY_COLORS[risk.severity];
   const [tooltipOpen, setTooltipOpen] = useState(false);
 
@@ -224,15 +220,7 @@ function RiskCardItem({ risk, withMoodys }: { risk: RiskCard; withMoodys: boolea
       </h3>
 
       {/* Source */}
-      <p className="text-[11px] text-[#6e7681] mb-1">{risk.source}</p>
-      {withMoodys && risk.moodysSignals && risk.moodysSignals.length > 0 && (
-        <div className="flex flex-wrap gap-1 mb-3">
-          {risk.moodysSignals.map((sig) => (
-            <MoodysSourceChip key={sig} label={sig} />
-          ))}
-        </div>
-      )}
-      {(!withMoodys || !risk.moodysSignals || risk.moodysSignals.length === 0) && <div className="mb-2" />}
+      <p className="text-[11px] text-[#6e7681] mb-2">{risk.source}</p>
 
       {/* Description */}
       <p className="text-[12px] text-[#8b949e] leading-relaxed flex-1 mb-4">
@@ -260,12 +248,39 @@ function RiskCardItem({ risk, withMoodys }: { risk: RiskCard; withMoodys: boolea
 
 export default function RiskDiscoveryDarkPage() {
   const [filter, setFilter] = useState<"all" | "new">("all");
-  const [withMoodys, toggleMoodys] = useMoodysMode();
+  const [toasterVisible, setToasterVisible] = useState(true);
+  const router = useRouter();
   const displayed = filter === "new" ? RISKS.filter((r) => r.isNew) : RISKS;
 
   return (
-    <div className="min-h-screen bg-[#0d1117] flex flex-col">
-      <MoodysToggle withMoodys={withMoodys} onToggle={toggleMoodys} />
+    <div className="min-h-screen bg-[#0d1117] flex flex-col relative">
+      {/* Toaster notification */}
+      {toasterVisible && (
+        <div className="fixed top-4 right-4 z-50 animate-slide-in-right">
+          <div
+            role="button"
+            tabIndex={0}
+            onClick={() => router.push("/superhero/cro-review?risk=risk-taiwan&owner=diana-reyes")}
+            onKeyDown={(e) => { if (e.key === "Enter") router.push("/superhero/cro-review?risk=risk-taiwan&owner=diana-reyes"); }}
+            className="flex items-start gap-3 w-[380px] rounded-xl border border-[#30363d] bg-[#161b22] px-4 py-3.5 shadow-lg hover:shadow-xl hover:border-[#58a6ff]/40 transition-all text-left group cursor-pointer"
+          >
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#3fb950]/10 flex-shrink-0 mt-0.5">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3fb950" strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12" /></svg>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-[#f0f6fc] mb-0.5 group-hover:text-[#58a6ff] transition-colors">Interview submitted</p>
+              <p className="text-xs text-[#8b949e] leading-relaxed">Diana Reyes has completed her risk owner interview regarding <span className="font-medium text-[#c9d1d9]">Taiwan Strait Geopolitical Tensions</span>. Ready for intake processing.</p>
+            </div>
+            <button
+              onClick={(e) => { e.stopPropagation(); setToasterVisible(false); }}
+              className="text-[#484f58] hover:text-[#8b949e] flex-shrink-0 mt-0.5"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-1 overflow-hidden">
         {/* Icon Sidebar */}
         <IconSidebar />
@@ -276,7 +291,7 @@ export default function RiskDiscoveryDarkPage() {
           <div className="h-12 bg-[#161b22] border-b border-[#21262d] flex items-center justify-between px-4 flex-shrink-0">
             <div className="flex items-center gap-2">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8b949e" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="2" /><line x1="3" y1="9" x2="21" y2="9" /><line x1="9" y1="21" x2="9" y2="9" /></svg>
-              <span className="text-sm font-medium text-[#c9d1d9]">Label</span>
+              <span className="text-sm font-medium text-[#c9d1d9]">Acme Co.</span>
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6e7681" strokeWidth="2"><polyline points="6 9 12 15 18 9" /></svg>
             </div>
             <button className="h-8 w-8 rounded-full bg-[#21262d] flex items-center justify-center">
@@ -311,18 +326,16 @@ export default function RiskDiscoveryDarkPage() {
                 <h2 className="text-sm font-bold text-[#f0f6fc]">Risks identified</h2>
               </div>
               <p className="text-[12px] text-[#6e7681] mb-4">
-                {withMoodys
-                  ? <>Source information from Moody&apos;s, 10-K reports, regulatory filings, and real-time news intelligence</>
-                  : "Source information from 10-K reports, regulatory filings, and real-time news intelligence"}
+                Source information from 10-K reports, regulatory filings, and real-time news intelligence
               </p>
               <div className="grid grid-cols-4 gap-6">
                 <div>
                   <div className="text-[11px] text-[#484f58] font-medium mb-0.5">Discovered risks</div>
-                  <div className="text-lg font-bold text-[#f0f6fc]">{withMoodys ? "98,120" : "41,200"} risks</div>
+                  <div className="text-lg font-bold text-[#f0f6fc]">41,200 risks</div>
                 </div>
                 <div>
                   <div className="text-[11px] text-[#484f58] font-medium mb-0.5">Companies</div>
-                  <div className="text-lg font-bold text-[#f0f6fc]">{withMoodys ? "2,755" : "1,180"} companies</div>
+                  <div className="text-lg font-bold text-[#f0f6fc]">1,180 companies</div>
                 </div>
                 <div>
                   <div className="text-[11px] text-[#484f58] font-medium mb-0.5">Industries</div>
@@ -381,7 +394,7 @@ export default function RiskDiscoveryDarkPage() {
             {/* Risk card grid */}
             <div className="grid grid-cols-3 gap-5 mb-8">
               {displayed.map((risk) => (
-                <RiskCardItem key={risk.id} risk={risk} withMoodys={withMoodys} />
+                <RiskCardItem key={risk.id} risk={risk} />
               ))}
             </div>
 
@@ -406,9 +419,9 @@ export default function RiskDiscoveryDarkPage() {
         </div>
       </div>
 
-      <StakeholderFooter label="Prototype navigation — AI Risk Discovery (dark mode)">
+      <StakeholderFooter label="Prototype navigation — AI Risk Discovery (light mode)">
         <PrototypeControlLink href="/superhero/risk-discovery">
-          View in Light Mode →
+          View in Dark Mode →
         </PrototypeControlLink>
         <PrototypeControlLink href="/superhero/reviewer">
           Continue to Review Sources →

@@ -112,6 +112,9 @@ function NotificationContent() {
         <PrototypeControlLink href={investigationUrl}>
           Start investigation as {owner.name} →
         </PrototypeControlLink>
+        <PrototypeControlLink href="/superhero/risk-discovery">
+          Skip to Risk Essentials (CRO view) →
+        </PrototypeControlLink>
       </StakeholderFooter>
     </div>
   );

@@ -1,18 +1,8 @@
 "use client";
 
-/* ------------------------------------------------------------------ */
-/*  MOODY'S EVIDENCE: Pipeline View                                    */
-/*  Stage 1 (Signal Detection): Moody's credit signal + sector outlook */
-/*    as additional inputs and output                                   */
-/*  Stage 2 (Exposure Mapping): Moody's concentration data as input    */
-/*  Stage 6 (Disclosure Assessment): Moody's peer/industry context     */
-/*    strengthens materiality rationale                                 */
-/*  Evidence drawer: Moody's artifacts at stages 1, 2, 6              */
-/* ------------------------------------------------------------------ */
-
 import React, { useState } from "react";
+import Link from "next/link";
 import { StakeholderFooter, PrototypeControlLink } from "../StakeholderFooter";
-import { useMoodysMode, MoodysToggle, MoodysEvidenceCard, MoodysSourceChip } from "../MoodysToggle";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -37,8 +27,6 @@ interface Stage {
   outputs: StageItem[];
   status: "complete" | "active" | "pending";
   aiAssisted: boolean;
-  moodysInputs?: string[];
-  moodysOutput?: StageItem;
 }
 
 interface Evidence {
@@ -47,7 +35,6 @@ interface Evidence {
   type: string;
   stage: number;
   summary: string;
-  isMoodys?: boolean;
 }
 
 /* ------------------------------------------------------------------ */
@@ -72,8 +59,6 @@ const STAGES: Stage[] = [
     ],
     status: "complete",
     aiAssisted: true,
-    moodysInputs: ["Moody\u2019s sector outlook", "Moody\u2019s credit signal"],
-    moodysOutput: { label: "Moody\u2019s: Semiconductor sector stress elevated", value: "78/100", status: "complete" },
   },
   {
     id: 2,
@@ -93,8 +78,6 @@ const STAGES: Stage[] = [
     ],
     status: "complete",
     aiAssisted: true,
-    moodysInputs: ["Moody\u2019s concentration data", "Moody\u2019s issuer intelligence"],
-    moodysOutput: { label: "Moody\u2019s: Supplier credit watch — 3 of 5 negative", value: "High", status: "complete" },
   },
   {
     id: 3,
@@ -167,8 +150,6 @@ const STAGES: Stage[] = [
     ],
     status: "complete",
     aiAssisted: true,
-    moodysInputs: ["Moody\u2019s sector commentary", "Moody\u2019s peer exposure data"],
-    moodysOutput: { label: "Moody\u2019s: Sector risk warrants disclosure per industry pattern", value: "Confirmed", status: "complete" },
   },
   {
     id: 7,
@@ -225,30 +206,6 @@ const EVIDENCE: Evidence[] = [
     type: "Competitive Intelligence",
     stage: 6,
     summary: "Apple and Nvidia have disclosed Taiwan Strait supply chain exposure in recent 10-K filings. AMD disclosure is pending. Delayed disclosure may signal governance weakness.",
-  },
-  {
-    id: "ev-m1",
-    title: "Moody\u2019s Semiconductor Sector Outlook",
-    type: "Moody\u2019s Sector Outlook",
-    stage: 1,
-    summary: "Sector stress index at 78/100 (elevated). Geopolitical instability driving increased default probability for Taiwan-dependent manufacturers. Sovereign risk assessment shifted to negative.",
-    isMoodys: true,
-  },
-  {
-    id: "ev-m2",
-    title: "Moody\u2019s Supplier Credit Watch Report",
-    type: "Moody\u2019s Credit Signal",
-    stage: 2,
-    summary: "3 of 5 key semiconductor suppliers placed on negative credit watch. TSMC (A1) remains stable but sector-wide sovereign risk elevated. Concentration score: 8.7/10 critical.",
-    isMoodys: true,
-  },
-  {
-    id: "ev-m3",
-    title: "Moody\u2019s Peer Disclosure Analysis",
-    type: "Moody\u2019s Issuer Event",
-    stage: 6,
-    summary: "Moody\u2019s issuer intelligence confirms 2 of 3 peer companies disclosed similar Taiwan supply chain exposure in recent filings. Industry pattern supports material risk classification.",
-    isMoodys: true,
   },
 ];
 
@@ -312,13 +269,11 @@ function StageCard({
   isSelected,
   onSelect,
   isLast,
-  withMoodys,
 }: {
   stage: Stage;
   isSelected: boolean;
   onSelect: () => void;
   isLast: boolean;
-  withMoodys: boolean;
 }) {
   return (
     <div className="flex">
@@ -398,11 +353,6 @@ function StageCard({
                   <span className="text-[11px] text-[#6e7681]">{inp}</span>
                 </div>
               ))}
-              {withMoodys && stage.moodysInputs && stage.moodysInputs.map((mi, i) => (
-                <div key={`m-${i}`} className="mt-0.5">
-                  <MoodysSourceChip label={mi} />
-                </div>
-              ))}
             </div>
           </div>
           {/* Outputs */}
@@ -416,13 +366,6 @@ function StageCard({
                   {out.value && <span className="text-[11px] font-bold text-[#f0f6fc] flex-shrink-0">{out.value}</span>}
                 </div>
               ))}
-              {withMoodys && stage.moodysOutput && (
-                <div className="flex items-center gap-1.5 rounded-md border border-[#002B5C]/30 bg-[#002B5C]/10 px-1.5 py-1">
-                  <StatusLabel status={stage.moodysOutput.status} />
-                  <span className="text-[11px] text-[#79c0ff] flex-1 min-w-0 truncate">{stage.moodysOutput.label}</span>
-                  {stage.moodysOutput.value && <span className="text-[11px] font-bold text-[#79c0ff] flex-shrink-0">{stage.moodysOutput.value}</span>}
-                </div>
-              )}
             </div>
           </div>
         </div>
@@ -521,11 +464,10 @@ function DecisionPanel({ decision, setDecision }: { decision: string | null; set
 /*  Evidence Drawer                                                    */
 /* ------------------------------------------------------------------ */
 
-function EvidenceDrawer({ evidence, selectedStage, withMoodys }: { evidence: Evidence[]; selectedStage: number; withMoodys: boolean }) {
+function EvidenceDrawer({ evidence, selectedStage }: { evidence: Evidence[]; selectedStage: number }) {
   const [open, setOpen] = useState(false);
-  const visibleEvidence = withMoodys ? evidence : evidence.filter((e) => !e.isMoodys);
-  const filtered = visibleEvidence.filter((e) => e.stage === selectedStage);
-  const shown = open ? visibleEvidence : filtered;
+  const filtered = evidence.filter((e) => e.stage === selectedStage);
+  const shown = open ? evidence : filtered;
 
   return (
     <div className="rounded-xl border border-[#30363d] bg-[#161b22] p-5">
@@ -535,7 +477,7 @@ function EvidenceDrawer({ evidence, selectedStage, withMoodys }: { evidence: Evi
             <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
           </svg>
           <h3 className="text-xs font-bold text-[#f0f6fc]">Evidence Chain</h3>
-          <span className="text-[10px] text-[#6e7681]">{visibleEvidence.length} artifacts</span>
+          <span className="text-[10px] text-[#6e7681]">{evidence.length} artifacts</span>
         </div>
         <button
           onClick={() => setOpen(!open)}
@@ -567,11 +509,7 @@ function EvidenceDrawer({ evidence, selectedStage, withMoodys }: { evidence: Evi
                   <span className="text-[10px] font-bold text-[#f0f6fc]">{ev.title}</span>
                 </div>
                 <div className="flex items-center gap-2 mb-1">
-                  {ev.isMoodys ? (
-                    <MoodysSourceChip label={ev.type} />
-                  ) : (
-                    <span className="text-[9px] font-semibold text-[#484f58] uppercase">{ev.type}</span>
-                  )}
+                  <span className="text-[9px] font-semibold text-[#484f58] uppercase">{ev.type}</span>
                 </div>
                 <p className="text-[11px] text-[#8b949e] leading-relaxed">{ev.summary}</p>
               </div>
@@ -587,80 +525,232 @@ function EvidenceDrawer({ evidence, selectedStage, withMoodys }: { evidence: Evi
 /*  Page                                                               */
 /* ------------------------------------------------------------------ */
 
+/* ------------------------------------------------------------------ */
+/*  Icon Sidebar (matches Risk Essentials)                             */
+/* ------------------------------------------------------------------ */
+
+function IconSidebar() {
+  const icons = [
+    { id: "home", active: false, el: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg> },
+    { id: "grc", active: true, el: <span className="text-[11px] font-extrabold">G</span> },
+    { id: "chart", active: false, el: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M18 20V10" /><path d="M12 20V4" /><path d="M6 20v-6" /></svg> },
+    { id: "board", active: false, el: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="2" /><line x1="3" y1="9" x2="21" y2="9" /><line x1="9" y1="21" x2="9" y2="9" /></svg> },
+    { id: "chat", active: false, el: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg> },
+    { id: "help", active: false, el: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg> },
+  ];
+
+  return (
+    <div className="w-12 bg-[#0d0d1a] flex flex-col items-center py-3 gap-1 flex-shrink-0 border-r border-[#21262d]">
+      <button className="h-9 w-9 flex items-center justify-center text-[#6e7681] hover:text-[#c9d1d9] rounded-lg hover:bg-white/5">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
+      </button>
+      <div className="h-9 w-9 flex items-center justify-center my-1">
+        <DiligentLogo size={20} />
+      </div>
+      <div className="w-6 h-px bg-white/10 my-1" />
+      {icons.map((ic) => (
+        <button
+          key={ic.id}
+          className={`h-9 w-9 flex items-center justify-center rounded-lg transition-colors ${
+            ic.active ? "bg-[#ef4444] text-white" : "text-[#6e7681] hover:text-[#c9d1d9] hover:bg-white/5"
+          }`}
+        >
+          {ic.el}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Page                                                               */
+/* ------------------------------------------------------------------ */
+
 export default function RiskPipelinePage() {
   const [selectedStage, setSelectedStage] = useState(7);
   const [decision, setDecision] = useState<string | null>("disclose");
-  const [withMoodys, toggleMoodys] = useMoodysMode();
 
   return (
     <div className="min-h-screen bg-[#0d1117] text-[#c9d1d9] flex flex-col">
-      <MoodysToggle withMoodys={withMoodys} onToggle={toggleMoodys} />
-      <div className="flex-1">
-        {/* ========================================================== */}
-        {/*  HEADER                                                     */}
-        {/* ========================================================== */}
-        <header className="border-b border-[#21262d] bg-[#161b22]">
-          <div className="max-w-[1400px] mx-auto px-6 py-5">
-            <div className="flex items-center gap-3 mb-3">
-              <DiligentLogo size={28} />
-              <h1 className="text-lg font-bold text-[#f0f6fc] tracking-tight">Risk-to-Disclosure Pipeline</h1>
+      <div className="flex flex-1 overflow-hidden">
+        <IconSidebar />
+
+        <div className="flex-1 flex flex-col overflow-y-auto">
+          {/* Top nav bar */}
+          <div className="h-12 bg-[#161b22] border-b border-[#21262d] flex items-center justify-between px-4 flex-shrink-0">
+            <div className="flex items-center gap-2">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8b949e" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="2" /><line x1="3" y1="9" x2="21" y2="9" /><line x1="9" y1="21" x2="9" y2="9" /></svg>
+              <span className="text-sm font-medium text-[#c9d1d9]">Acme Co.</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6e7681" strokeWidth="2"><polyline points="6 9 12 15 18 9" /></svg>
             </div>
-            <p className="text-sm text-[#8b949e] mb-4">
-              From external signal to disclosure-ready governance workflow — full traceability across 7 stages
-            </p>
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="flex items-center gap-2 rounded-lg border border-[#5b21b6] bg-[#2e1065]/40 px-3 py-1.5">
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" strokeWidth="2.5"><path d="M12 2L2 7l10 5 10-5-10-5z" /><path d="M2 17l10 5 10-5" /></svg>
-                <span className="text-[10px] font-semibold text-[#6e7681] uppercase">AI Confidence</span>
-                <span className="text-xs font-extrabold text-[#a78bfa]">92%</span>
-              </div>
-              <div className="flex items-center gap-2 rounded-lg border border-[#7f1d1d] bg-[#450a0a]/40 px-3 py-1.5">
-                <span className="text-[10px] font-semibold text-[#6e7681] uppercase">Urgency</span>
-                <span className="text-xs font-extrabold text-[#f87171]">Critical</span>
-              </div>
-              <div className="flex items-center gap-2 rounded-lg border border-[#21262d] bg-[#0d1117] px-3 py-1.5">
-                <span className="text-[10px] font-semibold text-[#6e7681] uppercase">Responsible</span>
-                <span className="text-xs font-extrabold text-[#f0f6fc]">General Counsel</span>
-              </div>
-              <div className="flex items-center gap-2 rounded-lg border border-[#065f46] bg-[#052e16]/40 px-3 py-1.5">
-                <span className="text-[10px] font-semibold text-[#6e7681] uppercase">Pipeline</span>
-                <span className="text-xs font-extrabold text-[#34d399]">6 of 7 complete</span>
-              </div>
-            </div>
+            <button className="h-8 w-8 rounded-full bg-[#21262d] flex items-center justify-center">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8b949e" strokeWidth="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+            </button>
           </div>
-        </header>
 
-        {/* ========================================================== */}
-        {/*  MAIN CONTENT                                               */}
-        {/* ========================================================== */}
-        <div className="max-w-[1400px] mx-auto px-6 py-6">
-          <div className="flex gap-6">
-            {/* Left: Pipeline stages */}
-            <div className="flex-1 min-w-0">
-              {STAGES.map((stage, i) => (
-                <StageCard
-                  key={stage.id}
-                  stage={stage}
-                  isSelected={selectedStage === stage.id}
-                  onSelect={() => setSelectedStage(stage.id)}
-                  isLast={i === STAGES.length - 1}
-                  withMoodys={withMoodys}
-                />
-              ))}
+          {/* Content */}
+          <div className="flex-1 px-6 py-6 overflow-y-auto">
+            <div className="max-w-[1400px] mx-auto">
+            {/* Breadcrumb */}
+            <div className="flex items-center gap-2 text-[12px] text-[#6e7681] mb-4">
+              <Link href="/superhero/risk-discovery" className="hover:text-[#58a6ff] cursor-pointer">AI Risk Essentials</Link>
+              <span>›</span>
+              <Link href="/superhero/risk-analysis" className="hover:text-[#58a6ff] cursor-pointer">AI Risk Impact Simulator</Link>
+              <span>›</span>
+              <span className="text-[#c9d1d9]">Risk Pipeline</span>
             </div>
 
-            {/* Right: Decision + Evidence */}
-            <div className="w-[380px] flex-shrink-0 space-y-5">
-              <DecisionPanel decision={decision} setDecision={setDecision} />
-              <EvidenceDrawer evidence={EVIDENCE} selectedStage={selectedStage} withMoodys={withMoodys} />
+            {/* Simulator nav */}
+            <div className="flex items-center gap-1 mb-6 border-b border-[#21262d] pb-3">
+              <Link href="/superhero/risk-discovery" className="rounded-lg px-3 py-1.5 text-[11px] font-medium text-[#6e7681] hover:text-[#c9d1d9] hover:bg-white/5 transition-colors">
+                ← Risk Essentials
+              </Link>
+              <div className="w-px h-4 bg-[#21262d] mx-1" />
+              <Link href="/superhero/risk-analysis" className="rounded-lg px-3 py-1.5 text-[11px] font-medium text-[#6e7681] hover:text-[#c9d1d9] hover:bg-white/5 transition-colors">
+                Simulator Home
+              </Link>
+              <Link href="/superhero/risk-gravity" className="rounded-lg px-3 py-1.5 text-[11px] font-medium text-[#6e7681] hover:text-[#c9d1d9] hover:bg-white/5 transition-colors">
+                Gravity Map
+              </Link>
+              <Link href="/superhero/risk-shockwave" className="rounded-lg px-3 py-1.5 text-[11px] font-medium text-[#6e7681] hover:text-[#c9d1d9] hover:bg-white/5 transition-colors">
+                Risk Shockwave
+              </Link>
+              <span className="rounded-lg px-3 py-1.5 text-[11px] font-medium bg-[#a78bfa]/10 text-[#a78bfa] border border-[#a78bfa]/20">
+                Risk Pipeline
+              </span>
+            </div>
+
+            {/* Title */}
+            <div className="flex items-center gap-3 mb-2">
+              <h1 className="text-xl font-bold text-[#f0f6fc]">Risk Pipeline</h1>
+              <span className="text-xs text-[#6e7681]">Taiwan Strait Geopolitical Tensions</span>
+            </div>
+            <p className="text-sm text-[#8b949e] mb-3">
+              Follow the complete chain: how a geopolitical signal became a $1.8B exposure finding and disclosure recommendation in 37 minutes
+            </p>
+            <div className="flex flex-wrap items-center gap-3 mb-6">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-[#5b21b6] bg-[#2e1065]/40 px-2.5 py-1 text-[10px] font-semibold text-[#a78bfa]">
+                <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" strokeWidth="2.5"><path d="M12 2L2 7l10 5 10-5-10-5z" /><path d="M2 17l10 5 10-5" /></svg>
+                AI Confidence 92%
+              </span>
+              <span className="inline-flex items-center rounded-full border border-[#7f1d1d] bg-[#450a0a]/40 px-2.5 py-1 text-[10px] font-semibold text-[#f87171]">Critical</span>
+              <span className="inline-flex items-center rounded-full border border-[#065f46] bg-[#052e16]/40 px-2.5 py-1 text-[10px] font-semibold text-[#34d399]">6 of 7 stages complete</span>
+            </div>
+
+            {/* Main content */}
+            <div>
+              <div className="flex gap-6">
+                {/* Left: Pipeline stages */}
+                <div className="flex-1 min-w-0">
+                  {STAGES.map((stage, i) => (
+                    <StageCard
+                      key={stage.id}
+                      stage={stage}
+                      isSelected={selectedStage === stage.id}
+                      onSelect={() => setSelectedStage(stage.id)}
+                      isLast={i === STAGES.length - 1}
+                    />
+                  ))}
+                </div>
+
+                {/* Right: Decision + Evidence */}
+                <div className="w-[380px] flex-shrink-0 space-y-5">
+                  <DecisionPanel decision={decision} setDecision={setDecision} />
+                  <EvidenceDrawer evidence={EVIDENCE} selectedStage={selectedStage} />
+
+                  {/* What Happens Next */}
+                  <div className="rounded-xl border border-[#30363d] bg-[#161b22] p-5">
+                    <div className="flex items-center gap-2 mb-4">
+                      <div className="h-7 w-7 rounded-lg bg-[#1e3a5f] border border-[#1e40af] flex items-center justify-center">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M5 12h14" /><path d="M12 5l7 7-7 7" />
+                        </svg>
+                      </div>
+                      <h3 className="text-sm font-bold text-[#f0f6fc]">After the Decision</h3>
+                    </div>
+
+                    <div className="space-y-0">
+                      {[
+                        { step: 1, title: "Disclosure language finalized", desc: "GC reviews AI-drafted 10-Q language and makes edits", color: "#a78bfa", bg: "#2e1065", border: "#5b21b6" },
+                        { step: 2, title: "Committee sign-off", desc: "Risk committee and audit committee review and approve", color: "#60a5fa", bg: "#1e3a5f", border: "#1e40af" },
+                        { step: 3, title: "Filing updated", desc: "10-Q filing updated with new risk factor disclosure", color: "#34d399", bg: "#052e16", border: "#065f46" },
+                      ].map((item, i) => (
+                        <div key={item.step} className="flex">
+                          <div className="flex flex-col items-center mr-3 flex-shrink-0">
+                            <div
+                              className="w-6 h-6 rounded-full border-2 flex items-center justify-center text-[9px] font-bold"
+                              style={{ borderColor: item.color, background: item.bg, color: item.color }}
+                            >
+                              {item.step}
+                            </div>
+                            {i < 2 && (
+                              <div className="w-0.5 flex-1 my-0.5" style={{ background: `${item.color}30` }} />
+                            )}
+                          </div>
+                          <div className={i < 2 ? "pb-3" : ""}>
+                            <div className="text-xs font-semibold text-[#f0f6fc]">{item.title}</div>
+                            <div className="text-[11px] text-[#6e7681] leading-snug">{item.desc}</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Who's Involved */}
+                  <div className="rounded-xl border border-[#30363d] bg-[#161b22] p-5">
+                    <div className="text-[10px] font-bold uppercase tracking-widest text-[#6e7681] mb-3">Who&apos;s Involved in This Decision</div>
+                    <div className="space-y-2">
+                      {[
+                        { name: "Diana Reyes", role: "General Counsel", note: "Final disclosure authority", color: "#f0abfc", bg: "#4a044e", border: "#86198f" },
+                        { name: "Marcus Webb", role: "Risk Committee Chair", note: "Committee approval", color: "#60a5fa", bg: "#1e3a5f", border: "#1e40af" },
+                        { name: "External Auditor", role: "", note: "Filing review", color: "#34d399", bg: "#052e16", border: "#065f46" },
+                      ].map((person) => (
+                        <div key={person.name} className="flex items-center gap-3 rounded-lg border border-[#21262d] bg-[#0d1117] px-3 py-2.5">
+                          <div
+                            className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0"
+                            style={{ background: person.bg, color: person.color, border: `1px solid ${person.border}` }}
+                          >
+                            {person.name.split(" ").map(n => n[0]).join("")}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="text-xs font-semibold text-[#f0f6fc] truncate">
+                              {person.name}{person.role && <span className="text-[#6e7681] font-normal">, {person.role}</span>}
+                            </div>
+                            <div className="text-[10px] text-[#484f58]">{person.note}</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="space-y-2.5">
+                    <button className="w-full rounded-lg py-2.5 text-xs font-bold text-white transition-all hover:brightness-110"
+                      style={{ background: "linear-gradient(135deg, #3b82f6, #2563eb)" }}
+                    >
+                      Finalize &amp; Send to Committee
+                    </button>
+                    <button className="w-full rounded-lg border border-[#30363d] bg-[#161b22] py-2.5 text-xs font-bold text-[#c9d1d9] hover:border-[#484f58] hover:bg-[#1c2129] transition-all">
+                      Export Full Evidence Chain
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
             </div>
           </div>
         </div>
       </div>
 
-      <StakeholderFooter label="Prototype navigation — Risk-to-Disclosure Pipeline">
+      <StakeholderFooter label="Prototype navigation — AI Risk Impact Simulator">
+        <PrototypeControlLink href="/superhero/risk-analysis">
+          ← Back to Simulator Home
+        </PrototypeControlLink>
+        <PrototypeControlLink href="/superhero/risk-gravity">
+          Gravity Map →
+        </PrototypeControlLink>
         <PrototypeControlLink href="/superhero/risk-shockwave">
-          View Risk Shockwave →
+          Risk Shockwave →
         </PrototypeControlLink>
       </StakeholderFooter>
     </div>
