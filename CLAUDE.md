@@ -1,10 +1,18 @@
 # Enterprise Risk Governance — Prototype Context
 
 ## Current State
-- **Version**: ERG v2 + Teams Simulation
-- **Last updated**: February 20, 2026
+- **Version**: ERG v3 Teams
+- **Last updated**: March 12, 2026
 - **Stack**: Next.js 14 (App Router), React, TypeScript, Tailwind CSS
 - **Deployment**: VibeSharing (prototype hosting)
+
+## Deployment URLs (do not guess — use these)
+- **Vercel domain**: `https://vs-step-1-general-counsel-alerted-m.vercel.app`
+- **Vercel project**: `vs-step-1-general-counsel-alerted-mljple8d`
+- **GitHub repo**: `https://github.com/vibesharing-prototypes/174f24af-step-1-general-counsel-alerted-to-emerging-risks`
+- **VibeSharing (ERG v3 Teams)**: `https://vibesharing.app/dashboard/projects/82f9616e-a6fb-48ba-b165-b67453c68eca`
+- **VibeSharing (HUC 6 parent)**: prototype ID `901d5591-242c-41cb-aa36-f2f765755e94`
+- **VibeSharing collection (All Hero Use Cases)**: collection ID `bacc3877-a34e-475e-9832-5f0119828e53`
 
 ## What Was Built
 
