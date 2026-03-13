@@ -791,12 +791,17 @@ function SlackContent() {
 
   return (
     <div className="h-screen bg-[#F5F5F5] flex flex-col items-center p-5 gap-3">
-      {/* Persona Navigator — outside the Slack app */}
+      {/* Platform Switcher + Persona Navigator */}
       <div className="w-full max-w-[1360px] shrink-0">
-        <div className="flex items-center gap-3 mb-2">
-          <p className="text-[11px] font-semibold uppercase tracking-widest text-[#888]">Workflow Personas</p>
+        <div className="flex items-center gap-2 mb-2">
+          <div className="flex items-center gap-1 bg-white rounded-lg border border-[#DDD] p-0.5 shrink-0">
+            <a href="/teams" className="px-3 py-1 rounded-md text-[11px] font-medium text-[#888] hover:bg-[#F0F0F0] transition-colors">Teams</a>
+            <span className="px-3 py-1 rounded-md bg-[#4A154B] text-white text-[11px] font-semibold">Slack</span>
+          </div>
+          <div className="h-4 w-px bg-[#DDD] mx-1" />
+          <a href="/slack/gc" className="text-[11px] text-[#4A154B] hover:underline font-medium whitespace-nowrap">GC End-to-End →</a>
           <div className="flex-1 h-px bg-[#DDD]" />
-          <p className="text-[10px] text-[#AAA]">Select a person to see their perspective in the chronological flow</p>
+          <p className="text-[10px] text-[#AAA] shrink-0">Select a persona to see their perspective</p>
         </div>
         <div className="flex items-center gap-2 overflow-x-auto pb-1">
           {PERSPECTIVES.map(p => {

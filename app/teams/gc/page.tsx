@@ -287,16 +287,23 @@ export default function TeamsGCPage() {
 
   return (
     <div className="h-screen bg-[#F5F5F5] flex flex-col items-center p-5 gap-3">
-      {/* Header — GC context */}
+      {/* Header — GC context + platform switcher */}
       <div className="w-full max-w-[1360px] shrink-0">
+        <div className="flex items-center gap-2 mb-2">
+          <div className="flex items-center gap-1 bg-white rounded-lg border border-[#DDD] p-0.5 shrink-0">
+            <span className="px-3 py-1 rounded-md bg-[#6264A7] text-white text-[11px] font-semibold">Teams</span>
+            <a href="/slack/gc" className="px-3 py-1 rounded-md text-[11px] font-medium text-[#888] hover:bg-[#F0F0F0] transition-colors">Slack</a>
+          </div>
+          <div className="h-4 w-px bg-[#DDD] mx-1" />
+          <a href="/teams" className="text-[11px] text-[#6264A7] hover:underline font-medium whitespace-nowrap">← Multi-persona view</a>
+          <div className="flex-1" />
+        </div>
         <div className="flex items-center gap-3">
           <Avatar src={AVATARS["sarah-mitchell"]} name="Sarah Mitchell" size={36} />
           <div>
             <p className="text-[13px] font-bold text-[#1D1D1D]">Sarah Mitchell — General Counsel</p>
             <p className="text-[11px] text-[#888]">End-to-end ERG workflow from risk detection to EDGAR filing — all from Sarah&apos;s Teams chat</p>
           </div>
-          <div className="flex-1" />
-          <a href="/teams" className="text-[11px] text-[#6264A7] hover:underline font-medium">← Multi-persona view</a>
         </div>
       </div>
 
