@@ -3,7 +3,6 @@
 import React, { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { StakeholderFooter, PrototypeControlButton } from "../StakeholderFooter";
 
 function cn(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
@@ -182,7 +181,7 @@ function LoadingScreen({ onComplete }: { onComplete: () => void }) {
   }, [onComplete]);
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#1a1a2e] flex flex-col items-center justify-center">
+    <div className="flex-1 bg-[#1a1a2e] flex flex-col items-center justify-center relative">
       <div className="flex flex-col items-center gap-6">
         <DiligentLogo className="h-14 w-auto" />
         <h2 className="text-xl font-semibold text-white">Diligent Data Room</h2>
@@ -206,13 +205,13 @@ function LoadingScreen({ onComplete }: { onComplete: () => void }) {
           ))}
         </div>
       </div>
-      <p className="absolute bottom-8 text-[10px] text-[#4a4a6a]">256-bit AES encrypted &middot; SOC 2 Type II certified</p>
+      <p className="absolute bottom-6 text-[10px] text-[#4a4a6a]">256-bit AES encrypted &middot; SOC 2 Type II certified</p>
     </div>
   );
 }
 
 function PromptBox({ onSubmit }: { onSubmit: () => void }) {
-  const [value, setValue] = useState("Send the context packet to everyone in the Disclosure Committee");
+  const [value, setValue] = useState("Approve materials in Diligent Boards");
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") onSubmit();
@@ -268,38 +267,41 @@ function DataRoomContent() {
   const [loading, setLoading] = useState(true);
 
   const handleNotifyCrisisCohort = () => {
-    router.push("/superhero/ceo-review/notification");
+    router.push("/superhero/board-governance");
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
-      {loading && <LoadingScreen onComplete={() => setLoading(false)} />}
+    <div className="min-h-screen bg-white flex items-center justify-center p-6">
 
-      {/* Demo controls */}
-      <div className="border-b-2 border-[#0ea5e9]/40 bg-[#e0f2fe] flex-shrink-0">
-        <div className="border-b border-[#0ea5e9]/30 bg-[#bae6fd] px-4 py-2">
-          <p className="text-[10px] font-medium uppercase tracking-widest text-[#0369a1]">Demo controls — not part of prototype</p>
-        </div>
-        <div className="px-4 py-2 flex items-center justify-between flex-wrap gap-2">
-          <div className="flex items-center gap-3">
-            <span className="text-xs font-medium uppercase tracking-wider text-[#0369a1]">Prototype</span>
-            <span className="text-sm font-semibold text-[#0c4a6e]">Diligent Data Room</span>
-            <Link href="/superhero/context-packet" className="text-xs font-medium text-[#0369a1] hover:underline">
-              ← Context Packet
-            </Link>
+      {/* Browser chrome wrapper */}
+      <div className="w-full max-w-[1200px] h-[85vh] rounded-xl border border-[#3a3a3a] bg-white shadow-2xl shadow-black/50 flex flex-col overflow-hidden">
+
+        {/* macOS title bar */}
+        <div className="h-10 bg-[#2b2b2b] border-b border-[#3a3a3a] flex items-center px-4 shrink-0">
+          <div className="flex items-center gap-2">
+            <Link href="/" className="w-3 h-3 rounded-full bg-[#ff5f57] hover:bg-[#ff5f57]/80 transition-colors" title="Close" />
+            <div className="w-3 h-3 rounded-full bg-[#febc2e]" />
+            <div className="w-3 h-3 rounded-full bg-[#28c840]" />
           </div>
-          <span className="rounded-full border-2 border-[#0c4a6e] bg-[#7dd3fc]/30 px-3 py-1 text-xs font-semibold text-[#0c4a6e]">
-            Viewing as: {GC_NAME} (General Counsel)
-          </span>
+          <div className="flex-1 flex justify-center">
+            <div className="flex items-center gap-2 bg-[#1a1a1a] rounded-md px-3 py-1 min-w-[360px]">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" /><path d="M2 12h20" /><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" /></svg>
+              <span className="text-[11px] text-[#999]">data-room.diligent.com/disclosure-committee/undisclosed-risks</span>
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2" className="ml-auto"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13" /></svg>
+            </div>
+          </div>
+          <div className="w-[52px]" />
         </div>
-      </div>
 
-      <DiligentHeader />
+        {loading ? (
+          <LoadingScreen onComplete={() => setLoading(false)} />
+        ) : (<>
+        <DiligentHeader />
 
-      <div className="flex-1 flex overflow-hidden min-h-0">
-        <DataRoomSidebar />
+        <div className="flex-1 flex overflow-hidden min-h-0">
+          <DataRoomSidebar />
 
-        <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-white">
+          <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-white">
           {/* Breadcrumb */}
           <div className="px-6 pt-4 pb-0 flex-shrink-0">
             <nav className="flex items-center gap-1.5 text-xs">
@@ -445,15 +447,9 @@ function DataRoomContent() {
           <PromptBox onSubmit={handleNotifyCrisisCohort} />
         </div>
       </div>
+      </>)}
 
-      <StakeholderFooter label="Continue as General Counsel to advance the workflow">
-        <Link href="/superhero/context-packet" className="text-sm text-[#6b7280] hover:text-[#374151]">
-          ← Back to Context Packet
-        </Link>
-        <PrototypeControlButton onClick={handleNotifyCrisisCohort}>
-          Notify Disclosure Committee →
-        </PrototypeControlButton>
-      </StakeholderFooter>
+      </div>{/* end browser chrome wrapper */}
     </div>
   );
 }

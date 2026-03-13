@@ -293,7 +293,25 @@ export default function PrototypeIndex() {
           </div>
         ))}
 
-        <div className="pt-6 border-t border-[#21262d] text-center">
+        {/* Teams Simulation */}
+        <div className="pt-6 border-t border-[#21262d]">
+          <Link
+            href="/teams"
+            className="block rounded-xl border border-[#6264A7]/40 bg-[#6264A7]/10 p-4 hover:bg-[#6264A7]/20 transition-all group"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-[#6264A7] flex items-center justify-center shrink-0">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 00-3-3.87" /><path d="M16 3.13a4 4 0 010 7.75" /></svg>
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-[#f0f6fc] group-hover:text-[#6264A7] transition-colors">Microsoft Teams Simulation</h3>
+                <p className="text-xs text-[#8b949e] mt-0.5">Full ERG workflow inside Teams — risk detection, owner interviews, CEO approval, and committee review via chat with Diligent AI agents and adaptive cards.</p>
+              </div>
+            </div>
+          </Link>
+        </div>
+
+        <div className="pt-4 text-center">
           <p className="text-xs text-[#484f58]">
             Prototype built with Next.js · Hosted on VibeSharing
           </p>

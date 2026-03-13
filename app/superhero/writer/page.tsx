@@ -1,10 +1,8 @@
 "use client";
 
-import React, { useState, useEffect, useRef, Suspense } from "react";
+import React, { useState, useEffect, useRef, useCallback, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { LeftRail } from "../LeftRail";
-import { StakeholderFooter, PrototypeControlLink } from "../StakeholderFooter";
 
 function cn(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
@@ -69,18 +67,12 @@ const RISK_DISCLOSURE_DATA: Record<
 
 const RISK_IDS = ["risk-taiwan", "risk-vendor", "risk-dma"] as const;
 
-const GC_AVATAR_URL = "https://randomuser.me/api/portraits/med/women/65.jpg";
-
-/** Metadata for right rail — away from work area, extra resources for GC */
-const RISK_METADATA: Record<
-  string,
-  {
-    avgWordCount: number;
-    shortDraftSuggestions: string[];
-    riskLibraryMentions: string[];
-    peerInsights: { count: number; examples: string[] };
-  }
-> = {
+const RISK_METADATA: Record<string, {
+  avgWordCount: number;
+  shortDraftSuggestions: string[];
+  riskLibraryMentions: string[];
+  peerInsights: { count: number; examples: string[] };
+}> = {
   "risk-taiwan": {
     avgWordCount: 142,
     shortDraftSuggestions: [
@@ -88,20 +80,12 @@ const RISK_METADATA: Record<
       "Consider adding the supplier diversification timeline (e.g., 12–18 month qualification).",
       "Consider mentioning board-level initiatives discussed in prior materials.",
     ],
-    riskLibraryMentions: [
-      "supplier diversification timeline",
-      "geographic concentration percentage",
-      "lead time / qualification period",
-      "board-level initiatives",
-    ],
-    peerInsights: {
-      count: 4,
-      examples: [
-        "TechCorp: \"Approximately 52% of our semiconductor procurement is sourced from Taiwan-based facilities.\"",
-        "GlobalChip: \"We are evaluating alternative sourcing in Vietnam and Malaysia; qualification typically requires 12–18 months.\"",
-        "MegaElectronics: \"Geopolitical tensions in the Taiwan Strait could materially disrupt our supply chain.\"",
-      ],
-    },
+    riskLibraryMentions: ["supplier diversification timeline", "geographic concentration percentage", "lead time / qualification period", "board-level initiatives"],
+    peerInsights: { count: 4, examples: [
+      "TechCorp: \"Approximately 52% of our semiconductor procurement is sourced from Taiwan-based facilities.\"",
+      "GlobalChip: \"We are evaluating alternative sourcing in Vietnam and Malaysia; qualification typically requires 12–18 months.\"",
+      "MegaElectronics: \"Geopolitical tensions in the Taiwan Strait could materially disrupt our supply chain.\"",
+    ]},
   },
   "risk-vendor": {
     avgWordCount: 128,
@@ -110,19 +94,11 @@ const RISK_METADATA: Record<
       "Consider adding vendor risk assessment or DPA coverage.",
       "Consider mentioning third-party concentration or reliance on key vendors.",
     ],
-    riskLibraryMentions: [
-      "third-party / vendor concentration",
-      "incident response procedures",
-      "DPA / data processing agreements",
-      "vendor risk assessments",
-    ],
-    peerInsights: {
-      count: 3,
-      examples: [
-        "SecureData Inc: \"A breach affecting our key cloud infrastructure vendor could disrupt operations across multiple business lines.\"",
-        "CloudFirst: \"We maintain incident response procedures with critical vendors; however, vendor compliance cannot be guaranteed.\"",
-      ],
-    },
+    riskLibraryMentions: ["third-party / vendor concentration", "incident response procedures", "DPA / data processing agreements", "vendor risk assessments"],
+    peerInsights: { count: 3, examples: [
+      "SecureData Inc: \"A breach affecting our key cloud infrastructure vendor could disrupt operations across multiple business lines.\"",
+      "CloudFirst: \"We maintain incident response procedures with critical vendors; however, vendor compliance cannot be guaranteed.\"",
+    ]},
   },
   "risk-dma": {
     avgWordCount: 118,
@@ -131,19 +107,11 @@ const RISK_METADATA: Record<
       "Consider adding EU revenue exposure or geographic breakdown.",
       "Consider mentioning EC enforcement actions or peer designation.",
     ],
-    riskLibraryMentions: [
-      "EU revenue exposure",
-      "EC enforcement actions",
-      "designation / gatekeeper status",
-      "compliance costs",
-    ],
-    peerInsights: {
-      count: 3,
-      examples: [
-        "EuroTech: \"The European Commission has designated three companies in our sector under the DMA; we are monitoring implications.\"",
-        "GlobalPlatform: \"Approximately 28% of revenue is derived from EU operations; regulatory changes could materially impact our business model.\"",
-      ],
-    },
+    riskLibraryMentions: ["EU revenue exposure", "EC enforcement actions", "designation / gatekeeper status", "compliance costs"],
+    peerInsights: { count: 3, examples: [
+      "EuroTech: \"The European Commission has designated three companies in our sector under the DMA; we are monitoring implications.\"",
+      "GlobalPlatform: \"Approximately 28% of revenue is derived from EU operations; regulatory changes could materially impact our business model.\"",
+    ]},
   },
 };
 
@@ -173,6 +141,213 @@ const PROMPT_SUGGESTIONS = [
   "Align with CRO assessment",
 ];
 
+/* ------------------------------------------------------------------ */
+/*  Text Selection Popup (adapted from Connected Compliance editor)    */
+/* ------------------------------------------------------------------ */
+
+interface SelectionPopup {
+  x: number;
+  y: number;
+  text: string;
+}
+
+function useTextSelectionPopup(containerRef: React.RefObject<HTMLDivElement | null>) {
+  const [popup, setPopup] = useState<SelectionPopup | null>(null);
+
+  const handleMouseUp = useCallback(() => {
+    const sel = window.getSelection();
+    if (!sel || sel.isCollapsed || !sel.toString().trim()) return;
+    if (containerRef.current && !containerRef.current.contains(sel.anchorNode)) return;
+
+    const range = sel.getRangeAt(0);
+    const rect = range.getBoundingClientRect();
+    const containerRect = containerRef.current?.getBoundingClientRect();
+    if (!containerRect) return;
+
+    setPopup({
+      x: rect.left + rect.width / 2 - containerRect.left,
+      y: rect.top - containerRect.top - 8,
+      text: sel.toString().trim(),
+    });
+  }, [containerRef]);
+
+  const dismiss = useCallback(() => setPopup(null), []);
+
+  useEffect(() => {
+    const handleMouseDown = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.closest("[data-selection-popup]")) return;
+      setPopup(null);
+    };
+    document.addEventListener("mouseup", handleMouseUp);
+    document.addEventListener("mousedown", handleMouseDown);
+    return () => {
+      document.removeEventListener("mouseup", handleMouseUp);
+      document.removeEventListener("mousedown", handleMouseDown);
+    };
+  }, [handleMouseUp]);
+
+  return { popup, dismiss };
+}
+
+function generateRewrite(original: string, mode: "formal" | "concise" | "example"): string {
+  const lower = original.toLowerCase();
+  if (mode === "formal") {
+    if (lower.includes("taiwan") || lower.includes("semiconductor") || lower.includes("supply chain")) {
+      return "The Corporation faces material risks arising from geopolitical instability in the Taiwan Strait region, upon which approximately 47% of the Corporation's semiconductor procurement is concentrated. Escalation of tensions may result in significant disruption to the Corporation's supply chain, materially adverse extension of component lead times, and impairment of the Corporation's capacity to fulfill its obligations to customers and partners.";
+    }
+    return "The Corporation hereby acknowledges and discloses the following risk factor, which may materially affect the Corporation's financial condition, results of operations, and future prospects, and which investors should carefully consider.";
+  }
+  if (mode === "concise") {
+    if (lower.includes("taiwan") || lower.includes("semiconductor") || lower.includes("supply chain")) {
+      return "47% of chip suppliers operate in Taiwan. Escalating tensions risk supply chain disruption, extended lead times, and inability to source critical components. Diversification underway; 12–18 month qualification timeline.";
+    }
+    return "This risk could materially impact operations and financial results. Mitigations are in progress but may not fully offset exposure.";
+  }
+  if (lower.includes("taiwan") || lower.includes("semiconductor") || lower.includes("supply chain")) {
+    return original + "\n\nFor example, in Q3 2025, a 72-hour military exercise near the Taiwan Strait caused a 14-day shipping delay for 3 of our top 10 chip suppliers, temporarily reducing available inventory by 22% and triggering expedited sourcing at a 35% cost premium.";
+  }
+  return original + "\n\nFor example, a comparable company in our sector experienced a $42M revenue impact when a single vendor disruption cascaded across three product lines over two quarters.";
+}
+
+function SelectionToolbar({ popup, onAction, onDismiss }: { popup: SelectionPopup; onAction: (action: string, result?: string) => void; onDismiss: () => void }) {
+  const [expanded, setExpanded] = useState<string | null>(null);
+  const [rewriteMode, setRewriteMode] = useState<"formal" | "concise" | "example" | null>(null);
+  const selectedSnippet = popup.text.length > 80 ? popup.text.slice(0, 77) + "..." : popup.text;
+
+  const actions = [
+    { id: "edit", icon: "M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7", label: "Edit directly", color: "#58a6ff" },
+    { id: "source", icon: "M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5", label: "See AI source", color: "#a78bfa" },
+    { id: "peers", icon: "M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4-4v2M9 11a4 4 0 100-8 4 4 0 000 8zM23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75", label: "How peers phrase this", color: "#fbbf24" },
+  ];
+
+  const rewriteActions: { id: "formal" | "concise" | "example"; label: string; color: string }[] = [
+    { id: "formal", label: "More formal", color: "#a78bfa" },
+    { id: "concise", label: "More concise", color: "#3fb950" },
+    { id: "example", label: "Add example", color: "#fbbf24" },
+  ];
+
+  const sourceContent: Record<string, { title: string; body: string }> = {
+    source: {
+      title: "AI Source & Reasoning",
+      body: "This language was generated from Moody's geopolitical risk signals, Diana Reyes's risk owner interview, the CRO's severity assessment, SEC 10-K disclosure guidance, and peer filings from 4 comparable companies with Taiwan semiconductor exposure.",
+    },
+    peers: {
+      title: "How Peers Phrase This",
+      body: "Among 4 peer companies with Taiwan supply chain exposure, 3 out of 4 explicitly quantify their supplier concentration percentage. 3 out of 4 mention diversification timelines. Average disclosure length for this risk factor is 142 words.",
+    },
+  };
+
+  const rewriteResult = rewriteMode ? generateRewrite(popup.text, rewriteMode) : null;
+  const rewriteLabels: Record<string, string> = { formal: "More Formal", concise: "More Concise", example: "With Example" };
+
+  return (
+    <div
+      data-selection-popup
+      className="absolute z-50"
+      style={{ left: popup.x, top: popup.y, transform: "translate(-50%, -100%)" }}
+    >
+      {expanded && expanded !== "edit" && sourceContent[expanded] && !rewriteMode && (
+        <div className="mb-2 w-[340px] rounded-lg border border-[#30363d] bg-[#161b22] p-4 shadow-xl shadow-black/40">
+          <div className="flex items-center justify-between mb-2">
+            <h4 className="text-[12px] font-bold text-[#f0f6fc]">{sourceContent[expanded].title}</h4>
+            <button onClick={() => setExpanded(null)} className="text-[#484f58] hover:text-[#8b949e] transition-colors">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
+            </button>
+          </div>
+          <p className="text-[11px] text-[#8b949e] leading-relaxed mb-3">{sourceContent[expanded].body}</p>
+          <div className="rounded-md bg-[#0d1117] border border-[#21262d] px-3 py-2">
+            <p className="text-[10px] text-[#484f58] mb-1">Selected text</p>
+            <p className="text-[11px] text-[#c9d1d9] italic">&ldquo;{selectedSnippet}&rdquo;</p>
+          </div>
+        </div>
+      )}
+
+      {rewriteMode && rewriteResult && (
+        <div className="mb-2 w-[400px] rounded-lg border border-[#30363d] bg-[#161b22] p-4 shadow-xl shadow-black/40">
+          <div className="flex items-center justify-between mb-2">
+            <h4 className="text-[12px] font-bold text-[#f0f6fc]">AI Rewrite — {rewriteLabels[rewriteMode]}</h4>
+            <button onClick={() => setRewriteMode(null)} className="text-[#484f58] hover:text-[#8b949e] transition-colors">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
+            </button>
+          </div>
+          <div className="rounded-md bg-[#0d1117] border border-[#21262d] px-3 py-2 mb-3">
+            <p className="text-[9px] font-bold uppercase tracking-widest text-[#484f58] mb-1">Original</p>
+            <p className="text-[11px] text-[#6e7681] leading-relaxed line-through">{selectedSnippet}</p>
+          </div>
+          <div className="rounded-md border border-[#a78bfa]/30 bg-[#a78bfa]/5 px-3 py-2 mb-3">
+            <p className="text-[9px] font-bold uppercase tracking-widest text-[#a78bfa] mb-1">Suggested rewrite</p>
+            <p className="text-[11px] text-[#c9d1d9] leading-relaxed whitespace-pre-line">{rewriteResult}</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => { onAction("accept-rewrite", rewriteResult); onDismiss(); }}
+              className="flex items-center gap-1.5 rounded-md bg-[#238636]/20 text-[#3fb950] text-[11px] font-semibold px-3 py-1.5 hover:bg-[#238636]/30 transition-colors"
+            >
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12" /></svg>
+              Accept rewrite
+            </button>
+            <button onClick={() => setRewriteMode(null)} className="rounded-md text-[#8b949e] text-[11px] font-medium px-3 py-1.5 hover:bg-[#21262d] transition-colors">Try another</button>
+          </div>
+        </div>
+      )}
+
+      <div className="rounded-lg border border-[#30363d] bg-[#161b22] shadow-xl shadow-black/40 overflow-hidden">
+        <div className="flex items-center gap-0.5 p-1">
+          {actions.map((a) => (
+            <button
+              key={a.id}
+              onClick={() => {
+                if (a.id === "edit") { onAction("edit"); onDismiss(); }
+                else { setRewriteMode(null); setExpanded(expanded === a.id ? null : a.id); }
+              }}
+              className="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-[11px] font-medium transition-colors hover:bg-[#21262d]"
+              style={{ color: expanded === a.id && !rewriteMode ? a.color : "#8b949e" }}
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d={a.icon} /></svg>
+              {a.label}
+            </button>
+          ))}
+        </div>
+        <div className="h-px bg-[#21262d]" />
+        <div className="flex items-center gap-0.5 p-1">
+          <span className="text-[9px] font-bold uppercase tracking-widest text-[#30363d] px-2">Rewrite</span>
+          {rewriteActions.map((a) => (
+            <button
+              key={a.id}
+              onClick={() => { setExpanded(null); setRewriteMode(rewriteMode === a.id ? null : a.id); }}
+              className="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-[11px] font-medium transition-colors hover:bg-[#21262d]"
+              style={{ color: rewriteMode === a.id ? a.color : "#6e7681" }}
+            >
+              {a.label}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="flex justify-center -mt-px">
+        <div className="w-2 h-2 rotate-45 bg-[#161b22] border-r border-b border-[#30363d]" />
+      </div>
+    </div>
+  );
+}
+
+function LeftRailMini() {
+  return (
+    <div className="flex items-center gap-1">
+      <Link href="/" className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-[#21262d] transition-colors" title="Home">
+        <DiligentLogo className="h-4 w-4" />
+      </Link>
+      <Link href="/superhero/risk-essentials" className="flex h-8 w-8 items-center justify-center rounded-lg text-[#8b949e] hover:text-[#f0f6fc] hover:bg-[#21262d] transition-colors" title="Risk Essentials">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+      </Link>
+      <Link href="/superhero/cro-review" className="flex h-8 w-8 items-center justify-center rounded-lg text-[#8b949e] hover:text-[#f0f6fc] hover:bg-[#21262d] transition-colors" title="CRO Review">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+      </Link>
+      <div className="h-5 w-px bg-[#30363d] mx-1" />
+    </div>
+  );
+}
+
 function WriterContent() {
   const searchParams = useSearchParams();
   const [mounted, setMounted] = useState(false);
@@ -181,8 +356,6 @@ function WriterContent() {
   useEffect(() => setMounted(true), []);
 
   const urlRiskId = mounted ? (searchParams?.get("risk") || "risk-taiwan") : "risk-taiwan";
-  const ownerId = mounted ? (searchParams?.get("owner") || "diana-reyes") : "diana-reyes";
-  const layout = mounted ? (searchParams?.get("layout") || "primary") : "primary"; // "primary" = prompt full width, "sidebar" = prompt in third column
 
   const [activeRiskId, setActiveRiskId] = useState<string>("risk-taiwan");
   const [croAssessment, setCroAssessment] = useState<CroAssessment | null>(null);
@@ -201,10 +374,10 @@ function WriterContent() {
   const [promptInput, setPromptInput] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [showPolicyManagerUpsell, setShowPolicyManagerUpsell] = useState(false);
-  const [focusMode, setFocusMode] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const editorRef = useRef<HTMLDivElement>(null);
+  const { popup, dismiss } = useTextSelectionPopup(editorRef);
 
   const scrollToBottom = () => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
 
@@ -282,586 +455,241 @@ function WriterContent() {
     inputRef.current?.focus();
   };
 
+  const [adviceTab, setAdviceTab] = useState<"suggestions" | "research" | "peers">("suggestions");
+  const meta = riskData ? RISK_METADATA[riskId] : null;
+  const wordCount = (draftTitle + " " + draftBody).trim().split(/\s+/).filter(Boolean).length;
+
   return (
-    <div className="min-h-screen bg-[#0d1117] flex flex-col">
-      {/* Meta-Prototype-Info blue banner */}
-      <div className="border-b-2 border-[#0ea5e9]/40 bg-[#e0f2fe] flex-shrink-0">
-        <div className="border-b border-[#0ea5e9]/30 bg-[#bae6fd] px-4 py-2">
-          <p className="text-[10px] font-medium uppercase tracking-widest text-[#0369a1]">Demo controls — not part of prototype</p>
-        </div>
-        <div className="px-4 py-2 flex items-center justify-between flex-wrap gap-2">
-          <div className="flex items-center gap-3">
-            <span className="text-xs font-medium uppercase tracking-wider text-[#0369a1]">Prototype</span>
-            <span className="text-sm font-semibold text-[#0c4a6e]">Risk Detection → 10K Update → Board Notification</span>
-            <Link
-              href={`/superhero/writer?risk=${activeRiskId}&owner=${ownerId}&layout=${layout === "sidebar" ? "primary" : "sidebar"}`}
-              className="text-xs font-medium text-[#0369a1] hover:underline"
-            >
-              {layout === "sidebar" ? "View Cursor-style layout" : "View alternative layout"}
-            </Link>
+    <div className="min-h-screen bg-white flex items-center justify-center p-6">
+      {/* Browser chrome wrapper */}
+      <div className="w-full max-w-[1200px] h-[85vh] rounded-xl border border-[#3a3a3a] bg-[#0d1117] shadow-2xl shadow-black/50 flex flex-col overflow-hidden">
+
+        {/* macOS title bar */}
+        <div className="h-10 bg-[#2b2b2b] border-b border-[#3a3a3a] flex items-center px-4 shrink-0">
+          <div className="flex items-center gap-2">
+            <Link href="/" className="w-3 h-3 rounded-full bg-[#ff5f57] hover:bg-[#ff5f57]/80 transition-colors" title="Close" />
+            <div className="w-3 h-3 rounded-full bg-[#febc2e]" />
+            <div className="w-3 h-3 rounded-full bg-[#28c840]" />
           </div>
-          <span className="rounded-full border-2 border-[#0c4a6e] bg-[#7dd3fc]/30 px-3 py-1 text-xs font-semibold text-[#0c4a6e]">
-            Viewing as: General Counsel
-          </span>
-        </div>
-      </div>
-
-      {/* Main layout: Left rail + content */}
-      <div className="flex-1 flex overflow-hidden min-h-0 min-w-0">
-        {!focusMode && <LeftRail actorLabel="General Counsel" activeRiskId={riskId} />}
-
-        <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-          {/* Breadcrumb + risk tabs */}
-          <div className="border-b border-[#30363d] bg-[#161b22] px-6 py-2.5 flex items-center justify-between flex-shrink-0 flex-wrap gap-2">
-            <div className="flex items-center gap-2 text-xs text-[#8b949e]">
-              <Link href="/superhero/coordinator" className="hover:text-[#f0f6fc]">Assign Owners</Link>
-              <span>›</span>
-              <Link href="/superhero/cro-review" className="hover:text-[#f0f6fc]">CRO Review</Link>
-              <span>›</span>
-              <span className="text-[#f0f6fc] font-medium">10-K Draft</span>
-            </div>
-            <div className="flex rounded-lg border border-[#30363d] bg-[#0d1117] p-0.5">
-              {RISK_IDS.map((id) => (
-                <button
-                  key={id}
-                  onClick={() => setActiveRiskId(id)}
-                  className={cn(
-                    "rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
-                    activeRiskId === id
-                      ? "bg-[#58a6ff]/20 text-[#58a6ff] border border-[#58a6ff]/30"
-                      : "text-[#8b949e] hover:text-[#f0f6fc] hover:bg-[#21262d]"
-                  )}
-                >
-                  {RISK_DISCLOSURE_DATA[id].label}
-                </button>
-              ))}
+          <div className="flex-1 flex justify-center">
+            <div className="flex items-center gap-2 bg-[#1a1a1a] rounded-md px-3 py-1 min-w-[360px]">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" /><path d="M2 12h20" /><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" /></svg>
+              <span className="text-[11px] text-[#999]">risk-essentials.diligent.com/disclosure-writer</span>
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2" className="ml-auto"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13" /></svg>
             </div>
           </div>
-
-          {/* Split view content */}
-          <div className="flex-1 flex overflow-hidden min-h-0">
-            {layout === "primary" ? (
-              /* Cursor-style: left working column (readable) + right editable document */
-              <>
-                {/* Left: Working column — prior year, gap, context, chat, prompt (contained) */}
-                <div className="w-[420px] flex-shrink-0 flex flex-col border-r border-[#30363d] bg-[#161b22] overflow-hidden">
-                  <div className="flex-1 overflow-y-auto">
-                    <div className="p-5 max-w-[380px] space-y-5">
-                      {riskData && (
-                        <>
-                          <div>
-                            <h2 className="text-[11px] font-medium text-[#6e7681] uppercase tracking-wider mb-2">
-                              Prior year — language we&apos;re updating
-                            </h2>
-                            <div className="rounded-lg border border-[#30363d] bg-[#0d1117] p-3">
-                              <div className="font-semibold text-[#f0f6fc] text-[13px] mb-1.5 leading-snug">{riskData.priorYearTitle}</div>
-                              <p className="text-[13px] text-[#8b949e] leading-relaxed" style={{ lineHeight: 1.6 }}>{riskData.priorYearBody}</p>
-                            </div>
-                          </div>
-
-                          <div>
-                            <h2 className="text-[11px] font-medium text-[#6e7681] uppercase tracking-wider mb-2">Disclosure gap</h2>
-                            <div className="rounded-lg border border-[#d29922]/40 bg-[#d29922]/5 p-3">
-                              <p className="text-[13px] text-[#f0f6fc] leading-relaxed" style={{ lineHeight: 1.6 }}>{riskData.gap}</p>
-                            </div>
-                          </div>
-                        </>
-                      )}
-
-                      <div className="rounded-lg border border-[#30363d] bg-[#0d1117] p-3">
-                        <h3 className="text-[11px] font-medium text-[#6e7681] uppercase tracking-wider mb-2">Context from workflow</h3>
-                        <div className="text-[13px] text-[#8b949e] space-y-1 leading-relaxed">
-                          <p><span className="text-[#f0f6fc]">Risk:</span> {croAssessment?.riskName || riskData?.priorYearTitle || "—"}</p>
-                          <p><span className="text-[#f0f6fc]">Owner:</span> {croAssessment?.ownerName || "—"}</p>
-                          {croAssessment?.likelihood && <p><span className="text-[#f0f6fc]">CRO likelihood:</span> {croAssessment.likelihood}</p>}
-                          {croAssessment?.impact && <p><span className="text-[#f0f6fc]">CRO impact:</span> {croAssessment.impact}</p>}
-                          {croAssessment?.controls && <p className="mt-1"><span className="text-[#f0f6fc]">Controls:</span> {croAssessment.controls.slice(0, 80)}...</p>}
-                          {!croAssessment && <p className="text-[#6e7681] italic">CRO assessment not yet available for this risk</p>}
-                        </div>
-                      </div>
-
-                      {messages.length > 0 && (
-                        <div className="space-y-3">
-                          <h3 className="text-[11px] font-medium text-[#6e7681] uppercase tracking-wider">AI conversation</h3>
-                          {messages.map((m) => (
-                            <div
-                              key={m.id}
-                              className={cn("flex gap-2", m.role === "user" && "flex-row-reverse")}
-                            >
-                              {m.role === "user" ? (
-                                <img src={GC_AVATAR_URL} alt="General Counsel" className="h-7 w-7 shrink-0 rounded-full object-cover" />
-                              ) : (
-                                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white p-1">
-                                  <DiligentAgentIcon />
-                                </div>
-                              )}
-                              <div
-                                className={cn(
-                                  "flex-1 min-w-0 rounded-lg px-3 py-2 text-[13px] leading-relaxed",
-                                  m.role === "user"
-                                    ? "bg-[#58a6ff]/10 border border-[#58a6ff]/20 text-[#f0f6fc]"
-                                    : "bg-[#21262d] border border-[#30363d] text-[#c9d1d9]"
-                                )}
-                              >
-                                <p className="font-medium text-[#8b949e] mb-0.5 text-[11px]">{m.role === "user" ? "You" : "Diligent AI"}</p>
-                                <p>{m.content}</p>
-                              </div>
-                            </div>
-                          ))}
-                          {isLoading && (
-                            <div className="flex items-center gap-2 text-[13px] text-[#8b949e]">
-                              <div className="h-1.5 w-1.5 rounded-full bg-[#58a6ff] animate-pulse" />
-                              AI is updating the draft...
-                            </div>
-                          )}
-                          <div ref={messagesEndRef} />
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Contained prompt box — not full width, Cursor-style */}
-                  <div className="flex-shrink-0 p-4 border-t border-[#30363d] bg-[#0d1117]">
-                    <div className="max-w-[380px] space-y-2">
-                      <div className="flex flex-wrap gap-1.5">
-                        {PROMPT_SUGGESTIONS.map((s) => (
-                          <button
-                            key={s}
-                            onClick={() => handleSuggestionClick(s)}
-                            className="rounded-md border border-[#30363d] bg-[#21262d] px-2 py-1 text-[11px] text-[#8b949e] hover:border-[#58a6ff]/50 hover:text-[#f0f6fc] transition-colors"
-                          >
-                            {s}
-                          </button>
-                        ))}
-                      </div>
-                      <div className="rounded-xl border border-[#30363d] bg-[#161b22] p-2.5 shadow-sm">
-                        <div className="flex gap-2">
-                          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white flex-shrink-0 p-1">
-                            <DiligentAgentIcon />
-                          </div>
-                          <textarea
-                            ref={inputRef}
-                            value={promptInput}
-                            onChange={(e) => setPromptInput(e.target.value)}
-                            onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), handleSendPrompt())}
-                            placeholder="Ask AI to add or change disclosure language..."
-                            rows={2}
-                            className="flex-1 bg-transparent text-[13px] text-[#f0f6fc] placeholder-[#484f58] focus:outline-none resize-none leading-relaxed"
-                            disabled={isLoading}
-                          />
-                        </div>
-                        <button
-                          onClick={handleSendPrompt}
-                          disabled={!promptInput.trim() || isLoading}
-                          className={cn(
-                            "mt-2 w-full rounded-lg py-2 text-[12px] font-medium transition-colors",
-                            promptInput.trim() && !isLoading
-                              ? "bg-[#58a6ff] text-white hover:bg-[#79c0ff]"
-                              : "bg-[#21262d] text-[#484f58] cursor-not-allowed"
-                          )}
-                        >
-                          Apply changes
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Center: Editable document — prominent, like Cursor editor */}
-                <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-[#0d1117]">
-                  <div className="flex-shrink-0 px-6 py-3 border-b border-[#30363d] bg-[#161b22] flex items-center justify-between">
-                    <div>
-                      <span className="text-[11px] font-medium text-[#6e7681] uppercase tracking-wider">10-K Draft — Item 1A</span>
-                      <span className="ml-2 rounded-full bg-[#3fb950]/10 border border-[#3fb950]/30 px-2 py-0.5 text-[10px] text-[#3fb950] font-medium">EDITABLE</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <button
-                        onClick={() => setFocusMode(!focusMode)}
-                        className={cn(
-                          "inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors",
-                          focusMode
-                            ? "border-[#58a6ff]/50 bg-[#58a6ff]/20 text-[#58a6ff]"
-                            : "border-[#30363d] bg-[#21262d] text-[#8b949e] hover:border-[#6e7681] hover:text-[#f0f6fc]"
-                        )}
-                      >
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                        {focusMode ? "Exit Focus mode" : "Enter Focus mode"}
-                      </button>
-                      <Link
-                        href="/superhero/gc-review/notification"
-                        className="inline-flex items-center gap-2 rounded-lg bg-[#3fb950] px-4 py-2 text-sm font-medium text-[#0d1117] hover:bg-[#46c35a] transition-colors"
-                      >
-                        Submit draft
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
-                      </Link>
-                    </div>
-                  </div>
-                  <div className="flex-1 overflow-y-auto p-6">
-                    <div className="max-w-3xl mx-auto">
-                      <input
-                        value={draftTitle}
-                        onChange={(e) => setDraftTitle(e.target.value)}
-                        className="w-full bg-transparent text-lg font-semibold text-[#f0f6fc] mb-4 focus:outline-none placeholder-[#484f58] leading-tight"
-                        placeholder="Risk factor title..."
-                      />
-                      <textarea
-                        value={draftBody}
-                        onChange={(e) => setDraftBody(e.target.value)}
-                        rows={16}
-                        className="w-full bg-transparent text-[15px] text-[#f0f6fc] placeholder-[#484f58] focus:outline-none resize-none leading-relaxed"
-                        placeholder="Draft disclosure text..."
-                        style={{ lineHeight: 1.7 }}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Right rail: Metadata & resources — away from work area (hidden in focus mode) */}
-                {!focusMode && riskData && RISK_METADATA[riskId] && (
-                  <div className="w-[300px] flex-shrink-0 flex flex-col border-l border-[#30363d] bg-[#161b22] overflow-y-auto">
-                    <div className="p-4 border-b border-[#30363d]">
-                      <h3 className="text-[11px] font-medium text-[#6e7681] uppercase tracking-wider mb-3">Resources</h3>
-                    </div>
-                    <div className="p-4 space-y-4">
-                      {/* Word count */}
-                      {(() => {
-                        const wordCount = (draftTitle + " " + draftBody).trim().split(/\s+/).filter(Boolean).length;
-                        const meta = RISK_METADATA[riskId];
-                        const diff = meta.avgWordCount - wordCount;
-                        return (
-                          <div className="rounded-lg border border-[#30363d] bg-[#0d1117] p-3">
-                            <h4 className="text-[11px] font-medium text-[#8b949e] mb-2">Word count</h4>
-                            <p className="text-[13px] text-[#f0f6fc] leading-relaxed">
-                              Your average risk disclosure: <span className="font-medium">{meta.avgWordCount} words</span>.
-                              {diff > 0 ? (
-                                <>
-                                  <span className="block mt-1 text-[#d29922]">This draft: {wordCount} words.</span>
-                                  <span className="block mt-2 text-[#8b949e] text-[12px]">Suggestions:</span>
-                                  <ul className="mt-1 space-y-1 text-[12px] text-[#c9d1d9]">
-                                    {meta.shortDraftSuggestions.map((s, i) => (
-                                      <li key={i} className="flex items-start gap-1.5">
-                                        <span className="text-[#3fb950] mt-0.5">•</span>
-                                        <span>{s}</span>
-                                      </li>
-                                    ))}
-                                  </ul>
-                                </>
-                              ) : (
-                                <span className="block mt-1 text-[#3fb950]">This draft: {wordCount} words.</span>
-                              )}
-                            </p>
-                          </div>
-                        );
-                      })()}
-
-                      {/* Risk library mentions */}
-                      <div className="rounded-lg border border-[#30363d] bg-[#0d1117] p-3">
-                        <h4 className="text-[11px] font-medium text-[#8b949e] mb-2">Risk libraries also mention</h4>
-                        <p className="text-[13px] text-[#8b949e] mb-2">
-                          Other risk libraries highlighting {riskData.label.toLowerCase()} risks also mention:
-                        </p>
-                        <ul className="space-y-1 text-[13px] text-[#f0f6fc]">
-                          {RISK_METADATA[riskId].riskLibraryMentions.map((m, i) => (
-                            <li key={i} className="flex items-start gap-1.5">
-                              <span className="text-[#58a6ff] mt-0.5">•</span>
-                              <span>{m}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-
-                      {/* Peer 10-K insights */}
-                      <div className="rounded-lg border border-[#30363d] bg-[#0d1117] p-3">
-                        <h4 className="text-[11px] font-medium text-[#8b949e] mb-2">Peer 10-K insights</h4>
-                        <p className="text-[13px] text-[#8b949e] mb-2">
-                          {RISK_METADATA[riskId].peerInsights.count} of your peers mentioned similar risks in recent 10-Ks:
-                        </p>
-                        <div className="space-y-2">
-                          {RISK_METADATA[riskId].peerInsights.examples.map((ex, i) => (
-                            <p key={i} className="text-[12px] text-[#c9d1d9] leading-relaxed italic border-l-2 border-[#30363d] pl-2">
-                              {ex}
-                            </p>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* In-situ: Policy upload for Vietnam-affiliated third parties → Policy Manager upsell */}
-                      {riskId === "risk-taiwan" && (
-                        <div className="rounded-lg border border-[#30363d] bg-[#0d1117] p-3">
-                          <h4 className="text-[11px] font-medium text-[#8b949e] mb-2">Supporting policy</h4>
-                          <p className="text-[13px] text-[#8b949e] mb-3">
-                            Attach policy for Vietnam-affiliated third parties to support the disclosure.
-                          </p>
-                          <div className="space-y-2">
-                            <button
-                              onClick={() => setShowPolicyManagerUpsell(true)}
-                              className="flex w-full items-center gap-3 rounded-lg border border-[#30363d] bg-[#21262d] px-3 py-2.5 text-left text-sm text-[#f0f6fc] hover:border-[#58a6ff]/50 hover:bg-[#21262d]/80 transition-colors"
-                            >
-                              <span className="text-lg">📄</span>
-                              <span>Upload from desktop</span>
-                              <span className="ml-auto text-[10px] text-[#6e7681]">.doc, .docx</span>
-                            </button>
-                            <button
-                              onClick={() => setShowPolicyManagerUpsell(true)}
-                              className="flex w-full items-center gap-3 rounded-lg border border-[#30363d] bg-[#21262d] px-3 py-2.5 text-left text-sm text-[#f0f6fc] hover:border-[#58a6ff]/50 hover:bg-[#21262d]/80 transition-colors"
-                            >
-                              <span className="text-lg">📁</span>
-                              <span>Browse SharePoint</span>
-                            </button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </>
-            ) : (
-              /* Alternative layout: prompt in third column */
-              <>
-                <div className="flex-1 overflow-y-auto border-r border-[#30363d]">
-                  <div className="p-6 space-y-6">
-                    {/* Risk tabs for sidebar layout */}
-                    <div className="flex rounded-lg border border-[#30363d] bg-[#0d1117] p-0.5">
-                      {RISK_IDS.map((id) => (
-                        <button
-                          key={id}
-                          onClick={() => setActiveRiskId(id)}
-                          className={cn(
-                            "flex-1 rounded-md px-2 py-1.5 text-xs font-medium transition-colors",
-                            activeRiskId === id
-                              ? "bg-[#58a6ff]/20 text-[#58a6ff] border border-[#58a6ff]/30"
-                              : "text-[#8b949e] hover:text-[#f0f6fc] hover:bg-[#21262d]"
-                          )}
-                        >
-                          {RISK_DISCLOSURE_DATA[id].label}
-                        </button>
-                      ))}
-                    </div>
-
-                    {riskData && (
-                      <>
-                        <div>
-                          <h2 className="text-xs font-medium text-[#6e7681] uppercase tracking-wider mb-3">Prior year — language we&apos;re updating</h2>
-                          <div className="rounded-xl border border-[#30363d] bg-[#161b22] p-4 max-h-32 overflow-y-auto">
-                            <div className="font-semibold text-[#f0f6fc] text-sm mb-2">{riskData.priorYearTitle}</div>
-                            <p className="text-xs text-[#8b949e] leading-relaxed">{riskData.priorYearBody}</p>
-                          </div>
-                        </div>
-
-                        <div>
-                          <h2 className="text-xs font-medium text-[#6e7681] uppercase tracking-wider mb-2">Disclosure gap</h2>
-                          <div className="rounded-xl border border-[#d29922]/40 bg-[#d29922]/5 p-3">
-                            <p className="text-xs text-[#f0f6fc] leading-relaxed">{riskData.gap}</p>
-                          </div>
-                        </div>
-                      </>
-                    )}
-
-                    <div>
-                      <h2 className="text-xs font-medium text-[#6e7681] uppercase tracking-wider mb-3 flex items-center gap-2">
-                        Draft — New/updated disclosure
-                        <span className="rounded-full bg-[#3fb950]/10 border border-[#3fb950]/30 px-1.5 py-0 text-[9px] text-[#3fb950] font-medium">EDITABLE</span>
-                      </h2>
-                      <div className="rounded-xl border border-[#58a6ff]/30 bg-[#58a6ff]/5 p-4">
-                        <input
-                          value={draftTitle}
-                          onChange={(e) => setDraftTitle(e.target.value)}
-                          className="w-full bg-transparent text-sm font-semibold text-[#f0f6fc] mb-3 focus:outline-none placeholder-[#484f58]"
-                          placeholder="Risk factor title..."
-                        />
-                        <textarea
-                          value={draftBody}
-                          onChange={(e) => setDraftBody(e.target.value)}
-                          rows={8}
-                          className="w-full rounded-lg border border-[#30363d] bg-[#161b22] px-3 py-2 text-sm text-[#f0f6fc] placeholder-[#484f58] focus:border-[#58a6ff] focus:outline-none resize-none"
-                          placeholder="Draft disclosure text..."
-                        />
-                      </div>
-                      <div className="mt-3 flex items-center gap-2">
-                        <button
-                          onClick={() => setFocusMode(!focusMode)}
-                          className={cn(
-                            "inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors",
-                            focusMode
-                              ? "border-[#58a6ff]/50 bg-[#58a6ff]/20 text-[#58a6ff]"
-                              : "border-[#30363d] bg-[#21262d] text-[#8b949e] hover:border-[#6e7681] hover:text-[#f0f6fc]"
-                          )}
-                        >
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" strokeLinecap="round" strokeLinejoin="round" />
-                          </svg>
-                          {focusMode ? "Exit Focus mode" : "Enter Focus mode"}
-                        </button>
-                        <Link
-                          href="/superhero/gc-review/notification"
-                          className="flex-1 flex items-center justify-center gap-2 rounded-lg bg-[#3fb950] px-4 py-2 text-sm font-medium text-[#0d1117] hover:bg-[#46c35a] transition-colors"
-                        >
-                          Submit draft
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {!focusMode && (
-                <div className="w-[380px] flex-shrink-0 flex flex-col border-l border-[#30363d] bg-[#161b22]">
-                  <div className="p-4 border-b border-[#30363d]">
-                    <h3 className="text-xs font-medium text-[#6e7681] uppercase tracking-wider mb-2">Context from workflow</h3>
-                    <div className="text-xs text-[#8b949e] space-y-1">
-                      <p><span className="text-[#f0f6fc]">Risk:</span> {croAssessment?.riskName || "Taiwan Strait Geopolitical Tensions"}</p>
-                      <p><span className="text-[#f0f6fc]">Owner:</span> {croAssessment?.ownerName || "Diana Reyes"}</p>
-                      {croAssessment?.likelihood && <p><span className="text-[#f0f6fc]">CRO likelihood:</span> {croAssessment.likelihood}</p>}
-                      {croAssessment?.impact && <p><span className="text-[#f0f6fc]">CRO impact:</span> {croAssessment.impact}</p>}
-                      {croAssessment?.controls && <p className="mt-1"><span className="text-[#f0f6fc]">Controls:</span> {croAssessment.controls.slice(0, 80)}...</p>}
-                    </div>
-                  </div>
-
-                  <div className="flex-1 overflow-y-auto p-4">
-                    <h3 className="text-xs font-medium text-[#6e7681] uppercase tracking-wider mb-2">Work with AI</h3>
-                    <p className="text-xs text-[#8b949e] mb-3">
-                      Edit the draft directly or prompt AI to suggest changes.
-                    </p>
-
-                    {messages.length > 0 && (
-                      <div className="space-y-3 mb-4">
-                        {messages.map((m) => (
-                          <div
-                            key={m.id}
-                            className={cn("flex gap-2", m.role === "user" && "flex-row-reverse")}
-                          >
-                            {m.role === "user" ? (
-                              <img src={GC_AVATAR_URL} alt="General Counsel" className="h-7 w-7 shrink-0 rounded-full object-cover" />
-                            ) : (
-                              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white p-1">
-                                <DiligentAgentIcon />
-                              </div>
-                            )}
-                            <div
-                              className={cn(
-                                "flex-1 min-w-0 rounded-lg px-3 py-2 text-xs",
-                                m.role === "user"
-                                  ? "bg-[#58a6ff]/10 border border-[#58a6ff]/20 text-[#f0f6fc]"
-                                  : "bg-[#21262d] border border-[#30363d] text-[#c9d1d9]"
-                              )}
-                            >
-                              <p className="font-medium text-[#8b949e] mb-0.5">{m.role === "user" ? "You" : "Diligent AI"}</p>
-                              <p className="leading-relaxed">{m.content}</p>
-                            </div>
-                          </div>
-                        ))}
-                        {isLoading && (
-                          <div className="flex items-center gap-2 text-xs text-[#8b949e]">
-                            <div className="h-1.5 w-1.5 rounded-full bg-[#58a6ff] animate-pulse" />
-                            AI is updating the draft...
-                          </div>
-                        )}
-                        <div ref={messagesEndRef} />
-                      </div>
-                    )}
-
-                    <div className="flex flex-wrap gap-2 mb-3">
-                      <span className="text-[10px] text-[#6e7681]">Try:</span>
-                      {PROMPT_SUGGESTIONS.map((s) => (
-                        <button
-                          key={s}
-                          onClick={() => handleSuggestionClick(s)}
-                          className="rounded-full border border-[#30363d] bg-[#21262d] px-2.5 py-1 text-[10px] text-[#8b949e] hover:border-[#58a6ff]/50 hover:text-[#f0f6fc] transition-colors"
-                        >
-                          {s}
-                        </button>
-                      ))}
-                    </div>
-
-                    <div className="rounded-xl border border-[#30363d] bg-[#0d1117] p-2">
-                      <div className="flex gap-2">
-                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white flex-shrink-0 p-1">
-                          <DiligentAgentIcon />
-                        </div>
-                        <textarea
-                          ref={inputRef}
-                          value={promptInput}
-                          onChange={(e) => setPromptInput(e.target.value)}
-                          onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), handleSendPrompt())}
-                          placeholder="Ask AI to add or change disclosure language..."
-                          rows={2}
-                          className="flex-1 bg-transparent text-sm text-[#f0f6fc] placeholder-[#484f58] focus:outline-none resize-none"
-                          disabled={isLoading}
-                        />
-                      </div>
-                      <button
-                        onClick={handleSendPrompt}
-                        disabled={!promptInput.trim() || isLoading}
-                        className={cn(
-                          "mt-2 w-full rounded-lg py-2 text-xs font-medium transition-colors",
-                          promptInput.trim() && !isLoading
-                            ? "bg-[#58a6ff] text-white hover:bg-[#79c0ff]"
-                            : "bg-[#21262d] text-[#484f58] cursor-not-allowed"
-                        )}
-                      >
-                        Apply changes
-                      </button>
-                    </div>
-                  </div>
-                </div>
-                )}
-              </>
-            )}
-          </div>
+          <div className="w-[52px]" />
         </div>
-      </div>
 
-      <StakeholderFooter label="Continue as General Counsel to advance the workflow">
-        <PrototypeControlLink href="/superhero/gc-review-feedback">
-          Continue to GC review →
-        </PrototypeControlLink>
-      </StakeholderFooter>
-
-      {/* In-situ Policy Manager upsell — appears when GC tries to upload policy for Vietnam third parties */}
-      {showPolicyManagerUpsell && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={() => setShowPolicyManagerUpsell(false)}>
-          <div
-            className="max-w-md rounded-2xl border border-[#30363d] bg-[#161b22] p-6 shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
+        {/* App top bar: logo + submit */}
+        <div className="flex items-center justify-between px-4 py-2 bg-[#161b22] border-b border-[#30363d] shrink-0">
+          <LeftRailMini />
+          <Link
+            href="/teams?chat=draft-review"
+            className="inline-flex items-center gap-2 rounded-lg bg-[#3fb950] px-4 py-1.5 text-xs font-semibold text-[#0d1117] hover:bg-[#46c35a] transition-colors"
           >
-            <div className="mb-4 flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#58a6ff]/20">
-                <span className="text-2xl">📋</span>
+            Submit draft
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+          </Link>
+        </div>
+
+        {/* Risk tabs — inside content, controls what's below */}
+        <div className="flex items-center gap-0 px-4 bg-[#0d1117] border-b border-[#30363d] shrink-0">
+          {RISK_IDS.map((id) => (
+            <button
+              key={id}
+              onClick={() => setActiveRiskId(id)}
+              className={cn(
+                "px-4 py-2.5 text-[12px] font-medium transition-colors border-b-2 -mb-px",
+                activeRiskId === id
+                  ? "border-[#58a6ff] text-[#58a6ff]"
+                  : "border-transparent text-[#8b949e] hover:text-[#f0f6fc]"
+              )}
+            >
+              {RISK_DISCLOSURE_DATA[id].label}
+            </button>
+          ))}
+        </div>
+
+        {/* Two columns: Original | New (editable with selection popover) */}
+        <div className="flex-1 flex min-h-0 overflow-hidden">
+
+          {/* Left: Original text (read-only) */}
+          <div className="w-[42%] shrink-0 flex flex-col border-r border-[#30363d]">
+            <div className="px-5 py-2 bg-[#161b22] border-b border-[#30363d] shrink-0">
+              <span className="text-[11px] font-medium text-[#6e7681] uppercase tracking-wider">Original — Prior Year Language</span>
+            </div>
+            <div className="flex-1 overflow-y-auto p-5">
+              {riskData && (
+                <div>
+                  <h3 className="text-[14px] font-semibold text-[#f0f6fc] mb-3">{riskData.priorYearTitle}</h3>
+                  <p className="text-[13px] text-[#8b949e] leading-[1.8]">{riskData.priorYearBody}</p>
+                  <div className="mt-4 rounded-lg border border-[#d29922]/40 bg-[#d29922]/5 p-3">
+                    <p className="text-[10px] font-semibold text-[#d29922] uppercase tracking-wider mb-1">Disclosure Gap</p>
+                    <p className="text-[12px] text-[#f0f6fc] leading-relaxed">{riskData.gap}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Right: editable draft (contentEditable for selection popover) + prompt */}
+          <div className="flex-1 flex flex-col min-w-0">
+
+            {/* Header with formatting toolbar */}
+            <div className="px-4 py-2 bg-[#161b22] border-b border-[#30363d] shrink-0 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-medium text-[#6e7681] uppercase tracking-wider">New — AI-Drafted Disclosure</span>
+                <span className="rounded-full bg-[#3fb950]/10 border border-[#3fb950]/30 px-2 py-0.5 text-[9px] text-[#3fb950] font-semibold">EDITABLE</span>
               </div>
-              <div>
-                <h3 className="text-lg font-semibold text-[#f0f6fc]">Try Policy Manager</h3>
-                <p className="text-xs text-[#8b949e]">Instead of static uploads</p>
+              <div className="flex items-center gap-0.5 bg-[#0d1117] border border-[#30363d] rounded-md px-1 py-0.5">
+                {[
+                  { label: "Bold", path: "M6 4h8a4 4 0 014 4 4 4 0 01-4 4H6zM6 12h9a4 4 0 014 4 4 4 0 01-4 4H6z" },
+                  { label: "Italic", path: "M19 4h-9M14 20H5M15 4L9 20" },
+                  { label: "Heading", path: "M6 4v16M18 4v16M6 12h12" },
+                  { label: "List", path: "M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" },
+                ].map((btn) => (
+                  <button key={btn.label} title={btn.label} className="w-6 h-6 flex items-center justify-center rounded text-[#6e7681] hover:text-[#f0f6fc] hover:bg-[#21262d] transition-colors">
+                    <svg width={12} height={12} fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round"><path d={btn.path} /></svg>
+                  </button>
+                ))}
+                <div className="w-px h-3.5 bg-[#30363d] mx-0.5" />
+                <button title="Undo" className="w-6 h-6 flex items-center justify-center rounded text-[#6e7681] hover:text-[#f0f6fc] hover:bg-[#21262d] transition-colors">
+                  <svg width={12} height={12} fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round"><path d="M3 10h10a5 5 0 015 5v0a5 5 0 01-5 5H3" /><path d="M7 6l-4 4 4 4" /></svg>
+                </button>
+                <button title="Redo" className="w-6 h-6 flex items-center justify-center rounded text-[#6e7681] hover:text-[#f0f6fc] hover:bg-[#21262d] transition-colors">
+                  <svg width={12} height={12} fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10H11a5 5 0 00-5 5v0a5 5 0 005 5h10" /><path d="M17 6l4 4-4 4" /></svg>
+                </button>
               </div>
             </div>
-            <p className="text-sm text-[#c9d1d9] leading-relaxed mb-5">
-              Before you upload a Word doc or browse SharePoint—consider Policy Manager. Automate drafting, approval chains, attestation, and version control instead of managing static files.
-            </p>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowPolicyManagerUpsell(false)}
-                className="flex-1 rounded-lg border border-[#30363d] bg-[#21262d] px-4 py-2.5 text-sm font-medium text-[#8b949e] hover:border-[#6e7681] hover:text-[#f0f6fc] transition-colors"
+
+            {/* contentEditable draft — supports text selection + popover */}
+            <div ref={editorRef} className="relative flex-1 overflow-y-auto p-5">
+              {popup && (
+                <SelectionToolbar
+                  popup={popup}
+                  onAction={(action, result) => {
+                    if (action === "accept-rewrite" && result) {
+                      setDraftBody((prev) => prev.replace(popup.text, result));
+                    }
+                  }}
+                  onDismiss={dismiss}
+                />
+              )}
+              <div
+                className="text-[14px] font-semibold text-[#f0f6fc] mb-3 focus:outline-none"
+                contentEditable
+                suppressContentEditableWarning
+                onBlur={(e) => setDraftTitle(e.currentTarget.textContent || "")}
               >
-                Continue with upload
-              </button>
-              <button
-                onClick={() => setShowPolicyManagerUpsell(false)}
-                className="flex-1 rounded-lg bg-[#58a6ff] px-4 py-2.5 text-sm font-medium text-white hover:bg-[#79c0ff] transition-colors"
+                {draftTitle}
+              </div>
+              <div
+                className="text-[13px] text-[#f0f6fc] leading-[1.8] focus:outline-none whitespace-pre-wrap min-h-[120px]"
+                contentEditable
+                suppressContentEditableWarning
+                onBlur={(e) => setDraftBody(e.currentTarget.textContent || "")}
               >
-                Try Policy Manager
-              </button>
+                {draftBody}
+              </div>
+            </div>
+
+            {/* Advice tray: tabbed — inside right column, above prompt */}
+            <div className="shrink-0 border-t border-[#30363d] bg-[#161b22]">
+              <div className="flex items-center gap-0 px-4 border-b border-[#30363d]">
+                {([
+                  { id: "suggestions" as const, label: "Suggestions", color: "#EE312E" },
+                  { id: "research" as const, label: "Supporting Research", color: "#58a6ff" },
+                  { id: "peers" as const, label: "Peer 10-K Insights", color: "#58a6ff" },
+                ]).map(tab => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setAdviceTab(tab.id)}
+                    className={cn(
+                      "px-4 py-2 text-[11px] font-medium transition-colors border-b-2 -mb-px",
+                      adviceTab === tab.id
+                        ? tab.id === "suggestions" ? "border-[#EE312E] text-[#f0f6fc] bg-[#EE312E]/10" : "border-[#58a6ff] text-[#58a6ff]"
+                        : "border-transparent text-[#8b949e] hover:text-[#f0f6fc]"
+                    )}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+                {meta && (
+                  <span className="ml-auto text-[10px] text-[#6e7681]">
+                    {wordCount} words <span className={wordCount < meta.avgWordCount ? "text-[#d29922]" : "text-[#3fb950]"}>({wordCount < meta.avgWordCount ? `${meta.avgWordCount - wordCount} below` : "at"} avg)</span>
+                  </span>
+                )}
+              </div>
+              <div className="px-5 py-2.5 max-h-[130px] overflow-y-auto">
+                {adviceTab === "suggestions" && meta && (
+                  <ul className="space-y-1">
+                    {meta.shortDraftSuggestions.map((s, i) => (
+                      <li key={i} className="flex items-start gap-1.5 text-[12px] text-[#c9d1d9]">
+                        <span className="text-[#3fb950] mt-0.5">•</span><span>{s}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {adviceTab === "research" && meta && (
+                  <div>
+                    <p className="text-[11px] text-[#8b949e] mb-1.5">Other risk libraries highlighting {riskData?.label.toLowerCase()} risks also mention:</p>
+                    <ul className="space-y-1">
+                      {meta.riskLibraryMentions.map((m, i) => (
+                        <li key={i} className="flex items-start gap-1.5 text-[12px] text-[#f0f6fc]">
+                          <span className="text-[#58a6ff] mt-0.5">•</span><span className="font-medium">{m}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {adviceTab === "peers" && meta && (
+                  <div>
+                    <p className="text-[11px] text-[#8b949e] mb-1.5">{meta.peerInsights.count} of your peers mentioned similar risks in recent 10-Ks:</p>
+                    <div className="space-y-1.5">
+                      {meta.peerInsights.examples.map((ex, i) => (
+                        <p key={i} className="text-[11px] text-[#c9d1d9] leading-relaxed italic border-l-2 border-[#30363d] pl-2">{ex}</p>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Prompt / chat */}
+            <div className="shrink-0 border-t border-[#30363d] bg-[#0d1117]">
+              {messages.length > 0 && (
+                <div className="px-4 pt-2 max-h-[72px] overflow-y-auto space-y-1">
+                  {messages.map((m) => (
+                    <div key={m.id} className={cn("text-[11px] px-2 py-1 rounded", m.role === "user" ? "text-[#8b949e]" : "text-[#c9d1d9] bg-[#21262d]")}>
+                      <span className="font-medium text-[#6e7681]">{m.role === "user" ? "You: " : "AI: "}</span>{m.content}
+                    </div>
+                  ))}
+                  {isLoading && <div className="text-[11px] text-[#8b949e] flex items-center gap-1"><div className="h-1.5 w-1.5 rounded-full bg-[#58a6ff] animate-pulse" /> Updating draft...</div>}
+                  <div ref={messagesEndRef} />
+                </div>
+              )}
+              <div className="px-4 pt-2 pb-1 flex flex-wrap gap-1">
+                {PROMPT_SUGGESTIONS.map((s) => (
+                  <button key={s} onClick={() => handleSuggestionClick(s)} className="rounded-full border border-[#30363d] bg-[#21262d] px-2.5 py-1 text-[10px] text-[#8b949e] hover:border-[#58a6ff]/50 hover:text-[#f0f6fc] transition-colors">{s}</button>
+                ))}
+              </div>
+              <div className="flex gap-2 items-end px-4 pb-3 pt-1">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white flex-shrink-0 p-1"><DiligentAgentIcon /></div>
+                <textarea ref={inputRef} value={promptInput} onChange={(e) => setPromptInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), handleSendPrompt())} placeholder="Ask AI to edit the disclosure..." rows={1} className="flex-1 bg-[#161b22] border border-[#30363d] rounded-lg px-3 py-2 text-[12px] text-[#f0f6fc] placeholder-[#484f58] focus:outline-none focus:border-[#58a6ff] resize-none" disabled={isLoading} />
+                <button onClick={handleSendPrompt} disabled={!promptInput.trim() || isLoading} className={cn("rounded-lg px-4 py-2 text-[11px] font-semibold transition-colors shrink-0", promptInput.trim() && !isLoading ? "bg-[#58a6ff] text-white hover:bg-[#79c0ff]" : "bg-[#21262d] text-[#484f58] cursor-not-allowed")}>Apply</button>
+              </div>
             </div>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }
 
 export default function WriterPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#0d1117] flex items-center justify-center"><div className="h-8 w-8 border-2 border-[#58a6ff] border-t-transparent rounded-full animate-spin" /></div>}>
+    <Suspense fallback={<div className="min-h-screen bg-white flex items-center justify-center"><div className="h-8 w-8 border-2 border-[#58a6ff] border-t-transparent rounded-full animate-spin" /></div>}>
       <WriterContent />
     </Suspense>
   );

@@ -20,7 +20,7 @@ function DiligentLogo({ className }: { className?: string }) {
 }
 
 const GC_AVATAR_URL = "https://randomuser.me/api/portraits/med/women/65.jpg";
-const CRO_AVATAR_URL = "https://i.pravatar.cc/150?u=chief-risk-officer";
+const CRO_AVATAR_URL = "https://randomuser.me/api/portraits/med/men/32.jpg";
 
 const RISKS = [
   { id: "risk-taiwan", label: "Taiwan Strait", href: "/superhero/writer?risk=risk-taiwan&owner=diana-reyes" },
