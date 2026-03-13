@@ -570,7 +570,7 @@ function WriterContent() {
                   popup={popup}
                   onAction={(action, result) => {
                     if (action === "accept-rewrite" && result) {
-                      setDraftBody((prev) => prev.replace(popup.text, result));
+                      setDraftBody(draftBody.replace(popup.text, result));
                     }
                   }}
                   onDismiss={dismiss}
