@@ -1,8 +1,8 @@
 # Enterprise Risk Governance — Prototype Context
 
 ## Current State
-- **Version**: ERG v3 Teams
-- **Last updated**: March 12, 2026
+- **Version**: ERG v3.1 Teams + Slack
+- **Last updated**: March 13, 2026
 - **Stack**: Next.js 14 (App Router), React, TypeScript, Tailwind CSS
 - **Deployment**: VibeSharing (prototype hosting)
 
@@ -81,7 +81,7 @@ The centerpiece — a full macOS Teams desktop simulation with 8 tabbed perspect
 | 1 | Sarah Mitchell (GC) | `gc` | AI detects 3 risks, recommends owners, Sarah assigns them |
 | 2 | Diana Reyes | `diana` | AI interviews Diana about Taiwan Strait risk (structured Q&A) |
 | 3 | Chief Risk Officer | `cro` | CRO assesses severity; AI shares its own point of view on likelihood |
-| 4 | Sarah Mitchell (GC) | `gc-draft` | AI pings Sarah that CRO is done, draft is ready for review |
+| 4 | Sarah Mitchell (GC) | `gc-draft` | AI pings Sarah that CRO is done, draft is ready ("Review Draft" / "Remind me at 1pm" buttons) |
 | 5 | Sarah Mitchell (Group) | `draft-review` | GC, CRO, Diana, CFO review the draft together |
 | 6 | Jennifer Walsh (CEO) | `ceo` | CEO reviews, approves, routes to committees. "View Documents" → Data Room |
 | 7 | Disclosure Committee | `committee` | 5 committee members review and approve |
@@ -93,6 +93,17 @@ Each chat features:
 - Context-sensitive sidebars (URGENT section + Team chats)
 - Consistent avatars from `randomuser.me` (gender-matched)
 - `useSearchParams` support for deep linking (e.g., `?chat=draft-review`)
+- **Step completion flow**: when a persona's steps are done, a green divider shows "Step N complete — continue to Step N+1: [Name] →" with a clickable link to advance
+- **Cross-page navigation**: all outbound links to superhero pages append `?from=teams` (or `?from=slack`), and those pages show a floating "Return to Teams/Slack" button to navigate back
+
+#### Slack Simulation (`/slack`)
+Complete duplicate of the Teams simulation adapted to Slack's design language — aubergine sidebar, Block Kit cards, flat message layout, Slack formatting toolbar. Same 8-step workflow and step completion flow.
+
+#### GC End-to-End Pages (`/teams/gc`, `/slack/gc`)
+Sarah Mitchell's complete journey in a single continuous chat — no persona tabs. Covers risk detection through EDGAR filing acceptance (8 prompt clicks). Designed for demos where you want to show the full GC experience without switching perspectives.
+
+#### Platform Switcher
+All 4 simulation pages (Teams multi, Slack multi, Teams GC, Slack GC) include a **Teams | Slack** toggle pill at the top, plus a link to the GC End-to-End or multi-persona variant. This means a single VibeSharing entry point (e.g., `/teams`) gives access to all four views.
 
 ### Other Pages
 - **Context Packet** (`/superhero/context-packet`) — Peer filings, transcripts, news, Q&A prep
@@ -104,10 +115,12 @@ Each chat features:
 
 - **Browser chrome wrapper** used for Data Room, Writer, and Boards pages to simulate navigating between Teams and browser-based Diligent products
 - **White/light backgrounds** for Data Room and Boards to feel like real product UIs (vs. the dark theme used in Risk Essentials and Command Center)
-- **Teams simulation as the connective tissue** — the entire ERG workflow can be experienced as a series of Teams chats, with "View in Diligent" links breaking out to the traditional UI when deeper interaction is needed
+- **Teams/Slack simulation as the connective tissue** — the entire ERG workflow can be experienced as a series of chats, with "View in Diligent" links breaking out to the traditional UI when deeper interaction is needed
 - **AI has a point of view** — the agent doesn't just present data, it recommends actions, compares against peers, and pushes when it disagrees with assessments
 - **Board-appropriate tone** — the Boards page deliberately tones down dashboard intensity (smaller cards, pastel backgrounds, expandable questions with answer quality guidance)
 - **contentEditable divs** (not textareas) used in the Writer page to enable `window.getSelection()` for the text selection popover
+- **Separated GC end-to-end from multi-persona** — the GC's chat in multi-persona stops after assigning owners (1 step), while `/teams/gc` and `/slack/gc` have the full 8-step GC journey. This avoids confusion where one persona's tab covers the entire arc.
+- **`?from=` param for cross-page navigation** — all outbound links from Teams/Slack append `?from=teams` or `?from=slack`. Superhero pages read this to show a "Return to [Platform]" button and route back correctly (writer → draft-review, board-governance → certification, etc.)
 
 ## Known Issues
 
@@ -123,7 +136,11 @@ Each chat features:
 app/
 ├── page.tsx                          # Prototype index (dark mode)
 ├── light/                            # Light mode variants
-├── teams/page.tsx                    # Microsoft Teams simulation (1200+ lines)
+├── teams/page.tsx                    # Teams multi-persona simulation
+├── teams/gc/page.tsx                 # Teams GC end-to-end
+├── slack/page.tsx                    # Slack multi-persona simulation
+├── slack/gc/page.tsx                 # Slack GC end-to-end
+├── components/ReturnToChat.tsx       # Shared "Return to Teams/Slack" floating button
 ├── gc-commandcenter/                 # GRC Command Center workflow
 ├── superhero/
 │   ├── boards-home/                  # Boards workflow entry
@@ -160,5 +177,18 @@ npm install
 npx next dev -p 3001
 ```
 
+## Session Log
+
+### March 13, 2026
+- Separated GC end-to-end experience into dedicated pages (`/teams/gc`, `/slack/gc`) with full 8-step journey
+- Trimmed GC chat in multi-persona views to 1 step (assign owners only) — status check moved to GC-only pages
+- Added step completion dividers with clickable "advance to next persona" links
+- Added `?from=teams`/`?from=slack` param to all outbound superhero links
+- Created `ReturnToChat` component (floating "Return to Teams/Slack" button) added to 6 superhero pages
+- Made board-governance and writer pages dynamically route back to the correct platform
+- Added "Review Draft" / "Remind me at 1pm" buttons to GC draft notification (Step 4)
+- Added platform switcher (Teams/Slack toggle) across all 4 simulation pages
+- Updated prototype index with nested GC-only links under each platform
+
 ---
-*Updated on February 20, 2026*
+*Updated on March 13, 2026*
