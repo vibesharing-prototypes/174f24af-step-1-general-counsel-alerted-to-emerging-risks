@@ -274,6 +274,23 @@ export default function PrototypeIndex() {
               </div>
             </div>
           </Link>
+          <Link
+            href="/slack"
+            className="block rounded-xl border border-[#4A154B]/40 bg-[#4A154B]/10 p-5 hover:bg-[#4A154B]/20 transition-all group mt-3"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-lg bg-[#4A154B] flex items-center justify-center shrink-0">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5"><path d="M14.5 2c-1.1 0-2 .9-2 2v3.5h3.5c1.1 0 2-.9 2-2s-.9-2-2-2h-1.5z" /><path d="M2 9.5c0 1.1.9 2 2 2h3.5V8H4c-1.1 0-2 .9-2 2z" /><path d="M9.5 22c1.1 0 2-.9 2-2v-3.5H8c-1.1 0-2 .9-2 2s.9 2 2 2h1.5z" /><path d="M22 14.5c0-1.1-.9-2-2-2h-3.5V16H20c1.1 0 2-.9 2-2z" /></svg>
+              </div>
+              <div>
+                <div className="flex items-center gap-2 mb-0.5">
+                  <span className="inline-flex items-center rounded-full bg-[#4A154B]/30 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#9B59B6]">New</span>
+                </div>
+                <h3 className="text-base font-semibold text-[#f0f6fc] group-hover:text-[#9B59B6] transition-colors">Slack Simulation — Full ERG Workflow</h3>
+                <p className="text-xs text-[#8b949e] mt-1 leading-relaxed">Same 8-step workflow inside Slack — channels, DMs, Block Kit cards, and the Diligent Risk Agent app working alongside your team.</p>
+              </div>
+            </div>
+          </Link>
         </div>
 
         {sections.map((section) => (
