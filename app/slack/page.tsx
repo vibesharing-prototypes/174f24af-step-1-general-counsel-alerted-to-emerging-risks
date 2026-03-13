@@ -112,62 +112,6 @@ const CHATS: Chat[] = [
           }},
         ],
       },
-      {
-        prompt: "What's the status?",
-        userMsg: { from: "user", text: "What's the status on the investigations?", time: "11:30 AM" },
-        botMsgs: [
-          { from: "bot", text: "", time: "11:30 AM", card: {
-            title: "Investigation Status",
-            statusRows: [
-              { icon: "check", text: "Diana Reyes — Interview complete", color: "#2BAC76" },
-              { icon: "pending", text: "CRO — Reviewing Diana's responses, assessing severity", color: "#E8912D" },
-              { icon: "pending", text: "Marcus Webb — Investigation in progress", color: "#E8912D" },
-              { icon: "clock", text: "James Park — Not yet started", color: "#8B949E" },
-            ],
-          }},
-          { from: "bot", text: "Diana finished her interview about Taiwan Strait — the CRO is reviewing it now and will submit his severity assessment shortly. I'll ping you as soon as all inputs are in so we can move to disclosure drafting.", time: "11:30 AM" },
-        ],
-      },
-      {
-        prompt: "I've reviewed the draft — looks good. Send to CEO.",
-        userMsg: { from: "user", text: "I've reviewed the draft — looks good. Send to Jennifer Walsh for approval.", time: "3:30 PM" },
-        botMsgs: [
-          { from: "bot", text: ":white_check_mark: Sent to Jennifer Walsh (CEO) for approval. She'll receive an approval request in Slack with the 10-K Risk Factor Draft, ERM Board Deck, and AI verification summary.\n\nI'll notify you when she responds.", time: "3:30 PM" },
-        ],
-      },
-      {
-        prompt: "Any updates from the CEO?",
-        userMsg: { from: "user", text: "Any updates from Jennifer?", time: "4:45 PM" },
-        botMsgs: [
-          { from: "bot", text: "", time: "4:45 PM", card: {
-            title: "CEO Approved — All Disclosures",
-            statusRows: [
-              { icon: "check", text: "Jennifer Walsh approved all 3 disclosures at 4:30 PM", color: "#2BAC76" },
-              { icon: "check", text: "She requested routing to Audit, Risk, Compliance, and Cybersecurity committees", color: "#2BAC76" },
-              { icon: "check", text: "All 5 committee members have been notified in #disclosure-committee", color: "#2BAC76" },
-            ],
-            bullets: ["Committee members are reviewing now. I'll let you know when all confirmations are in."],
-          }},
-        ],
-      },
-      {
-        prompt: "Is everything confirmed?",
-        userMsg: { from: "user", text: "Is everything confirmed?", time: "5:30 PM" },
-        botMsgs: [
-          { from: "bot", text: "", time: "5:30 PM", card: {
-            title: "All Reviews Complete — EDGAR Filing Ready",
-            statusRows: [
-              { icon: "check", text: "David Patel (Audit) — No changes", color: "#2BAC76" },
-              { icon: "check", text: "Linda Nakamura (Risk) — No changes", color: "#2BAC76" },
-              { icon: "check", text: "James Thornton (Independent) — No changes", color: "#2BAC76" },
-              { icon: "check", text: "Patricia Wells (Cybersecurity) — No changes", color: "#2BAC76" },
-              { icon: "check", text: "Michael Okafor (Compliance) — No changes", color: "#2BAC76" },
-            ],
-            bullets: ["EDGAR filing package generated. 10-K amendment, ERM deck, and full audit trail are in the Diligent Data Room."],
-            buttons: [{ label: "View in Data Room", href: "/superhero/data-room" }, { label: "Generate Filing Package", style: "primary" }],
-          }},
-        ],
-      },
     ],
   },
 
@@ -739,7 +683,12 @@ function SlackContent() {
     }, 600);
     setTimeout(() => {
       setChats(prev => prev.map(c => c.id !== "gc-draft" ? c : { ...c, messages: [...c.messages,
-        { from: "bot", text: "Sarah — all inputs are in. Diana completed her risk owner interview, the CRO has assessed the severity as HIGH likelihood / CRITICAL impact, and I've cross-referenced Moody's signals and peer filings.\n\nI've already drafted a 10-K risk factor disclosure for the Taiwan Strait semiconductor supply chain risk. It incorporates all of the above — you can review, edit, and refine it before routing for approval.\n\nWant to review the draft now, or should I remind you after lunch?", time: "2:26 PM" },
+        { from: "bot", text: "Sarah — all inputs are in. Diana completed her risk owner interview, the CRO has assessed the severity as HIGH likelihood / CRITICAL impact, and I've cross-referenced Moody's signals and peer filings.\n\nI've already drafted a 10-K risk factor disclosure for the Taiwan Strait semiconductor supply chain risk. It incorporates all of the above — you can review, edit, and refine it before routing for approval.", time: "2:26 PM", card: {
+          buttons: [
+            { label: "Review Draft", style: "primary", href: "/superhero/writer?risk=risk-taiwan&owner=diana-reyes" },
+            { label: "Remind me at 1pm" },
+          ],
+        }},
       ]})); scroll();
     }, 2200);
   }, [activeChat, scroll]);
@@ -815,15 +764,23 @@ function SlackContent() {
     setSending(true);
     const step = currentStep;
     const chatId = activeChat;
+    const nextStepNum = (stepIdx[chatId] ?? 0) + 1;
+    const chatObj = chats.find(c => c.id === chatId)!;
+    const isLastStep = nextStepNum >= chatObj.steps.length;
     setChats(prev => prev.map(c => c.id !== chatId ? c : { ...c, messages: [...c.messages, step.userMsg] }));
     setTimeout(scroll, 50);
     setTimeout(() => {
+      const curPIdx = PERSPECTIVES.findIndex(p => p.chatId === chatId);
+      const nextPerspective = PERSPECTIVES[curPIdx + 1];
+      const doneMsgs: Msg[] = isLastStep && nextPerspective ? [{
+        from: "system", text: `Step ${PERSPECTIVES[curPIdx]?.step ?? ""} complete — continue to Step ${nextPerspective.step}: ${nextPerspective.name}`, time: "",
+      }] : [];
       setChats(prev => prev.map(c => c.id !== chatId ? c : {
         ...c,
-        messages: [...c.messages, ...step.botMsgs],
+        messages: [...c.messages, ...step.botMsgs, ...doneMsgs],
         preview: (step.botMsgs[step.botMsgs.length - 1].text || step.botMsgs[step.botMsgs.length - 1].card?.title || "").slice(0, 45) + "...",
       }));
-      setStepIdx(prev => ({ ...prev, [chatId]: (prev[chatId] ?? 0) + 1 }));
+      setStepIdx(prev => ({ ...prev, [chatId]: nextStepNum }));
       setSending(false);
       setTimeout(scroll, 50);
     }, 1200);
@@ -833,30 +790,39 @@ function SlackContent() {
   const channelName = isChannel ? chat.name.toLowerCase().replace(/\s+/g, "-") : null;
 
   return (
-    <div className="h-screen bg-white flex items-center justify-center p-5">
-      <div className="w-full max-w-[1360px] h-[calc(100vh-40px)] rounded-xl overflow-hidden flex flex-col" style={{ boxShadow: "0 25px 60px rgba(0,0,0,0.3), 0 0 0 0.5px rgba(0,0,0,0.12)" }}>
-
-        {/* Perspective Tabs — prototype navigation */}
-        <div className="bg-[#0D1117] shrink-0 px-2 py-2">
-          <div className="flex items-center gap-2 overflow-x-auto">
-            {PERSPECTIVES.map(p => {
-              const isActive = p.chatId === activeChat;
-              return (
-                <button key={p.chatId} onClick={() => setActiveChat(p.chatId)} className={`flex items-center gap-3 px-4 py-3 rounded-lg min-w-0 transition-all ${isActive ? "bg-white/10 ring-1 ring-white/20" : "bg-white/[0.03] hover:bg-white/[0.06]"}`}>
-                  <div className="relative shrink-0">
-                    <Avatar src={p.avatar} name={p.name} size={36} className={`${isActive ? "ring-2 ring-white/40" : "opacity-60"}`} />
-                    <span className={`absolute -top-1 -left-1 w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold ${isActive ? "bg-white text-[#0D1117]" : "bg-[#30363d] text-[#8B949E]"}`}>{p.step}</span>
-                  </div>
-                  <div className="text-left min-w-0">
-                    <p className={`text-[13px] font-bold truncate leading-tight ${isActive ? "text-white" : "text-[#8B949E]"}`}>{p.name}</p>
-                    <p className={`text-[11px] truncate leading-tight mt-0.5 ${isActive ? "text-[#A8A8A8]" : "text-[#484F58]"}`}>{p.role}</p>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
+    <div className="h-screen bg-[#F5F5F5] flex flex-col items-center p-5 gap-3">
+      {/* Persona Navigator — outside the Slack app */}
+      <div className="w-full max-w-[1360px] shrink-0">
+        <div className="flex items-center gap-3 mb-2">
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-[#888]">Workflow Personas</p>
+          <div className="flex-1 h-px bg-[#DDD]" />
+          <p className="text-[10px] text-[#AAA]">Select a person to see their perspective in the chronological flow</p>
         </div>
+        <div className="flex items-center gap-2 overflow-x-auto pb-1">
+          {PERSPECTIVES.map(p => {
+            const isActive = p.chatId === activeChat;
+            return (
+              <button
+                key={p.chatId}
+                onClick={() => setActiveChat(p.chatId)}
+                className={`flex items-center gap-2.5 px-3 py-2 rounded-lg min-w-0 transition-all border ${isActive ? "bg-white border-[#CCC] shadow-sm" : "bg-white/60 border-transparent hover:bg-white hover:border-[#DDD]"}`}
+              >
+                <div className="relative shrink-0">
+                  <Avatar src={p.avatar} name={p.name} size={32} className={`${isActive ? "" : "opacity-50"}`} />
+                  <span className={`absolute -top-1.5 -left-1.5 w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold ${isActive ? "bg-[#0D1117] text-white" : "bg-[#E0E0E0] text-[#888]"}`}>{p.step}</span>
+                </div>
+                <div className="text-left min-w-0">
+                  <p className={`text-[12px] font-semibold truncate leading-tight ${isActive ? "text-[#1D1D1D]" : "text-[#999]"}`}>{p.name}</p>
+                  <p className={`text-[10px] truncate leading-tight mt-0.5 ${isActive ? "text-[#666]" : "text-[#BBB]"}`}>{p.role}</p>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
 
+      {/* Slack App Window */}
+      <div className="w-full max-w-[1360px] flex-1 min-h-0 rounded-xl overflow-hidden flex flex-col" style={{ boxShadow: "0 25px 60px rgba(0,0,0,0.3), 0 0 0 0.5px rgba(0,0,0,0.12)" }}>
         {/* macOS Title Bar */}
         <div className="h-[32px] bg-[#350D36] flex items-center px-3 shrink-0 relative">
           <div className="flex items-center gap-2">
@@ -984,14 +950,26 @@ function SlackContent() {
 
             {/* Messages */}
             <div className="flex-1 overflow-y-auto px-5 py-4 min-h-0">
-              {/* Viewing-as context */}
-              <div className="max-w-[820px] mx-auto mb-4 flex items-center justify-center gap-2 py-1.5">
-                <span className="text-[11px] text-[#616061]">Viewing Slack as</span>
-                <Avatar src={perspective.avatar} name={perspective.name} size={20} />
-                <span className="text-[11px] text-[#1D1C1D] font-semibold">{perspective.name}</span>
-              </div>
+              {/* Top spacer */}
+              <div className="h-2" />
               <div className="max-w-[820px] mx-auto space-y-1">
                 {chat.messages.map((msg, i) => {
+                  if (msg.from === "system") {
+                    const curPIdx = PERSPECTIVES.findIndex(p => p.chatId === activeChat);
+                    const nextP = PERSPECTIVES[curPIdx + 1];
+                    return (
+                      <div key={i} className="flex items-center gap-3 py-3 my-2">
+                        <div className="flex-1 h-px bg-[#2BAC76]/30" />
+                        <button
+                          onClick={() => nextP && setActiveChat(nextP.chatId)}
+                          className="text-[12px] text-[#2BAC76] font-medium px-3 py-1.5 rounded-full border border-[#2BAC76]/30 hover:bg-[#2BAC76]/10 transition-colors cursor-pointer whitespace-nowrap"
+                        >
+                          {msg.text} →
+                        </button>
+                        <div className="flex-1 h-px bg-[#2BAC76]/30" />
+                      </div>
+                    );
+                  }
                   const isUser = msg.from === "user";
                   const isBot = msg.from === "bot";
                   const personName = !isUser && !isBot ? msg.from : null;
@@ -1091,8 +1069,9 @@ function SlackContent() {
                                 {msg.card.buttons.map((btn, bi) => {
                                   const isLastMsg = i === chat.messages.length - 1 || (i === chat.messages.length - 2 && chat.messages[chat.messages.length - 1]?.card?.buttons);
                                   const canAdvance = isLastMsg && !sending && currentStep;
-                                  return btn.href ? (
-                                    <a key={bi} href={btn.href} target="_blank" rel="noopener noreferrer" className={`px-3 py-1.5 rounded text-[12px] font-bold transition-colors cursor-pointer ${btn.style === "primary" ? "bg-[#007A5A] text-white hover:bg-[#148567]" : "border border-[#D0D0D0] text-[#1D1C1D] hover:bg-[#F0F0F0]"}`}>
+                                  const hrefWithFrom = btn.href ? btn.href + (btn.href.includes("?") ? "&from=slack" : "?from=slack") : undefined;
+                                  return hrefWithFrom ? (
+                                    <a key={bi} href={hrefWithFrom} className={`px-3 py-1.5 rounded text-[12px] font-bold transition-colors cursor-pointer ${btn.style === "primary" ? "bg-[#007A5A] text-white hover:bg-[#148567]" : "border border-[#D0D0D0] text-[#1D1C1D] hover:bg-[#F0F0F0]"}`}>
                                       {btn.label}
                                     </a>
                                   ) : (
@@ -1136,9 +1115,17 @@ function SlackContent() {
                     <span className="flex-1 text-[14px] text-[#B0B0B0]">Message {isChannel ? `#${channelName}` : "Diligent Risk Agent"}</span>
                   ) : hasMore ? (
                     <button onClick={handleSend} className="flex-1 text-left text-[14px] text-[#1D1C1D] truncate cursor-pointer hover:text-[#4A154B] transition-colors">{currentStep?.prompt}</button>
-                  ) : (
-                    <span className="flex-1 text-[14px] text-[#B0B0B0]">Message {isChannel ? `#${channelName}` : "Diligent Risk Agent"}</span>
-                  )}
+                  ) : (() => {
+                    const curIdx = PERSPECTIVES.findIndex(p => p.chatId === activeChat);
+                    const next = PERSPECTIVES[curIdx + 1];
+                    return next ? (
+                      <button onClick={() => setActiveChat(next.chatId)} className="flex-1 text-left text-[14px] text-[#2BAC76] cursor-pointer hover:text-[#2BAC76]/80 transition-colors truncate">
+                        ✓ Step complete — Continue to Step {next.step}: {next.name} →
+                      </button>
+                    ) : (
+                      <span className="flex-1 text-[14px] text-[#2BAC76] font-medium">✓ Workflow complete</span>
+                    );
+                  })()}
                   <div className="flex items-center gap-1 shrink-0">
                     <button className="w-7 h-7 rounded flex items-center justify-center text-[#616061] hover:bg-[#F0F0F0] transition-colors">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="10" /><path d="M8 14s1.5 2 4 2 4-2 4-2" /><line x1="9" y1="9" x2="9.01" y2="9" strokeWidth="2.5" /><line x1="15" y1="9" x2="15.01" y2="9" strokeWidth="2.5" /></svg>

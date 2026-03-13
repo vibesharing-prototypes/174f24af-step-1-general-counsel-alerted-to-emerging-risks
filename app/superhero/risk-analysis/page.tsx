@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { StakeholderFooter, PrototypeControlLink } from "../StakeholderFooter";
+import ReturnToChat from "@/app/components/ReturnToChat";
 
 /* ------------------------------------------------------------------ */
 /*  Shared helpers                                                     */
@@ -176,6 +177,7 @@ function IconSidebar() {
 export default function RiskAnalysisPage() {
   return (
     <div className="min-h-screen bg-[#0d1117] text-[#c9d1d9] flex flex-col">
+      <ReturnToChat />
       <div className="flex flex-1 overflow-hidden">
         <IconSidebar />
 

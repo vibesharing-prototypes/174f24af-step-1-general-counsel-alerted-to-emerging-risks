@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef, useCallback, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import ReturnToChat from "@/app/components/ReturnToChat";
 
 function cn(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
@@ -356,6 +357,8 @@ function WriterContent() {
   useEffect(() => setMounted(true), []);
 
   const urlRiskId = mounted ? (searchParams?.get("risk") || "risk-taiwan") : "risk-taiwan";
+  const fromParam = mounted ? searchParams?.get("from") : null;
+  const chatBase = fromParam === "slack" ? "/slack" : "/teams";
 
   const [activeRiskId, setActiveRiskId] = useState<string>("risk-taiwan");
   const [croAssessment, setCroAssessment] = useState<CroAssessment | null>(null);
@@ -461,6 +464,7 @@ function WriterContent() {
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center p-6">
+      <ReturnToChat />
       {/* Browser chrome wrapper */}
       <div className="w-full max-w-[1200px] h-[85vh] rounded-xl border border-[#3a3a3a] bg-[#0d1117] shadow-2xl shadow-black/50 flex flex-col overflow-hidden">
 
@@ -485,7 +489,7 @@ function WriterContent() {
         <div className="flex items-center justify-between px-4 py-2 bg-[#161b22] border-b border-[#30363d] shrink-0">
           <LeftRailMini />
           <Link
-            href="/teams?chat=draft-review"
+            href={`${chatBase}?chat=draft-review`}
             className="inline-flex items-center gap-2 rounded-lg bg-[#3fb950] px-4 py-1.5 text-xs font-semibold text-[#0d1117] hover:bg-[#46c35a] transition-colors"
           >
             Submit draft

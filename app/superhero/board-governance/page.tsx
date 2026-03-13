@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import ReturnToChat from "@/app/components/ReturnToChat";
 
 type SlideType = "agenda" | "data" | "content";
 type ViewMode = "meeting" | "prep";
@@ -101,7 +102,7 @@ const BOARD_REVIEWERS = [
   { name: "Michael Okafor", title: "Compliance Committee Chair", avatar: "MO", reviewed: true },
 ];
 
-export default function BoardGovernancePage() {
+function BoardGovernanceContent() {
   const [currentSlide, setCurrentSlide] = useState(2);
   const [viewMode, setViewMode] = useState<ViewMode>("prep");
   const [userRole, setUserRole] = useState<UserRole>("board-member");
@@ -109,6 +110,9 @@ export default function BoardGovernancePage() {
   const [aiPanelMode, setAiPanelMode] = useState<"context" | "meeting" | "actions">("context");
   const [markedAsRead, setMarkedAsRead] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const fromParam = searchParams?.get("from");
+  const chatBase = fromParam === "slack" ? "/slack" : "/teams";
   const [repOpen, setRepOpen] = useState(false);
   const [govOpen, setGovOpen] = useState(false);
   const [expandedQ, setExpandedQ] = useState<Record<number, boolean>>({});
@@ -124,7 +128,7 @@ export default function BoardGovernancePage() {
 
   return (
     <div style={{ minHeight: "100vh", background: "#ffffff", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
-
+      <ReturnToChat />
       {/* Browser chrome wrapper */}
       <div style={{ width: "100%", maxWidth: 1200, height: "85vh", borderRadius: 12, border: "1px solid #3a3a3a", background: "#ffffff", boxShadow: "0 25px 50px -12px rgba(0,0,0,0.25)", display: "flex", flexDirection: "column", overflow: "hidden" }}>
 
@@ -1047,7 +1051,7 @@ export default function BoardGovernancePage() {
             }}>
               <div style={{ position: "relative", width: 1, height: 24, borderRadius: 1, background: "linear-gradient(to bottom, #e8b4d8, #b8a9e8, #a0c4f0, #8dd8d0)", flexShrink: 0 }} />
               <button
-                onClick={() => router.push("/teams?chat=certification")}
+                onClick={() => router.push(`${chatBase}?chat=certification`)}
                 style={{
                   flex: 1, background: "none", border: "none", outline: "none",
                   fontSize: 13, color: "#374151", cursor: "pointer", textAlign: "left", padding: 0,
@@ -1056,7 +1060,7 @@ export default function BoardGovernancePage() {
                 This looks good — I approve
               </button>
               <button
-                onClick={() => router.push("/teams?chat=certification")}
+                onClick={() => router.push(`${chatBase}?chat=certification`)}
                 style={{
                   padding: "6px 14px", background: "#059669", color: "#fff",
                   border: "none", borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: "pointer",
@@ -1073,5 +1077,13 @@ export default function BoardGovernancePage() {
 
       </div>{/* end browser chrome wrapper */}
     </div>
+  );
+}
+
+export default function BoardGovernancePage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-white flex items-center justify-center"><div className="h-8 w-8 border-2 border-[#6264A7] border-t-transparent rounded-full animate-spin" /></div>}>
+      <BoardGovernanceContent />
+    </Suspense>
   );
 }

@@ -266,11 +266,22 @@ export default function PrototypeIndex() {
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 00-3-3.87" /><path d="M16 3.13a4 4 0 010 7.75" /></svg>
               </div>
               <div>
-                <div className="flex items-center gap-2 mb-0.5">
-                  <span className="inline-flex items-center rounded-full bg-[#6264A7]/30 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#6264A7]">New</span>
-                </div>
-                <h3 className="text-base font-semibold text-[#f0f6fc] group-hover:text-[#6264A7] transition-colors">Microsoft Teams Simulation — Full ERG Workflow</h3>
-                <p className="text-xs text-[#8b949e] mt-1 leading-relaxed">8-step end-to-end workflow inside Teams — risk detection, owner interviews, CRO assessment, GC disclosure drafting, CEO/CFO certification, committee review, and EDGAR filing via chat with Diligent AI agents.</p>
+                <h3 className="text-base font-semibold text-[#f0f6fc] group-hover:text-[#6264A7] transition-colors">Microsoft Teams — Multi-Persona Workflow</h3>
+                <p className="text-xs text-[#8b949e] mt-1 leading-relaxed">8-step workflow across all personas — GC, Risk Owner, CRO, CEO, Committee, and more. Switch between perspectives to see the full picture.</p>
+              </div>
+            </div>
+          </Link>
+          <Link
+            href="/teams/gc"
+            className="block rounded-xl border border-[#6264A7]/20 bg-[#6264A7]/5 p-4 hover:bg-[#6264A7]/10 transition-all group mt-2 ml-6"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-lg bg-[#6264A7]/60 flex items-center justify-center shrink-0">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+              </div>
+              <div>
+                <h3 className="text-sm font-medium text-[#c9d1d9] group-hover:text-[#6264A7] transition-colors">Teams — GC End-to-End</h3>
+                <p className="text-[11px] text-[#6e7681] mt-0.5 leading-relaxed">Sarah Mitchell&apos;s complete journey in one continuous chat — risk detection through EDGAR filing. No persona switching.</p>
               </div>
             </div>
           </Link>
@@ -283,11 +294,22 @@ export default function PrototypeIndex() {
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5"><path d="M14.5 2c-1.1 0-2 .9-2 2v3.5h3.5c1.1 0 2-.9 2-2s-.9-2-2-2h-1.5z" /><path d="M2 9.5c0 1.1.9 2 2 2h3.5V8H4c-1.1 0-2 .9-2 2z" /><path d="M9.5 22c1.1 0 2-.9 2-2v-3.5H8c-1.1 0-2 .9-2 2s.9 2 2 2h1.5z" /><path d="M22 14.5c0-1.1-.9-2-2-2h-3.5V16H20c1.1 0 2-.9 2-2z" /></svg>
               </div>
               <div>
-                <div className="flex items-center gap-2 mb-0.5">
-                  <span className="inline-flex items-center rounded-full bg-[#4A154B]/30 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#9B59B6]">New</span>
-                </div>
-                <h3 className="text-base font-semibold text-[#f0f6fc] group-hover:text-[#9B59B6] transition-colors">Slack Simulation — Full ERG Workflow</h3>
+                <h3 className="text-base font-semibold text-[#f0f6fc] group-hover:text-[#9B59B6] transition-colors">Slack — Multi-Persona Workflow</h3>
                 <p className="text-xs text-[#8b949e] mt-1 leading-relaxed">Same 8-step workflow inside Slack — channels, DMs, Block Kit cards, and the Diligent Risk Agent app working alongside your team.</p>
+              </div>
+            </div>
+          </Link>
+          <Link
+            href="/slack/gc"
+            className="block rounded-xl border border-[#4A154B]/20 bg-[#4A154B]/5 p-4 hover:bg-[#4A154B]/10 transition-all group mt-2 ml-6"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-lg bg-[#4A154B]/60 flex items-center justify-center shrink-0">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+              </div>
+              <div>
+                <h3 className="text-sm font-medium text-[#c9d1d9] group-hover:text-[#9B59B6] transition-colors">Slack — GC End-to-End</h3>
+                <p className="text-[11px] text-[#6e7681] mt-0.5 leading-relaxed">Sarah Mitchell&apos;s complete journey in one continuous Slack DM — risk detection through EDGAR filing.</p>
               </div>
             </div>
           </Link>

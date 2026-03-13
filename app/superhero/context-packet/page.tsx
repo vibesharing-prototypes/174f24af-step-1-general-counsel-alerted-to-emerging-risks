@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { LeftRail } from "../LeftRail";
 import { StakeholderFooter, PrototypeControlButton } from "../StakeholderFooter";
+import ReturnToChat from "@/app/components/ReturnToChat";
 
 const GC_NAME = "Sarah Mitchell";
 const GC_AVATAR_URL = "https://randomuser.me/api/portraits/med/women/65.jpg";
@@ -42,6 +43,7 @@ function ContextPacketContent() {
 
   return (
     <div className="min-h-screen bg-[#0d1117] flex flex-col">
+      <ReturnToChat />
       <div className="border-b-2 border-[#0ea5e9]/40 bg-[#e0f2fe] flex-shrink-0">
         <div className="border-b border-[#0ea5e9]/30 bg-[#bae6fd] px-4 py-2">
           <p className="text-[10px] font-medium uppercase tracking-widest text-[#0369a1]">Demo controls — not part of prototype</p>

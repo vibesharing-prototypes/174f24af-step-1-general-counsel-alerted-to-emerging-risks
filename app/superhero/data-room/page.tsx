@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import ReturnToChat from "@/app/components/ReturnToChat";
 
 function cn(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
@@ -264,15 +265,17 @@ function PromptBox({ onSubmit }: { onSubmit: () => void }) {
 
 function DataRoomContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const fromParam = searchParams?.get("from");
   const [loading, setLoading] = useState(true);
 
   const handleNotifyCrisisCohort = () => {
-    router.push("/superhero/board-governance");
+    router.push("/superhero/board-governance" + (fromParam ? `?from=${fromParam}` : ""));
   };
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center p-6">
-
+      <ReturnToChat />
       {/* Browser chrome wrapper */}
       <div className="w-full max-w-[1200px] h-[85vh] rounded-xl border border-[#3a3a3a] bg-white shadow-2xl shadow-black/50 flex flex-col overflow-hidden">
 

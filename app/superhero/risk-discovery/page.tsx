@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { StakeholderFooter, PrototypeControlLink } from "../StakeholderFooter";
+import ReturnToChat from "@/app/components/ReturnToChat";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -248,6 +249,7 @@ export default function RiskDiscoveryPage() {
 
   return (
     <div className="min-h-screen bg-[#0d1117] flex flex-col relative">
+      <ReturnToChat />
       {/* Toaster notification */}
       {toasterVisible && (
         <div className="fixed top-4 right-4 z-50 animate-slide-in-right">
